@@ -4,12 +4,12 @@ import { prisma } from '@/db/client'
 
 const createEventSchema = z.object({
   name: z.string().min(1),
-  status: z.string().optional(),
+  status: z.enum(['test', 'live']).optional(),
 })
 
 const updateEventSchema = z.object({
   name: z.string().min(1).optional(),
-  status: z.string().optional(),
+  status: z.enum(['test', 'live']).optional(),
   hidePrices: z.boolean().optional(),
   tseEnabled: z.boolean().optional(),
 })

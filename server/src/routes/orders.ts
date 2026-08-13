@@ -22,8 +22,8 @@ const updateOrderStatusBody = z.object({
 })
 
 export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
-  // POST /api/orders — create order
-  server.post('/api/orders', async (request, reply) => {
+  // POST /orders — create order
+  server.post('/orders', async (request, reply) => {
     const parsed = createOrderBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
     const { tableNumber, waiterId, eventId, items } = parsed.data
@@ -71,8 +71,8 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
     }
   })
 
-  // GET /api/events/:eventId/orders — list orders for event
-  server.get('/api/events/:eventId/orders', async (request, reply) => {
+  // GET /events/:eventId/orders — list orders for event
+  server.get('/events/:eventId/orders', async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     const orders = await prisma.order.findMany({
       where: { eventId },
@@ -84,8 +84,8 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
     return reply.status(200).send(orders)
   })
 
-  // GET /api/orders/:id — single order with items
-  server.get('/api/orders/:id', async (request, reply) => {
+  // GET /orders/:id — single order with items
+  server.get('/orders/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const order = await prisma.order.findUnique({
       where: { id },
@@ -97,8 +97,8 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
     return reply.status(200).send(order)
   })
 
-  // PATCH /api/orders/:id — update order status
-  server.patch('/api/orders/:id', async (request, reply) => {
+  // PATCH /orders/:id — update order status
+  server.patch('/orders/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = updateOrderStatusBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })

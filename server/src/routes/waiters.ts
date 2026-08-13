@@ -26,8 +26,8 @@ const toggleActiveBody = z.object({
 })
 
 export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
-  // POST /api/events/:eventId/waiters — create waiter
-  server.post('/api/events/:eventId/waiters', async (request, reply) => {
+  // POST /events/:eventId/waiters — create waiter
+  server.post('/events/:eventId/waiters', async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     const parsed = createWaiterBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -46,8 +46,8 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
     return reply.status(201).send(waiter)
   })
 
-  // GET /api/events/:eventId/waiters — list waiters for event
-  server.get('/api/events/:eventId/waiters', async (request, reply) => {
+  // GET /events/:eventId/waiters — list waiters for event
+  server.get('/events/:eventId/waiters', async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     try {
       const waiters = await prisma.waiter.findMany({ where: { eventId } })
@@ -57,16 +57,16 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
     }
   })
 
-  // GET /api/waiters/:id — single waiter
-  server.get('/api/waiters/:id', async (request, reply) => {
+  // GET /waiters/:id — single waiter
+  server.get('/waiters/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const waiter = await prisma.waiter.findUnique({ where: { id } })
     if (!waiter) return reply.status(404).send({ error: 'Waiter not found' })
     return reply.status(200).send(waiter)
   })
 
-  // PUT /api/waiters/:id — update waiter
-  server.put('/api/waiters/:id', async (request, reply) => {
+  // PUT /waiters/:id — update waiter
+  server.put('/waiters/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = updateWaiterBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -80,8 +80,8 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
     }
   })
 
-  // DELETE /api/waiters/:id
-  server.delete('/api/waiters/:id', async (request, reply) => {
+  // DELETE /waiters/:id
+  server.delete('/waiters/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     try {
       await prisma.waiter.delete({ where: { id } })
@@ -93,8 +93,8 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
     }
   })
 
-  // PATCH /api/waiters/:id/active — toggle active flag
-  server.patch('/api/waiters/:id/active', async (request, reply) => {
+  // PATCH /waiters/:id/active — toggle active flag
+  server.patch('/waiters/:id/active', async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = toggleActiveBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })

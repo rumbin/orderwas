@@ -27,6 +27,11 @@ async function request<T>(
     throw new Error(body.error ?? `HTTP ${response.status}`)
   }
 
+  // Handle 204 No Content (DELETE responses)
+  if (response.status === 204) {
+    return undefined as T
+  }
+
   return response.json() as Promise<T>
 }
 
