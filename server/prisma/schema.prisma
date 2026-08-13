@@ -4,7 +4,115 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./orderwas.db"
+  url      = env("DATABASE_URL")
 }
 
-// Entities will be added in Phase 1
+model Event {
+  id        String   @id @default(cuid())
+  name      String
+  status    String   @default("test") // "test" | "live"
+  hidePrices Boolean @default(false)
+  tseEnabled Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  stations  Station[]
+  waiters   Waiter[]
+  orders    Order[]
+}
+
+model Station {
+  id         String   @id @default(cuid())
+  name       String
+  logo       String?
+  printerIp  String?
+  printerType String  @default("network") // "network" | "ignore" | "dummy"
+  kitchenMonitor Boolean @default(false)
+  sortOrder  Int      @default(0)
+  copyPrint  Boolean  @default(false)
+  eventId    String
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  products   Product[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Product {
+  id         String   @id @default(cuid())
+  name       String
+  shortName  String?
+  price      Float
+  taxRate    Float    @default(20.0)
+  stationId  String
+  station    Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  available  Boolean  @default(true)
+  isVoucher  Boolean  @default(false)
+  addable    Boolean  @default(true)
+  stockMode  String   @default("none") // "none" | "tracked" | "composite"
+  stockCount Float    @default(0)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  orderItems OrderItem[]
+}
+
+model Waiter {
+  id           String   @id @default(cuid())
+  name         String
+  pin          String
+  logo         String?
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  printerIp    String?
+  printsImmediately Boolean @default(true)
+  canCancel    Boolean  @default(false)
+  canCashOut   Boolean  @default(false)
+  canStatistics Boolean @default(false)
+  canCreateWaiters Boolean @default(false)
+  canTransfer  Boolean  @default(false)
+  isStationWaiter Boolean @default(false)
+  hidden       Boolean  @default(false)
+  autoSammelbon Boolean @default(false)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orders       Order[]
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  tableNumber   String
+  waiterId      String
+  waiter        Waiter      @relation(fields: [waiterId], references: [id])
+  eventId       String
+  event         Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  status        String      @default("open") // "open" | "preparing" | "partial" | "paid" | "cancelled"
+  total         Float       @default(0)
+  comment       String?
+  tearOffNumber Int?
+  pickupCode    String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
+  status    String  @default("open") // "open" | "prepared" | "delivered" | "cancelled"
+  comment   String?
+}
+
+model AppLayout {
+  id        String   @id @default(cuid())
+  eventId   String
+  waiterId  String?
+  columns   Int      @default(3)
+  rows      Int      @default(5)
+  buttons   String   @default("[]") // JSON array of {name, color, productId, row, col}
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,55 @@
+{
+  "app": {
+    "title": "Orderwas",
+    "tagline": "Ordering system for club festivals"
+  },
+  "login": {
+    "selectEvent": "Select event",
+    "selectWaiter": "Select waiter",
+    "enterPin": "Enter PIN",
+    "login": "Log in",
+    "wrongPin": "Wrong PIN"
+  },
+  "order": {
+    "tableNumber": "Table number",
+    "products": "Products",
+    "cart": "Cart",
+    "total": "Total",
+    "submit": "Submit order",
+    "empty": "No products selected yet",
+    "success": "Order submitted!",
+    "quantity": "Quantity",
+    "add": "Add",
+    "remove": "Remove"
+  },
+  "station": {
+    "title": "Station",
+    "openOrders": "Open orders",
+    "markDone": "Done",
+    "waitTime": "Wait time",
+    "table": "Table",
+    "noOrders": "No open orders"
+  },
+  "admin": {
+    "title": "Administration",
+    "events": "Events",
+    "waiters": "Waiters",
+    "stations": "Stations",
+    "products": "Products",
+    "printers": "Printers",
+    "settings": "Settings"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "yes": "Yes",
+    "no": "No",
+    "loading": "Loading...",
+    "error": "Error",
+    "confirm": "Confirm"
+  }
+}

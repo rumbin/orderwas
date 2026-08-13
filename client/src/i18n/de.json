@@ -1,0 +1,55 @@
+{
+  "app": {
+    "title": "Orderwas",
+    "tagline": "Bestellsystem für Vereinsfeste"
+  },
+  "login": {
+    "selectEvent": "Veranstaltung wählen",
+    "selectWaiter": "Kellner wählen",
+    "enterPin": "PIN eingeben",
+    "login": "Anmelden",
+    "wrongPin": "Falsche PIN"
+  },
+  "order": {
+    "tableNumber": "Tischnummer",
+    "products": "Produkte",
+    "cart": "Warenkorb",
+    "total": "Summe",
+    "submit": "Bestellung abschließen",
+    "empty": "Noch keine Produkte ausgewählt",
+    "success": "Bestellung aufgegeben!",
+    "quantity": "Menge",
+    "add": "Hinzufügen",
+    "remove": "Entfernen"
+  },
+  "station": {
+    "title": "Station",
+    "openOrders": "Offene Bestellungen",
+    "markDone": "Erledigt",
+    "waitTime": "Wartezeit",
+    "table": "Tisch",
+    "noOrders": "Keine offenen Bestellungen"
+  },
+  "admin": {
+    "title": "Administration",
+    "events": "Veranstaltungen",
+    "waiters": "Kellner",
+    "stations": "Stationen",
+    "products": "Produkte",
+    "printers": "Drucker",
+    "settings": "Einstellungen"
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "back": "Zurück",
+    "yes": "Ja",
+    "no": "Nein",
+    "loading": "Laden...",
+    "error": "Fehler",
+    "confirm": "Bestätigen"
+  }
+}

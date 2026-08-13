@@ -1,0 +1,55 @@
+{
+  "app": {
+    "title": "Orderwas",
+    "tagline": "Système de commande pour fêtes de club"
+  },
+  "login": {
+    "selectEvent": "Choisir l'événement",
+    "selectWaiter": "Choisir le serveur",
+    "enterPin": "Entrer le PIN",
+    "login": "Se connecter",
+    "wrongPin": "PIN incorrect"
+  },
+  "order": {
+    "tableNumber": "Numéro de table",
+    "products": "Produits",
+    "cart": "Panier",
+    "total": "Total",
+    "submit": "Commander",
+    "empty": "Aucun produit sélectionné",
+    "success": "Commande passée!",
+    "quantity": "Quantité",
+    "add": "Ajouter",
+    "remove": "Retirer"
+  },
+  "station": {
+    "title": "Station",
+    "openOrders": "Commandes ouvertes",
+    "markDone": "Terminé",
+    "waitTime": "Temps d'attente",
+    "table": "Table",
+    "noOrders": "Aucune commande ouverte"
+  },
+  "admin": {
+    "title": "Administration",
+    "events": "Événements",
+    "waiters": "Serveurs",
+    "stations": "Stations",
+    "products": "Produits",
+    "printers": "Imprimantes",
+    "settings": "Paramètres"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "back": "Retour",
+    "yes": "Oui",
+    "no": "Non",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "confirm": "Confirmer"
+  }
+}
