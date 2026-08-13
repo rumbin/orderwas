@@ -1,6 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 import cors from '@fastify/cors'
+import eventRoutes from '@/routes/events'
 
 export type AppServer = FastifyInstance
 
@@ -18,6 +19,9 @@ export function buildServer(): AppServer {
   })
 
   server.register(corsPlugin)
+
+  // API routes
+  server.register(eventRoutes, { prefix: '/api' })
 
   server.get('/health', async () => {
     return { status: 'ok' }
