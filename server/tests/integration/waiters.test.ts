@@ -1,5 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest'
-import Fastify, { type FastifyInstance } from 'fastify'
+import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
 import { buildServer, type AppServer } from '@/index'
 import { waitersRoutes } from '@/routes/waiters'
 import { prisma } from '@/db/client'
@@ -10,41 +9,50 @@ const NAME = 'Test Waiter'
 let server: AppServer
 
 beforeAll(async () => {
-  // Build a fresh server (buildServer already registers cors + /health) but
-  // we do NOT rely on index.ts registering the waiters route. We register the
-  // plugin ourselves so the tests run standalone.
-  server = buildServer() as FastifyInstance
-  // `buildServer` doesn't close the previous instance; fastify-plugin or plain
-  // async plugin both work. Register the routes plugin directly.
-  ;(server as unknown as { register: (p: unknown) => void }).register(waitersRoutes)
+  // Build a fresh server (buildServer already registers cors + /health) and
+  // register the waiters plugin ourselves so the tests run standalone without
+  // relying on index.ts wiring.
+  server = buildServer()
+  server.register(waitersRoutes)
   await server.ready()
 })
 
 afterAll(async () => {
-  await prisma.waiter.deleteMany({ where: { name: NAME } })
   await server.close()
 })
 
-// A unique eventId is created for each describe block so routes are isolated.
-let sharedEventId: string
-let sharedEventName = `Waiter Test ${Date.now()}`
+/**
+ * Create a throwaway event for a single test and return its id.  The event is
+ * scoped to the test via `afterEach` cleanup by id, so we never rely on
+ * global `deleteMany({})` (which other test suites use destructively).
+ */
+async function makeEvent(): Promise<string> {
+  const ev = await prisma.event.create({ data: { name: `Waiter Test ${Date.now()}-${Math.random()}` } })
+  return ev.id
+}
 
-beforeEach(async () => {
-  // (Re)create an event for each test so waiter lists stay isolated.
-  const ev = await prisma.event.create({ data: { name: sharedEventName } })
-  sharedEventId = ev.id
-})
+const createdEvents: string[] = []
 
 afterEach(async () => {
-  await prisma.waiter.deleteMany({ where: { eventId: sharedEventId } }).catch(() => {})
-  await prisma.event.delete({ where: { id: sharedEventId } }).catch(() => {})
+  // Clean up only the events (and their cascaded waiters) we created.
+  for (const id of createdEvents.splice(0)) {
+    await prisma.waiter.deleteMany({ where: { eventId: id } }).catch(() => {})
+    await prisma.event.delete({ where: { id } }).catch(() => {})
+  }
 })
+
+async function setupEvent(): Promise<string> {
+  const id = await makeEvent()
+  createdEvents.push(id)
+  return id
+}
 
 describe('Waiter CRUD - POST /api/events/:eventId/waiters', () => {
   it('creates a waiter and returns 201', async () => {
+    const eventId = await setupEvent()
     const res = await server.inject({
       method: 'POST',
-      url: `/api/events/${sharedEventId}/waiters`,
+      url: `/api/events/${eventId}/waiters`,
       payload: { name: NAME, pin: PIN, canCancel: true, canCashOut: true },
     })
     expect(res.statusCode).toBe(201)
@@ -52,7 +60,7 @@ describe('Waiter CRUD - POST /api/events/:eventId/waiters', () => {
     expect(body.id).toBeDefined()
     expect(body.name).toBe(NAME)
     expect(body.pin).toBe(PIN)
-    expect(body.eventId).toBe(sharedEventId)
+    expect(body.eventId).toBe(eventId)
     expect(body.canCancel).toBe(true)
     expect(body.canCashOut).toBe(true)
     expect(body.canStatistics).toBe(false) // default
@@ -60,9 +68,10 @@ describe('Waiter CRUD - POST /api/events/:eventId/waiters', () => {
   })
 
   it('rejects creation when name is missing (400)', async () => {
+    const eventId = await setupEvent()
     const res = await server.inject({
       method: 'POST',
-      url: `/api/events/${sharedEventId}/waiters`,
+      url: `/api/events/${eventId}/waiters`,
       payload: { pin: PIN }, // name missing
     })
     expect(res.statusCode).toBe(400)
@@ -71,43 +80,43 @@ describe('Waiter CRUD - POST /api/events/:eventId/waiters', () => {
 
 describe('Waiter CRUD - GET /api/events/:eventId/waiters', () => {
   it('lists waiters for the event', async () => {
+    const eventId = await setupEvent()
     await server.inject({
       method: 'POST',
-      url: `/api/events/${sharedEventId}/waiters`,
+      url: `/api/events/${eventId}/waiters`,
       payload: { name: `${NAME}-a`, pin: '1' },
     })
     await server.inject({
       method: 'POST',
-      url: `/api/events/${sharedEventId}/waiters`,
+      url: `/api/events/${eventId}/waiters`,
       payload: { name: `${NAME}-b`, pin: '2' },
     })
     const res = await server.inject({
       method: 'GET',
-      url: `/api/events/${sharedEventId}/waiters`,
+      url: `/api/events/${eventId}/waiters`,
     })
     expect(res.statusCode).toBe(200)
     const list = res.json() as unknown[]
     expect(list.length).toBeGreaterThanOrEqual(2)
     list.forEach((w) => {
-      expect((w as Record<string, unknown>).eventId).toBe(sharedEventId)
+      expect((w as Record<string, unknown>).eventId).toBe(eventId)
     })
   })
 })
 
-let sharedWaiterId: string
-
 describe('Waiter CRUD - GET /api/waiters/:id', () => {
   it('fetches a single waiter by id', async () => {
+    const eventId = await setupEvent()
     const created = await server.inject({
       method: 'POST',
-      url: `/api/events/${sharedEventId}/waiters`,
+      url: `/api/events/${eventId}/waiters`,
       payload: { name: NAME, pin: PIN },
     })
-    sharedWaiterId = created.json().id
+    const waiterId = created.json().id
 
-    const res = await server.inject({ method: 'GET', url: `/api/waiters/${sharedWaiterId}` })
+    const res = await server.inject({ method: 'GET', url: `/api/waiters/${waiterId}` })
     expect(res.statusCode).toBe(200)
-    expect((res.json() as Record<string, unknown>).id).toBe(sharedWaiterId)
+    expect((res.json() as Record<string, unknown>).id).toBe(waiterId)
   })
 
   it('returns 404 for an unknown waiter id', async () => {
@@ -118,9 +127,10 @@ describe('Waiter CRUD - GET /api/waiters/:id', () => {
 
 describe('Waiter CRUD - PUT /api/waiters/:id', () => {
   it('updates a waiter', async () => {
+    const eventId = await setupEvent()
     const created = await server.inject({
       method: 'POST',
-      url: `/api/events/${sharedEventId}/waiters`,
+      url: `/api/events/${eventId}/waiters`,
       payload: { name: NAME, pin: PIN },
     })
     const id = created.json().id
@@ -140,9 +150,10 @@ describe('Waiter CRUD - PUT /api/waiters/:id', () => {
 
 describe('Waiter CRUD - DELETE /api/waiters/:id', () => {
   it('deletes a waiter', async () => {
+    const eventId = await setupEvent()
     const created = await server.inject({
       method: 'POST',
-      url: `/api/events/${sharedEventId}/waiters`,
+      url: `/api/events/${eventId}/waiters`,
       payload: { name: NAME, pin: PIN },
     })
     const id = created.json().id
@@ -157,9 +168,10 @@ describe('Waiter CRUD - DELETE /api/waiters/:id', () => {
 
 describe('Waiter CRUD - PATCH /api/waiters/:id/active', () => {
   it('toggles the active flag', async () => {
+    const eventId = await setupEvent()
     const created = await server.inject({
       method: 'POST',
-      url: `/api/events/${sharedEventId}/waiters`,
+      url: `/api/events/${eventId}/waiters`,
       payload: { name: NAME, pin: PIN },
     })
     const id = created.json().id

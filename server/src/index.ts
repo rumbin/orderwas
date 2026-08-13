@@ -2,6 +2,9 @@ import Fastify, { type FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 import cors from '@fastify/cors'
 import eventRoutes from '@/routes/events'
+import stationRoutes from '@/routes/stations'
+import { waitersRoutes } from '@/routes/waiters'
+import { ordersRoutes } from '@/routes/orders'
 
 export type AppServer = FastifyInstance
 
@@ -22,6 +25,9 @@ export function buildServer(): AppServer {
 
   // API routes
   server.register(eventRoutes, { prefix: '/api' })
+  server.register(stationRoutes, { prefix: '/api' })
+  server.register(waitersRoutes, { prefix: '/api' })
+  server.register(ordersRoutes, { prefix: '/api' })
 
   server.get('/health', async () => {
     return { status: 'ok' }
