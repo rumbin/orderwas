@@ -2,6 +2,27 @@ import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
 import { prisma } from '@/db/client'
 
+// Fields returned to clients. PIN is NEVER included.
+const waiterSelect = {
+  id: true,
+  name: true,
+  logo: true,
+  eventId: true,
+  printerIp: true,
+  printsImmediately: true,
+  canCancel: true,
+  canCashOut: true,
+  canStatistics: true,
+  canCreateWaiters: true,
+  canTransfer: true,
+  isStationWaiter: true,
+  hidden: true,
+  autoSammelbon: true,
+  active: true,
+  createdAt: true,
+  updatedAt: true,
+} as const
+
 const createWaiterBody = z.object({
   name: z.string().min(1),
   pin: z.string().min(1),
@@ -42,6 +63,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
 
     const waiter = await prisma.waiter.create({
       data: { name, pin, printerIp, canCancel, canCashOut, canStatistics, eventId },
+      select: waiterSelect,
     })
     return reply.status(201).send(waiter)
   })
@@ -50,7 +72,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   server.get('/events/:eventId/waiters', async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     try {
-      const waiters = await prisma.waiter.findMany({ where: { eventId } })
+      const waiters = await prisma.waiter.findMany({ where: { eventId }, select: waiterSelect })
       return reply.status(200).send(waiters)
     } catch (err) {
       return reply.status(500).send({ error: (err as Error).message })
@@ -60,7 +82,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   // GET /waiters/:id — single waiter
   server.get('/waiters/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
-    const waiter = await prisma.waiter.findUnique({ where: { id } })
+    const waiter = await prisma.waiter.findUnique({ where: { id }, select: waiterSelect })
     if (!waiter) return reply.status(404).send({ error: 'Waiter not found' })
     return reply.status(200).send(waiter)
   })
@@ -71,7 +93,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
     const parsed = updateWaiterBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
     try {
-      const waiter = await prisma.waiter.update({ where: { id }, data: parsed.data })
+      const waiter = await prisma.waiter.update({ where: { id }, data: parsed.data, select: waiterSelect })
       return reply.status(200).send(waiter)
     } catch (err) {
       const code = (err as { code?: string }).code
@@ -99,7 +121,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
     const parsed = toggleActiveBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
     try {
-      const waiter = await prisma.waiter.update({ where: { id }, data: { active: parsed.data.active } })
+      const waiter = await prisma.waiter.update({ where: { id }, data: { active: parsed.data.active }, select: waiterSelect })
       return reply.status(200).send(waiter)
     } catch (err) {
       const code = (err as { code?: string }).code

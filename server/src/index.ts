@@ -6,6 +6,8 @@ import stationRoutes from '@/routes/stations'
 import { waitersRoutes } from '@/routes/waiters'
 import { ordersRoutes } from '@/routes/orders'
 import { productsRoutes } from '@/routes/products'
+import { authRoutes } from '@/routes/auth'
+import authPlugin from '@/plugins/auth'
 
 export type AppServer = FastifyInstance
 
@@ -23,8 +25,10 @@ export function buildServer(): AppServer {
   })
 
   server.register(corsPlugin)
+  server.register(authPlugin)
 
   // API routes
+  server.register(authRoutes, { prefix: '/api' })
   server.register(eventRoutes, { prefix: '/api' })
   server.register(stationRoutes, { prefix: '/api' })
   server.register(waitersRoutes, { prefix: '/api' })

@@ -59,7 +59,7 @@ describe('Waiter CRUD - POST /api/events/:eventId/waiters', () => {
     const body = res.json() as Record<string, unknown>
     expect(body.id).toBeDefined()
     expect(body.name).toBe(NAME)
-    expect(body.pin).toBe(PIN)
+    expect(body.pin).toBeUndefined() // pin is never returned
     expect(body.eventId).toBe(eventId)
     expect(body.canCancel).toBe(true)
     expect(body.canCashOut).toBe(true)
@@ -143,7 +143,7 @@ describe('Waiter CRUD - PUT /api/waiters/:id', () => {
     expect(res.statusCode).toBe(200)
     const body = res.json() as Record<string, unknown>
     expect(body.name).toBe(`${NAME}-upd`)
-    expect(body.pin).toBe('9999')
+    expect(body.pin).toBeUndefined() // pin is never returned
     expect(body.canStatistics).toBe(true)
   })
 })
