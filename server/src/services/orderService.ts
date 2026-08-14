@@ -2,7 +2,8 @@ import { prisma } from '@/db/client'
 import type { Prisma } from '@prisma/client'
 
 export interface CreateOrderInput {
-  tableNumber: string
+  tableNumber?: string
+  pickupCode?: string
   waiterId: string
   eventId: string
   items: Array<{
@@ -26,7 +27,12 @@ export class OrderValidationError extends Error {
  * returns the created order with items.
  */
 export async function createOrder(input: CreateOrderInput) {
-  const { tableNumber, waiterId, eventId, items } = input
+  const { tableNumber, pickupCode, waiterId, eventId, items } = input
+
+  // Validate XOR: exactly one of tableNumber or pickupCode must be present
+  if (Boolean(tableNumber) === Boolean(pickupCode)) {
+    throw new OrderValidationError('Exactly one of tableNumber or pickupCode must be provided')
+  }
 
   // Validate waiter exists
   const waiter = await prisma.waiter.findUnique({ where: { id: waiterId }, select: { id: true } })
@@ -62,7 +68,8 @@ export async function createOrder(input: CreateOrderInput) {
 
     return tx.order.create({
       data: {
-        tableNumber,
+        tableNumber: tableNumber ?? null,
+        pickupCode: pickupCode ?? null,
         waiterId,
         eventId,
         totalCents,

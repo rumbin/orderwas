@@ -17,6 +17,8 @@ describe('Station CRUD routes', () => {
     await prisma.order.deleteMany({})
     await prisma.product.deleteMany({})
     await prisma.waiter.deleteMany({})
+    await prisma.stationAltPrinter.deleteMany({})
+    await prisma.printer.deleteMany({})
     await prisma.station.deleteMany({})
     await prisma.event.deleteMany({})
   })
@@ -26,6 +28,8 @@ describe('Station CRUD routes', () => {
     await prisma.order.deleteMany({})
     await prisma.product.deleteMany({})
     await prisma.waiter.deleteMany({})
+    await prisma.stationAltPrinter.deleteMany({})
+    await prisma.printer.deleteMany({})
     await prisma.station.deleteMany({})
     await prisma.event.deleteMany({})
     const ev = await prisma.event.create({ data: { name: 'Station Test Event' } })
@@ -36,23 +40,23 @@ describe('Station CRUD routes', () => {
     const response = await server.inject({
       method: 'POST',
       url: `/api/events/${eventId}/stations`,
-      payload: { name: 'Main Bar', printerIp: '192.168.1.50', printerType: 'network', kitchenMonitor: true },
+      payload: { name: 'Main Bar', kitchenMonitor: true, sortOrder: 1 },
     })
     expect(response.statusCode).toBe(201)
     const body = response.json()
     expect(body.id).toBeDefined()
     expect(body.name).toBe('Main Bar')
     expect(body.eventId).toBe(eventId)
-    expect(body.printerIp).toBe('192.168.1.50')
-    expect(body.printerType).toBe('network')
+    expect(body.printerId).toBeNull()
     expect(body.kitchenMonitor).toBe(true)
+    expect(body.sortOrder).toBe(1)
   })
 
   it('POST /api/events/:eventId/stations returns 400 for invalid payload', async () => {
     const response = await server.inject({
       method: 'POST',
       url: `/api/events/${eventId}/stations`,
-      payload: { printerIp: '1.2.3.4' },
+      payload: { sortOrder: 1 },
     })
     expect(response.statusCode).toBe(400)
   })
@@ -66,9 +70,26 @@ describe('Station CRUD routes', () => {
     expect(response.statusCode).toBe(404)
   })
 
+  it('POST creates station with printer FK', async () => {
+    const printer = await prisma.printer.create({
+      data: { name: 'Bar Printer', type: 'network', ip: '192.168.1.50', eventId },
+    })
+    const response = await server.inject({
+      method: 'POST',
+      url: `/api/events/${eventId}/stations`,
+      payload: { name: 'Bar', printerId: printer.id, kitchenMonitor: true },
+    })
+    expect(response.statusCode).toBe(201)
+    const body = response.json()
+    expect(body.printerId).toBe(printer.id)
+    expect(body.printer).toBeDefined()
+    expect(body.printer.name).toBe('Bar Printer')
+    expect(body.printer.ip).toBe('192.168.1.50')
+  })
+
   it('GET /api/events/:eventId/stations lists stations for event', async () => {
-    await prisma.station.create({ data: { name: 'Bar A', eventId } })
-    await prisma.station.create({ data: { name: 'Bar B', eventId } })
+    await prisma.station.create({ data: { name: 'Bar A', eventId, sortOrder: 1 } })
+    await prisma.station.create({ data: { name: 'Bar B', eventId, sortOrder: 2 } })
 
     const response = await server.inject({
       method: 'GET',
@@ -77,11 +98,11 @@ describe('Station CRUD routes', () => {
     expect(response.statusCode).toBe(200)
     const body = response.json()
     expect(body).toHaveLength(2)
-    expect(body.map((s: { name: string }) => s.name).sort()).toEqual(['Bar A', 'Bar B'])
+    expect(body.map((s: { name: string }) => s.name)).toEqual(['Bar A', 'Bar B'])
     body.forEach((s: { eventId: string }) => expect(s.eventId).toBe(eventId))
   })
 
-  it('GET /api/stations/:id returns a single station', async () => {
+  it('GET /api/stations/:id returns a single station with printer', async () => {
     const created = await prisma.station.create({ data: { name: 'Solo Station', eventId } })
 
     const response = await server.inject({
@@ -92,6 +113,7 @@ describe('Station CRUD routes', () => {
     const body = response.json()
     expect(body.id).toBe(created.id)
     expect(body.name).toBe('Solo Station')
+    expect(body.printer).toBeNull()
   })
 
   it('GET /api/stations/:id returns 404 for missing station', async () => {
@@ -108,14 +130,13 @@ describe('Station CRUD routes', () => {
     const response = await server.inject({
       method: 'PUT',
       url: `/api/stations/${created.id}`,
-      payload: { name: 'Updated', printerIp: '10.0.0.1', printerType: 'dummy', kitchenMonitor: true },
+      payload: { name: 'Updated', kitchenMonitor: true, sortOrder: 5 },
     })
     expect(response.statusCode).toBe(200)
     const body = response.json()
     expect(body.name).toBe('Updated')
-    expect(body.printerIp).toBe('10.0.0.1')
-    expect(body.printerType).toBe('dummy')
     expect(body.kitchenMonitor).toBe(true)
+    expect(body.sortOrder).toBe(5)
   })
 
   it('PUT /api/stations/:id returns 404 for missing station', async () => {

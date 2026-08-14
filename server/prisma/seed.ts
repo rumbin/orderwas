@@ -7,13 +7,17 @@ async function main() {
 
   // Wipe existing data (dev only — fresh start each seed)
   // Use catch to handle fresh databases where tables might not exist yet
+  // FK-safe order: OrderItem → Order → Product → Waiter → StationAltPrinter → Printer → Station → Voucher → AppLayout → Event
   await prisma.orderItem.deleteMany({}).catch(() => {})
   await prisma.order.deleteMany({}).catch(() => {})
   await prisma.product.deleteMany({}).catch(() => {})
   await prisma.waiter.deleteMany({}).catch(() => {})
+  await prisma.stationAltPrinter.deleteMany({}).catch(() => {})
+  await prisma.printer.deleteMany({}).catch(() => {})
   await prisma.station.deleteMany({}).catch(() => {})
-  await prisma.event.deleteMany({}).catch(() => {})
+  await prisma.voucher.deleteMany({}).catch(() => {})
   await prisma.appLayout.deleteMany({}).catch(() => {})
+  await prisma.event.deleteMany({}).catch(() => {})
 
   // Event
   const event = await prisma.event.create({
@@ -21,12 +25,21 @@ async function main() {
   })
   console.log(`  ✓ Event: ${event.name} (${event.id})`)
 
+  // Printers
+  const barPrinter = await prisma.printer.create({
+    data: { name: 'Bar Drucker', type: 'dummy', eventId: event.id, charsPerLine: 42 },
+  })
+  const kuechePrinter = await prisma.printer.create({
+    data: { name: 'Küche Drucker', type: 'dummy', eventId: event.id, charsPerLine: 42 },
+  })
+  console.log(`  ✓ Printers: Bar Drucker (dummy), Küche Drucker (dummy)`)
+
   // Stations
   const bar = await prisma.station.create({
-    data: { name: 'Bar', eventId: event.id, sortOrder: 1, kitchenMonitor: false },
+    data: { name: 'Bar', eventId: event.id, sortOrder: 1, kitchenMonitor: false, printerId: barPrinter.id },
   })
   const kueche = await prisma.station.create({
-    data: { name: 'Küche', eventId: event.id, sortOrder: 2, kitchenMonitor: true },
+    data: { name: 'Küche', eventId: event.id, sortOrder: 2, kitchenMonitor: true, printerId: kuechePrinter.id },
   })
   const kaffee = await prisma.station.create({
     data: { name: 'Kaffee', eventId: event.id, sortOrder: 3, kitchenMonitor: false },

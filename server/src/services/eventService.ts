@@ -28,8 +28,23 @@ export async function getEvent(id: string) {
 
 /**
  * Updates an event.
+ * Special rule: switching status from "test" to "live" wipes all orders
+ * and resets the tear-off counter (wiki §14 business rule).
  */
 export async function updateEvent(id: string, data: Record<string, unknown>) {
+  // Check for test→live transition
+  if (data.status === 'live') {
+    const event = await prisma.event.findUnique({ where: { id }, select: { status: true } })
+    if (event && event.status === 'test') {
+      // Wipe all orders for this event and reset tear-off counter
+      await prisma.$transaction([
+        prisma.orderItem.deleteMany({ where: { order: { eventId: id } } }),
+        prisma.order.deleteMany({ where: { eventId: id } }),
+        prisma.event.update({ where: { id }, data: { lastTearOffNumber: 0 } }),
+      ])
+    }
+  }
+
   try {
     return await prisma.event.update({ where: { id }, data })
   } catch (err) {

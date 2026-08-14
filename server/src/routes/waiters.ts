@@ -8,7 +8,8 @@ const waiterSelect = {
   name: true,
   logo: true,
   eventId: true,
-  printerIp: true,
+  printerId: true,
+  pickupCode: true,
   printsImmediately: true,
   canCancel: true,
   canCashOut: true,
@@ -26,7 +27,8 @@ const waiterSelect = {
 const createWaiterBody = z.object({
   name: z.string().min(1),
   pin: z.string().min(1),
-  printerIp: z.string().optional(),
+  printerId: z.string().optional(),
+  pickupCode: z.string().optional(),
   canCancel: z.boolean().optional(),
   canCashOut: z.boolean().optional(),
   canStatistics: z.boolean().optional(),
@@ -35,7 +37,8 @@ const createWaiterBody = z.object({
 const updateWaiterBody = z.object({
   name: z.string().min(1).optional(),
   pin: z.string().min(1).optional(),
-  printerIp: z.string().nullable().optional(),
+  printerId: z.string().nullable().optional(),
+  pickupCode: z.string().nullable().optional(),
   canCancel: z.boolean().optional(),
   canCashOut: z.boolean().optional(),
   canStatistics: z.boolean().optional(),
@@ -52,7 +55,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
     const { eventId } = request.params as { eventId: string }
     const parsed = createWaiterBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
-    const { name, pin, printerIp, canCancel, canCashOut, canStatistics } = parsed.data
+    const { name, pin, printerId, pickupCode, canCancel, canCashOut, canStatistics } = parsed.data
 
     try {
       const event = await prisma.event.findUnique({ where: { id: eventId }, select: { id: true } })
@@ -62,7 +65,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
     }
 
     const waiter = await prisma.waiter.create({
-      data: { name, pin, printerIp, canCancel, canCashOut, canStatistics, eventId },
+      data: { name, pin, printerId, pickupCode, canCancel, canCashOut, canStatistics, eventId },
       select: waiterSelect,
     })
     return reply.status(201).send(waiter)

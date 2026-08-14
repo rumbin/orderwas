@@ -9,11 +9,15 @@ const createOrderItemSchema = z.object({
 })
 
 const createOrderBody = z.object({
-  tableNumber: z.string().min(1),
+  tableNumber: z.string().min(1).optional(),
+  pickupCode: z.string().min(1).optional(),
   waiterId: z.string().min(1),
   eventId: z.string().min(1),
   items: z.array(createOrderItemSchema).nonempty({ message: 'items must not be empty' }),
-})
+}).refine(
+  (data) => Boolean(data.tableNumber) !== Boolean(data.pickupCode),
+  { message: 'Exactly one of tableNumber or pickupCode must be provided' },
+)
 
 const updateOrderStatusBody = z.object({
   status: z.enum(['open', 'preparing', 'partial', 'paid', 'cancelled']),

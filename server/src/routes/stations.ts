@@ -4,16 +4,18 @@ import { prisma } from '@/db/client'
 
 const createStationSchema = z.object({
   name: z.string().min(1),
-  printerIp: z.string().optional(),
-  printerType: z.string().optional(),
+  printerId: z.string().optional(),
   kitchenMonitor: z.boolean().optional(),
+  sortOrder: z.number().int().optional(),
+  copyPrint: z.boolean().optional(),
 })
 
 const updateStationSchema = z.object({
   name: z.string().min(1).optional(),
-  printerIp: z.string().nullable().optional(),
-  printerType: z.string().optional(),
+  printerId: z.string().nullable().optional(),
   kitchenMonitor: z.boolean().optional(),
+  sortOrder: z.number().int().optional(),
+  copyPrint: z.boolean().optional(),
 })
 
 export default async function stationRoutes(server: FastifyInstance): Promise<void> {
@@ -32,10 +34,12 @@ export default async function stationRoutes(server: FastifyInstance): Promise<vo
       data: {
         name: parsed.data.name,
         eventId,
-        ...(parsed.data.printerIp !== undefined ? { printerIp: parsed.data.printerIp } : {}),
-        ...(parsed.data.printerType !== undefined ? { printerType: parsed.data.printerType } : {}),
-        ...(parsed.data.kitchenMonitor !== undefined ? { kitchenMonitor: parsed.data.kitchenMonitor } : {}),
+        ...('printerId' in parsed.data ? { printerId: parsed.data.printerId } : {}),
+        ...('kitchenMonitor' in parsed.data ? { kitchenMonitor: parsed.data.kitchenMonitor } : {}),
+        ...('sortOrder' in parsed.data ? { sortOrder: parsed.data.sortOrder } : {}),
+        ...('copyPrint' in parsed.data ? { copyPrint: parsed.data.copyPrint } : {}),
       },
+      include: { printer: true },
     })
     return reply.code(201).send(station)
   })
@@ -49,7 +53,8 @@ export default async function stationRoutes(server: FastifyInstance): Promise<vo
     }
     const stations = await prisma.station.findMany({
       where: { eventId },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { sortOrder: 'asc' },
+      include: { printer: true },
     })
     return stations
   })
@@ -57,7 +62,10 @@ export default async function stationRoutes(server: FastifyInstance): Promise<vo
   // Get single station
   server.get('/stations/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
-    const station = await prisma.station.findUnique({ where: { id } })
+    const station = await prisma.station.findUnique({
+      where: { id },
+      include: { printer: true },
+    })
     if (!station) {
       return reply.code(404).send({ error: 'Station not found' })
     }
@@ -78,6 +86,7 @@ export default async function stationRoutes(server: FastifyInstance): Promise<vo
     const updated = await prisma.station.update({
       where: { id },
       data: parsed.data,
+      include: { printer: true },
     })
     return updated
   })

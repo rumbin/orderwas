@@ -155,6 +155,42 @@ describe('orderService.createOrder', () => {
     expect(order3.tearOffNumber).toBe(2)
   })
 
+  // Pickup code orders (Task 2.5)
+  it('creates an order with pickupCode instead of tableNumber', async () => {
+    const order = await createOrder({
+      pickupCode: 'A',
+      waiterId,
+      eventId,
+      items: [{ productId: beerId, quantity: 2 }],
+    })
+    expect(order.tableNumber).toBeNull()
+    expect(order.pickupCode).toBe('A')
+    expect(order.tearOffNumber).toBe(1)
+    expect(order.totalCents).toBe(600)
+  })
+
+  it('rejects order with neither tableNumber nor pickupCode', async () => {
+    await expect(
+      createOrder({
+        waiterId,
+        eventId,
+        items: [{ productId: beerId, quantity: 1 }],
+      }),
+    ).rejects.toThrow()
+  })
+
+  it('rejects order with both tableNumber and pickupCode', async () => {
+    await expect(
+      createOrder({
+        tableNumber: '5',
+        pickupCode: 'A',
+        waiterId,
+        eventId,
+        items: [{ productId: beerId, quantity: 1 }],
+      }),
+    ).rejects.toThrow()
+  })
+
   it('assigns distinct tear-off numbers to rapid sequential orders', async () => {
     // SQLite serializes write transactions, so we test rapid sequential creation
     // rather than true parallelism. The atomic increment guarantees correctness.

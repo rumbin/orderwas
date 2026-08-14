@@ -19,22 +19,52 @@ model Event {
   stations          Station[]
   waiters           Waiter[]
   orders            Order[]
+  printers          Printer[]
+  vouchers          Voucher[]
 }
 
 model Station {
+  id              String   @id @default(cuid())
+  name            String
+  logo            String?
+  printerId       String?
+  printer         Printer? @relation(fields: [printerId], references: [id])
+  kitchenMonitor  Boolean  @default(false)
+  sortOrder       Int      @default(0)
+  copyPrint       Boolean  @default(false)
+  eventId         String
+  event           Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  products        Product[]
+  altPrinters     StationAltPrinter[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model StationAltPrinter {
   id         String   @id @default(cuid())
-  name       String
-  logo       String?
-  printerIp  String?
-  printerType String  @default("network") // "network" | "ignore" | "dummy"
-  kitchenMonitor Boolean @default(false)
-  sortOrder  Int      @default(0)
-  copyPrint  Boolean  @default(false)
-  eventId    String
-  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  products   Product[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  stationId  String
+  station    Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  printerId  String
+  printer    Printer  @relation(fields: [printerId], references: [id])
+  tableFrom  String?
+  tableTo    String?
+  pickupCode String?
+}
+
+model Printer {
+  id           String   @id @default(cuid())
+  name         String
+  type         String   @default("network") // "network" | "ignore" | "dummy"
+  ip           String?
+  charsPerLine Int      @default(42)
+  font         String   @default("A")
+  buzzer       Boolean  @default(false)
+  paperCut     String   @default("partial") // "full" | "partial" | "none"
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  stations     Station[]
+  waiters      Waiter[]
+  altFor       StationAltPrinter[]
 }
 
 model Product {
@@ -54,6 +84,17 @@ model Product {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   orderItems OrderItem[]
+  components ProductComponent[] @relation("Composite")
+  usedIn     ProductComponent[] @relation("Ingredient")
+}
+
+model ProductComponent {
+  id           String  @id @default(cuid())
+  compositeId  String
+  composite    Product @relation("Composite", fields: [compositeId], references: [id], onDelete: Cascade)
+  ingredientId String
+  ingredient   Product @relation("Ingredient", fields: [ingredientId], references: [id])
+  quantity     Float   // decimal quantities allowed (0.5L beer from 1L unit)
 }
 
 model Waiter {
@@ -63,7 +104,9 @@ model Waiter {
   logo         String?
   eventId      String
   event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  printerIp    String?
+  printerId    String?
+  printer      Printer? @relation(fields: [printerId], references: [id])
+  pickupCode   String?  // Abholkennzeichen — waiter's orders skip table entry
   printsImmediately Boolean @default(true)
   canCancel    Boolean  @default(false)
   canCashOut   Boolean  @default(false)
@@ -81,7 +124,7 @@ model Waiter {
 
 model Order {
   id            String      @id @default(cuid())
-  tableNumber   String
+  tableNumber   String?
   waiterId      String
   waiter        Waiter      @relation(fields: [waiterId], references: [id])
   eventId       String
@@ -91,6 +134,7 @@ model Order {
   comment       String?
   tearOffNumber Int?
   pickupCode    String?
+  sammelbonId   String?     // reserved for Phase 6 collective receipts
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   items         OrderItem[]
@@ -105,6 +149,19 @@ model OrderItem {
   quantity  Int     @default(1)
   status    String  @default("open") // "open" | "prepared" | "delivered" | "cancelled"
   comment   String?
+}
+
+model Voucher {
+  id              String    @id @default(cuid())
+  eventId         String
+  event           Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  code            String
+  valueCents      Int
+  status          String    @default("active") // "active" | "redeemed" | "expired"
+  redeemedOrderId String?
+  createdAt       DateTime  @default(now())
+  redeemedAt      DateTime?
+  @@unique([eventId, code])
 }
 
 model AppLayout {

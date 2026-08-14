@@ -9,16 +9,29 @@ export interface Event {
   status: 'test' | 'live'
   hidePrices: boolean
   tseEnabled: boolean
+  lastTearOffNumber: number
   createdAt: string
   updatedAt: string
+}
+
+export interface Printer {
+  id: string
+  name: string
+  type: 'network' | 'ignore' | 'dummy'
+  ip: string | null
+  charsPerLine: number
+  font: string
+  buzzer: boolean
+  paperCut: 'full' | 'partial' | 'none'
+  eventId: string
 }
 
 export interface Station {
   id: string
   name: string
   logo: string | null
-  printerIp: string | null
-  printerType: 'network' | 'ignore' | 'dummy'
+  printerId: string | null
+  printer?: Printer | null
   kitchenMonitor: boolean
   sortOrder: number
   copyPrint: boolean
@@ -43,10 +56,10 @@ export interface Product {
 export interface Waiter {
   id: string
   name: string
-  pin: string
   logo: string | null
   eventId: string
-  printerIp: string | null
+  printerId: string | null
+  pickupCode: string | null
   printsImmediately: boolean
   canCancel: boolean
   canCashOut: boolean
@@ -71,7 +84,7 @@ export interface OrderItem {
 
 export interface Order {
   id: string
-  tableNumber: string
+  tableNumber: string | null
   waiterId: string
   waiter?: Waiter
   eventId: string
@@ -80,7 +93,19 @@ export interface Order {
   comment: string | null
   tearOffNumber: number | null
   pickupCode: string | null
+  sammelbonId: string | null
   createdAt: string
   updatedAt: string
   items: OrderItem[]
+}
+
+export interface Voucher {
+  id: string
+  eventId: string
+  code: string
+  valueCents: number
+  status: 'active' | 'redeemed' | 'expired'
+  redeemedOrderId: string | null
+  createdAt: string
+  redeemedAt: string | null
 }

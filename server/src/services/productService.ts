@@ -60,3 +60,29 @@ export async function deleteProduct(id: string): Promise<boolean> {
 export class ProductReferencedError extends Error {
   statusCode = 409
 }
+
+/**
+ * Expands a composite product's components into ingredient quantities.
+ * Returns array of { ingredientId, ingredientName, quantity }.
+ */
+export async function expandComponents(compositeId: string) {
+  const components = await prisma.productComponent.findMany({
+    where: { compositeId },
+    include: { ingredient: { select: { id: true, name: true } } },
+  })
+  return components.map((c) => ({
+    ingredientId: c.ingredientId,
+    ingredientName: c.ingredient.name,
+    quantity: c.quantity,
+  }))
+}
+
+/**
+ * Adds component ingredients to a composite product.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function addComponent(compositeId: string, ingredientId: string, quantity: number) {
+  return prisma.productComponent.create({
+    data: { compositeId, ingredientId, quantity },
+  })
+}
