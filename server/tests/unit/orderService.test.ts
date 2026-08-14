@@ -107,4 +107,67 @@ describe('orderService.createOrder', () => {
       }),
     ).rejects.toThrow('One or more products do not exist')
   })
+
+  it('assigns auto-incrementing tear-off numbers per event', async () => {
+    const order1 = await createOrder({
+      tableNumber: '1',
+      waiterId,
+      eventId,
+      items: [{ productId: beerId, quantity: 1 }],
+    })
+    expect(order1.tearOffNumber).toBe(1)
+
+    const order2 = await createOrder({
+      tableNumber: '2',
+      waiterId,
+      eventId,
+      items: [{ productId: beerId, quantity: 1 }],
+    })
+    expect(order2.tearOffNumber).toBe(2)
+  })
+
+  it('has independent tear-off sequences per event', async () => {
+    const event2 = await prisma.event.create({ data: { name: 'Event 2' } })
+    const waiter2 = await prisma.waiter.create({ data: { name: 'Bob', pin: '5678', eventId: event2.id } })
+
+    const order1 = await createOrder({
+      tableNumber: '1',
+      waiterId,
+      eventId,
+      items: [{ productId: beerId, quantity: 1 }],
+    })
+    expect(order1.tearOffNumber).toBe(1)
+
+    const order2 = await createOrder({
+      tableNumber: '1',
+      waiterId: waiter2.id,
+      eventId: event2.id,
+      items: [{ productId: beerId, quantity: 1 }],
+    })
+    expect(order2.tearOffNumber).toBe(1) // independent sequence
+
+    const order3 = await createOrder({
+      tableNumber: '2',
+      waiterId,
+      eventId,
+      items: [{ productId: beerId, quantity: 1 }],
+    })
+    expect(order3.tearOffNumber).toBe(2)
+  })
+
+  it('assigns distinct tear-off numbers to rapid sequential orders', async () => {
+    // SQLite serializes write transactions, so we test rapid sequential creation
+    // rather than true parallelism. The atomic increment guarantees correctness.
+    const numbers: number[] = []
+    for (let i = 0; i < 5; i++) {
+      const order = await createOrder({
+        tableNumber: `${i}`,
+        waiterId,
+        eventId,
+        items: [{ productId: beerId, quantity: 1 }],
+      })
+      numbers.push(order.tearOffNumber!)
+    }
+    expect(numbers).toEqual([1, 2, 3, 4, 5])
+  })
 })

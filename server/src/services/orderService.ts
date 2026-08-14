@@ -22,7 +22,8 @@ export class OrderValidationError extends Error {
 
 /**
  * Creates an order: validates entities, calculates total in integer cents,
- * persists order + items, returns the created order with items.
+ * atomically assigns a per-event tear-off number, persists order + items,
+ * returns the created order with items.
  */
 export async function createOrder(input: CreateOrderInput) {
   const { tableNumber, waiterId, eventId, items } = input
@@ -51,23 +52,33 @@ export async function createOrder(input: CreateOrderInput) {
     0,
   )
 
-  const order = await prisma.order.create({
-    data: {
-      tableNumber,
-      waiterId,
-      eventId,
-      totalCents,
-      items: {
-        create: items.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          comment: item.comment,
-        })),
+  // Atomically increment the event's tear-off counter and create the order
+  const order = await prisma.$transaction(async (tx) => {
+    const updatedEvent = await tx.event.update({
+      where: { id: eventId },
+      data: { lastTearOffNumber: { increment: 1 } },
+      select: { lastTearOffNumber: true },
+    })
+
+    return tx.order.create({
+      data: {
+        tableNumber,
+        waiterId,
+        eventId,
+        totalCents,
+        tearOffNumber: updatedEvent.lastTearOffNumber,
+        items: {
+          create: items.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            comment: item.comment,
+          })),
+        },
       },
-    },
-    include: {
-      items: { include: { product: { select: { id: true, name: true, priceCents: true } } } },
-    },
+      include: {
+        items: { include: { product: { select: { id: true, name: true, priceCents: true } } } },
+      },
+    })
   })
 
   return order

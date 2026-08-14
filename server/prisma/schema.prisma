@@ -8,16 +8,17 @@ datasource db {
 }
 
 model Event {
-  id        String   @id @default(cuid())
-  name      String
-  status    String   @default("test") // "test" | "live"
-  hidePrices Boolean @default(false)
-  tseEnabled Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  stations  Station[]
-  waiters   Waiter[]
-  orders    Order[]
+  id                String   @id @default(cuid())
+  name              String
+  status            String   @default("test") // "test" | "live"
+  hidePrices        Boolean  @default(false)
+  tseEnabled        Boolean  @default(false)
+  lastTearOffNumber Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  stations          Station[]
+  waiters           Waiter[]
+  orders            Order[]
 }
 
 model Station {
