@@ -4,1073 +4,587 @@
 
 **Goal:** Build an open-source ordering system for club festivals (Vereinsfeste) — browser-based, offline-capable, with ESC/POS printer support.
 
-**Architecture:** Monorepo with a Node.js/TypeScript backend (REST + WebSocket) and a React/Vite frontend (PWA). SQLite as primary database with a Prisma ORM abstraction layer for PostgreSQL swappability. ESC/POS for thermal printers. German-first UI with i18n architecture.
+**Architecture:** Monorepo with a Node.js/TypeScript backend (REST + WebSocket) and a React/Vite frontend (PWA). SQLite via Prisma (PostgreSQL-swappable). Money is integer cents. Thin routes, fat services. See **`docs/ARCHITECTURE.md`** — the binding architecture document.
 
 **Tech Stack:**
-- **Backend:** Node.js 20+, TypeScript, Fastify, Prisma ORM, SQLite, Socket.io, Zod validation
-- **Frontend:** React 18+, Vite, TypeScript, Tailwind CSS, react-i18next, PWA (vite-plugin-pwa)
+- **Backend:** Node.js 20+, TypeScript, Fastify 5, Prisma ORM, SQLite (WAL), Socket.io, Zod
+- **Frontend:** React 18, Vite 5, TypeScript, Tailwind CSS, react-i18next, zustand, PWA (vite-plugin-pwa)
 - **Testing:** Vitest (unit + integration), Playwright (E2E)
-- **Deployment:** Docker, docker-compose
+- **Deployment:** Docker, docker-compose (single container, single port)
 - **License:** GPL-3.0
 
 ---
 
-## Architecture
+## Revision History
 
-```
-orderwas/
-├── server/                  # Backend (Node.js + Fastify)
-│   ├── src/
-│   │   ├── routes/           # REST API routes
-│   │   ├── services/        # Business logic
-│   │   ├── printer/         # ESC/POS printer driver
-│   │   ├── websocket/       # Socket.io real-time
-│   │   ├── db/              # Prisma schema & client
-│   │   ├── i18n/            # Backend translations (receipts etc.)
-│   │   └── index.ts         # Entry point
-│   ├── prisma/
-│   │   └── schema.prisma    # Database schema
-│   ├── tests/
-│   │   ├── unit/
-│   │   └── integration/
-│   └── package.json
-├── client/                  # Frontend (React + Vite PWA)
-│   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   ├── pages/           # Route pages
-│   │   ├── hooks/           # Custom hooks
-│   │   ├── i18n/            # Translation files (de.json, en.json, fr.json)
-│   │   ├── api/             # API client
-│   │   ├── stores/          # State management (zustand)
-│   │   └── main.tsx         # Entry point
-│   ├── tests/
-│   └── package.json
-├── docs/                    # Existing documentation
-├── docker/                  # Dockerfile, docker-compose.yml
-├── package.json             # Workspace root
-└── README.md
-```
-
-## Implementation Order
-
-### Phase 0: Project Bootstrap (Tasks 1-3)
-Set up monorepo, tooling, Docker. No business logic.
-
-### Phase 1: Backend Core — The Tracer Bullet (Tasks 4-12)
-Vertical slice: Event → Products → Order → API response.
-Proves the architecture works end-to-end.
-
-### Phase 1.5: Local CI Pipeline (Tasks 12a-12d)
-Build verification, lint, typecheck, E2E smoke tests, and pre-commit hooks.
-Must be in place before Phase 2 so every subsequent phase is validated.
-
-### Phase 1.7: Backend Foundation Gaps (Tasks 12e-12j)
-Fill gaps from Phase 1 and lay groundwork for Phase 2+:
-- Products CRUD route (was skipped in Phase 1)
-- Auth: login endpoint + JWT/session middleware
-- Service layer extraction (order creation logic → services/)
-- Float → Decimal for all monetary fields
-- Exclude PIN from waiter API responses
-- Tear-off number auto-incrementing per event
-- Seed data script for development
-
-### Phase 2: Frontend Core — Order Taking (Tasks 13-18)
-Responsive PWA where a waiter can select products and submit orders.
-Connects to the backend API from Phase 1/1.7.
-Includes minimal admin setup page for stations/products/waiters.
-
-### Phase 3: Station Display & Printers (Tasks 19-24)
-Kitchen monitor view + ESC/POS printer support.
-Orders appear at the station in real-time.
-
-### Phase 4: Real-Time (Tasks 25-27)
-WebSocket integration for live updates across all devices.
-
-### Phase 5: Admin & Configuration (Tasks 28-32)
-Admin UI for events, waiters, stations, products, printers.
-Export/import configuration.
-
-### Phase 6: Advanced Features (Tasks 33-40)
-Vouchers, stock management, settlement, QR code ordering.
-
-### Phase 7: Polish (Tasks 41-44)
-Offline mode, i18n completion, Docker deployment, documentation.
+- **2026-08-14 (v1):** Initial plan.
+- **2026-08-14 (v2, glm-5.2 review):** Added Phase 1.7 (products CRUD, auth, service layer, money, tear-off, seed).
+- **2026-08-14 (v3, kimi-k3 review):** Deep requirements re-review against orderjutsu-wiki-analysis. **Data model corrections:** Printer as first-class entity, ProductComponent (composite stock), Voucher entity, nullable tableNumber + pickupCode, integer cents everywhere, sammelbonId reserved. **Phase restructuring:** WebSocket merged into the station-display phase (was Phase 4) — a station display without live updates fails requirements §5.3.1 and the Phase-1 roadmap. Docker moved earlier (Phase 6). Explicit v1 non-goals documented (TSE, multi-tenant, floor plan). Task renumbering: phases now use letter-suffixed task IDs within phases (e.g. 2.1, 2.2) to stop the 12a/12e sprawl.
 
 ---
 
-## Phase 0: Project Bootstrap
+## Phase Overview
 
-### Task 1: Initialize git repo and monorepo structure
+| Phase | Name | Delivers | Status |
+|-------|------|----------|--------|
+| 0 | Project Bootstrap | monorepo, tooling | ✅ done |
+| 1 | Backend Core — Tracer Bullet | Event/Station/Waiter/Order APIs | ✅ done (with gaps) |
+| 1.5 | Local CI Pipeline | typecheck, build, E2E, hooks | ✅ done |
+| 1.7 | Backend Foundation Gaps | products CRUD, auth, services, cents, tear-off, seed | ⬜ next |
+| 2 | Data Model Completion | Printer entity, ProductComponent, Voucher, pickup codes, schema migration | ⬜ |
+| 3 | Frontend Core — Order Taking | login, product grid, cart, submit, PWA shell, dev admin page | ⬜ |
+| 4 | Station Display + Real-Time + Printers | kitchen monitor (live), ESC/POS, print on order | ⬜ |
+| 5 | Admin & Configuration | admin UI, CRUD pages, config export/import | ⬜ |
+| 6 | Advanced Features | vouchers, stock, settlement, QR ordering, permissions | ⬜ |
+| 7 | Polish | offline sync, i18n completion, Docker, docs | ⬜ |
 
-**Objective:** Create the project skeleton with npm workspaces.
-
-**Files:**
-- Create: `package.json` (workspace root)
-- Create: `.gitignore`
-- Create: `server/package.json`
-- Create: `client/package.json`
-- Create: `LICENSE` (GPL-3.0)
-
-**Steps:**
-1. `cd /home/biephi/hermine/orderwas && git init`
-2. Create root `package.json` with npm workspaces:
-```json
-{
-  "name": "orderwas",
-  "private": true,
-  "workspaces": ["server", "client"],
-  "scripts": {
-    "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
-    "dev:server": "npm -w server run dev",
-    "dev:client": "npm -w client run dev",
-    "test": "npm -w server run test && npm -w client run test",
-    "build": "npm -w server run build && npm -w client run build"
-  },
-  "devDependencies": {
-    "concurrently": "^9.0.0"
-  }
-}
-```
-3. Create `.gitignore` (node_modules, dist, *.db, .env, .prisma)
-4. Create GPL-3.0 LICENSE file
-5. Create `server/package.json` and `client/package.json` stubs
-6. `git add -A && git commit -m "chore: initialize monorepo structure"`
+**Key sequencing rationale:** Printing and live station displays are the product's core value — they land in Phase 4, before admin polish. Docker moves to Phase 7 but the client is served by Fastify from Phase 3 onward so the single-container topology is never in doubt.
 
 ---
 
-### Task 2: Set up backend (Fastify + TypeScript + Prisma + Vitest)
+## Phase 0: Project Bootstrap ✅ DONE
 
-**Objective:** Backend dev environment with TypeScript, Fastify, Prisma, and Vitest.
-
-**Files:**
-- Create: `server/tsconfig.json`
-- Create: `server/src/index.ts` (minimal Fastify server)
-- Create: `server/prisma/schema.prisma` (SQLite, empty)
-- Create: `server/tests/health.test.ts`
-- Create: `server/vitest.config.ts`
-- Modify: `server/package.json`
-
-**TDD Steps:**
-1. Write `server/tests/health.test.ts` — test GET `/health` returns 200 `{status:"ok"}`
-2. Run: `npx vitest run` — expect FAIL (server not implemented)
-3. Implement `server/src/index.ts` — minimal Fastify server with `/health` route
-4. Run: `npx vitest run` — expect PASS
-5. Commit: `feat: backend health check endpoint`
+Tasks 1–3 complete. Monorepo with npm workspaces, Fastify+TS+Prisma+Vitest backend, React+Vite+Tailwind+Vitest frontend, GPL-3.0 LICENSE.
 
 ---
 
-### Task 3: Set up frontend (React + Vite + Tailwind + Vitest)
+## Phase 1: Backend Core — Tracer Bullet ✅ DONE (with gaps tracked in 1.7)
 
-**Objective:** Frontend dev environment with React, Vite, Tailwind, and Vitest.
+Tasks 4–12 complete: Prisma schema (Event, Station, Product, Waiter, Order, OrderItem, AppLayout), CRUD routes for events/stations/waiters/orders, 35 integration tests passing.
 
-**Files:**
-- Create: `client/vite.config.ts`
-- Create: `client/tsconfig.json`
-- Create: `client/src/main.tsx` (minimal React app)
-- Create: `client/src/App.tsx` (displays "Orderwas")
-- Create: `client/tests/app.test.tsx`
-- Create: `client/tailwind.config.ts`
-- Create: `client/postcss.config.js`
-- Create: `client/index.html`
-
-**TDD Steps:**
-1. Write `client/tests/app.test.tsx` — test App renders "Orderwas" heading
-2. Run: `npx vitest run` — expect FAIL
-3. Implement `client/src/App.tsx`
-4. Run: `npx vitest run` — expect PASS
-5. Commit: `feat: frontend skeleton with React + Tailwind`
+**Known gaps carried into Phase 1.7/2:** no products CRUD route; Float money; pin leaked in responses; no auth; no service layer; tear-off not assigned; no Printer/ProductComponent/Voucher entities.
 
 ---
 
-## Phase 1: Backend Core — Tracer Bullet
+## Phase 1.5: Local CI Pipeline ✅ DONE
 
-### Task 4: Prisma schema — Event entity
-
-**Objective:** Create the Event model in Prisma with SQLite.
-
-**Files:**
-- Modify: `server/prisma/schema.prisma`
-- Create: `server/tests/unit/event.test.ts`
-- Create: `server/src/services/eventService.ts`
-
-**TDD Steps:**
-1. Write test: `createEvent({name: "Testfest"})` returns event with id and name
-2. Run — FAIL
-3. Add Event model to schema.prisma, run `npx prisma migrate dev`, implement service
-4. Run — PASS
-5. Commit: `feat: event model and service`
-
-**Schema:**
-```prisma
-model Event {
-  id        String   @id @default(cuid())
-  name      String
-  status    String   @default("test") // "test" | "live"
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-```
-
----
-
-### Task 5: Prisma schema — Station entity
-
-**Objective:** Create Station model linked to Event.
-
-**Schema:**
-```prisma
-model Station {
-  id        String   @id @default(cuid())
-  name      String
-  eventId   String
-  event     Event    @relation(fields: [eventId], references: [id])
-  printerIp String?
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-```
-
-**TDD Steps:** Same pattern — test create/list, fail, implement, pass, commit.
-
----
-
-### Task 6: Prisma schema — Product entity
-
-**Objective:** Create Product model linked to Station.
-
-**Schema:**
-```prisma
-model Product {
-  id        String   @id @default(cuid())
-  name      String
-  price     Float
-  stationId String
-  station   Station  @relation(fields: [stationId], references: [id])
-  taxRate   Float    @default(20.0)
-  available Boolean  @default(true)
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-```
-
----
-
-### Task 7: Prisma schema — Waiter entity
-
-**Objective:** Create Waiter model linked to Event.
-
-**Schema:**
-```prisma
-model Waiter {
-  id        String   @id @default(cuid())
-  name      String
-  pin       String
-  eventId   String
-  event     Event    @relation(fields: [eventId], references: [id])
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-```
-
----
-
-### Task 8: Prisma schema — Order and OrderItem entities
-
-**Objective:** Create Order + OrderItem models.
-
-**Schema:**
-```prisma
-model Order {
-  id          String      @id @default(cuid())
-  tableNumber  String
-  waiterId    String
-  waiter      Waiter      @relation(fields: [waiterId], references: [id])
-  eventId     String
-  event       Event       @relation(fields: [eventId], references: [id])
-  status      String      @default("open") // "open" | "paid" | "cancelled"
-  total       Float       @default(0)
-  comment     String?
-  tearOffNumber Int?
-  createdAt   DateTime    @default(now())
-  items       OrderItem[]
-}
-
-model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  quantity  Int     @default(1)
-  status    String  @default("open") // "open" | "prepared" | "delivered" | "cancelled"
-  comment   String?
-}
-```
-
----
-
-### Task 9: REST API — Event CRUD routes
-
-**Objective:** Fastify routes for POST/GET/PUT/DELETE events.
-
-**Files:**
-- Create: `server/src/routes/events.ts`
-- Create: `server/tests/integration/events.test.ts`
-- Use Zod for request validation
-
-**TDD Steps:**
-1. Write integration test: POST `/api/events` → 201 with event body
-2. Write test: GET `/api/events` → 200 with array
-3. Write test: GET `/api/events/:id` → 200 or 404
-4. Run — FAIL
-5. Implement routes with Zod schemas
-6. Run — PASS
-7. Commit: `feat: event CRUD API`
-
----
-
-### Task 10: REST API — Product CRUD routes
-
-Same pattern as Task 9, for products with stationId association.
-
----
-
-### Task 11: REST API — Order creation route
-
-**Objective:** POST `/api/orders` creates order with items, calculates total.
-
-**TDD Steps:**
-1. Write test: POST order with 2× Beer (€3) + 1× Schnitzel (€8) → total = €14
-2. Write test: Order without items → 400 validation error
-3. Write test: Order with non-existent product → 404
-4. Run — FAIL
-5. Implement order service with total calculation
-6. Run — PASS
-7. Commit: `feat: order creation with total calculation`
-
----
-
-### Task 12: REST API — Order listing and status routes
-
-**Objective:** GET orders by event, PATCH order status.
-
-**TDD Steps:**
-1. Write test: GET `/api/events/:eventId/orders` → list of orders
-2. Write test: PATCH `/api/orders/:id` with `{status: "paid"}` → updates status
-3. Run — FAIL
-4. Implement
-5. Run — PASS
-6. Commit: `feat: order listing and status update`
-
----
-
-## Phase 1.5: Local CI Pipeline
-
-### Task 12a: Typecheck and lint scripts
-
-**Objective:** Add `typecheck` and `lint` scripts to both workspaces and the root.
-
-**Files:**
-- Modify: `package.json` (root) — add `typecheck`, `lint`, `ci` scripts
-- Modify: `server/package.json` — add `typecheck` script
-- Modify: `client/package.json` — add `typecheck` script
-- Create: `server/.eslintrc.json` (or eslint flat config)
-- Create: `client/.eslintrc.json`
-
-**TDD Steps:**
-1. Run `npx tsc --noEmit -p server/tsconfig.json` — must pass
-2. Run `npx tsc --noEmit -p client/tsconfig.json` — must pass
-3. Add root scripts:
-   - `"typecheck": "npm -w server run typecheck && npm -w client run typecheck"`
-   - `"ci": "npm run typecheck && npm test && npm run build && npm run test:e2e"`
-4. Commit: `chore: typecheck and ci scripts`
-
----
-
-### Task 12b: Build verification
-
-**Objective:** Verify both server and client build successfully from clean state.
-
-**Files:**
-- Modify: `server/package.json` — ensure `"build": "tsc"` works
-- Modify: `client/package.json` — ensure `"build": "tsc && vite build"` works
-
-**Steps:**
-1. Run `npm -w server run build` — must produce `dist/` without errors
-2. Run `npm -w client run build` — must produce `dist/` without errors
-3. Fix any build failures
-4. Add `"build:check": "npm -w server run build && npm -w client run build"` to root
-5. Commit: `chore: build verification`
-
----
-
-### Task 12c: Playwright E2E setup + smoke test
-
-**Objective:** End-to-end test that starts the backend, serves the frontend, and verifies the health endpoint and the app renders.
-
-**Files:**
-- Create: `e2e/playwright.config.ts` — runs against `localhost:5173` with backend at `localhost:3000`
-- Create: `e2e/smoke.spec.ts` — loads the app, checks for "Orderwas" heading, hits `/api/health`
-- Create: `e2e/package.json` — playwright dependency
-- Create: `scripts/start-e2e.sh` — starts backend + frontend in background for tests
-
-**TDD Steps:**
-1. Write `e2e/smoke.spec.ts`:
-   ```typescript
-   import { test, expect } from '@playwright/test'
-
-   test('frontend renders the app heading', async ({ page }) => {
-     await page.goto('http://localhost:5173')
-     await expect(page.locator('h1')).toContainText(/orderwas/i)
-   })
-
-   test('backend health endpoint returns ok', async ({ request }) => {
-     const response = await request.get('http://localhost:3000/health')
-     expect(response.ok()).toBeTruthy()
-     const body = await response.json()
-     expect(body.status).toBe('ok')
-   })
-   ```
-2. Install playwright browsers: `npx playwright install chromium`
-3. Add `"test:e2e": "npx playwright test --config e2e/playwright.config.ts"` to root
-4. Run — verify pass (requires backend + frontend running)
-5. Commit: `test: playwright smoke e2e test`
-
----
-
-### Task 12d: Pre-commit hooks (git hooks, no external tools)
-
-**Objective:** Run typecheck + unit tests before every commit. No pre-commit binary — use plain git hooks.
-
-**Files:**
-- Create: `scripts/pre-commit` — shell script that runs typecheck + unit tests
-- Create: `scripts/install-hooks.sh` — symlinks `scripts/pre-commit` → `.git/hooks/pre-commit`
-- Modify: `package.json` — add `"postinstall": "bash scripts/install-hooks.sh"`
-
-**Script `scripts/pre-commit`:**
-```bash
-#!/usr/bin/env bash
-set -e
-echo "▶ Running typecheck..."
-npm run typecheck 2>&1
-echo "▶ Running unit tests..."
-npm test 2>&1
-echo "▶ Running build..."
-npm run build 2>&1
-echo "✓ Pre-commit checks passed"
-```
-
-**Steps:**
-1. Create the scripts
-2. Run `bash scripts/install-hooks.sh`
-3. Test: make a trivial change and `git commit` — hook runs
-4. Commit: `chore: pre-commit hooks for typecheck + tests + build`
+Tasks 12a–12d complete: root `typecheck`/`ci` scripts, build verification, Playwright smoke E2E, pre-commit hooks (plain git hooks, no external tools).
 
 ---
 
 ## Phase 1.7: Backend Foundation Gaps
 
-> **Review note:** These tasks fill gaps left by Phase 1 and lay groundwork for Phase 2+.
-> Monetary values on Float is a correctness bug (€3.50 × 3 = €10.499999998).
-> Products CRUD was planned as Task 6+10 but never implemented.
-> Waiter PIN leaks to clients. No auth exists. No service layer.
+> Fixes correctness bugs and lays groundwork. No schema-breaking changes here except cents migration prep — the big schema rework is Phase 2.
 
-### Task 12e: Products CRUD route
+### Task 1.7.1: Products CRUD route
 
-**Objective:** REST CRUD for products under a station. Client API client already references these endpoints.
+**Objective:** REST CRUD for products under a station. The client API client already calls these endpoints; backend never implemented them.
 
 **Files:**
 - Create: `server/src/routes/products.ts`
 - Create: `server/tests/integration/products.test.ts`
-- Modify: `server/src/index.ts` (register products route)
+- Modify: `server/src/index.ts` (register route)
 
 **Endpoints:**
-- POST `/api/stations/:stationId/products` — create product (name, price, taxRate, isVoucher, addable, stockMode, stockCount, sortOrder, shortName)
-- GET `/api/stations/:stationId/products` — list products for station, ordered by sortOrder
-- GET `/api/products/:id` — single product
-- PUT `/api/products/:id` — update product
-- DELETE `/api/products/:id` — delete product (cascade orderItem via schema if needed, or block if referenced)
+- `POST /api/stations/:stationId/products` — create (name, price, taxRate, shortName, isVoucher, addable, stockMode, stockCount, sortOrder)
+- `GET /api/stations/:stationId/products` — list, ordered by sortOrder
+- `GET /api/products/:id` — single
+- `PUT /api/products/:id` — update
+- `DELETE /api/products/:id` — delete (409 if referenced by OrderItems)
 
 **TDD Steps:**
-1. Write integration test: POST creates product → 201
-2. Write test: GET lists products for station → 200 array
-3. Write test: PUT updates price → 200
-4. Write test: DELETE removes product → 204
-5. Write test: POST non-existent stationId → 404
-6. Run — FAIL
-7. Implement with Zod validation
-8. Run — PASS
-9. Commit: `feat: product CRUD API`
+1. Test: POST creates product → 201 with body
+2. Test: GET lists products for station → 200 array sorted by sortOrder
+3. Test: PUT updates price → 200
+4. Test: DELETE removes product → 204
+5. Test: POST to non-existent stationId → 404
+6. Test: DELETE product referenced by an OrderItem → 409
+7. Run — FAIL
+8. Implement with Zod validation
+9. Run — PASS
+10. Commit: `feat: product CRUD API`
 
 ---
 
-### Task 12f: Float → Decimal for monetary fields
+### Task 1.7.2: Integer cents for money
 
-**Objective:** Replace Float with Decimal for price, total, taxRate, stockCount to prevent floating-point rounding errors.
+**Objective:** Replace Float with Int cents for price/total; taxRate as basis points. Rounding-safe on SQLite.
+
+**Decision (final):** `priceCents Int`, `totalCents Int`, `taxRateBps Int` (2000 = 20.00%). API exposes cents; client formats. `stockCount` stays `Decimal` (0.5L beer is legitimate).
 
 **Files:**
-- Modify: `server/prisma/schema.prisma`
-- Modify: `server/src/routes/orders.ts` (total calculation)
-- Modify: `server/tests/integration/orders.test.ts` (total assertions use Number(), toMatchObject or toBeCloseTo)
-- Modify: `client/src/api/types.ts` (price: string, total: string — Prisma Decimal serializes as string)
+- Modify: `server/prisma/schema.prisma` (Product.price→priceCents Int, Order.total→totalCents Int, Product.taxRate→taxRateBps Int @default(2000))
+- Modify: `server/src/routes/orders.ts` (integer total math)
+- Modify: `server/tests/integration/orders.test.ts` (prices in cents; add €3.50×3 = 1050 cents regression test)
+- Modify: `server/tests/helpers/setup.ts` (beer 300 cents, schnitzel 800 cents)
+- Modify: `client/src/api/types.ts` (priceCents: number, totalCents: number)
 
 **TDD Steps:**
-1. Add test: order with prices €3.50 × 3 → total = €10.50 (not 10.499999998)
-2. Run — FAIL (Float arithmetic)
-3. Change schema: price → Decimal @db.Real, total → Decimal @db.Real, taxRate → Decimal @db.Real, stockCount → Decimal @db.Real
-4. Run `npx prisma db push --force-reset`
-5. Update order route to use Prisma Decimal arithmetic (convert via Number for API response or serialize as string)
-6. Run — PASS
-7. Commit: `fix: use Decimal for monetary values to prevent rounding errors`
-
-**Pitfall:** SQLite has no native Decimal type — Prisma maps Decimal to REAL (float64). `@db.Real` is still IEEE 754. The real fix is to store cents as integers or use `Decimal` with Prisma's JS `Decimal` type and round explicitly. Alternative: store prices as integer cents (`priceInCent: Int`) and compute in integer space. The API can expose `price: number` (cents / 100) or keep Prisma `Decimal` + always `.toFixed(2)` on output. Choose one approach and document it.
+1. Write test: order 3× product at 350 cents → totalCents = 1050 exactly
+2. Run — FAIL (schema has Float)
+3. Migrate schema: `npx prisma db push --force-reset` (dev DB is disposable per DESIGN-DECISIONS)
+4. Update code to integer math
+5. Run — PASS (all existing tests updated to cents)
+6. Commit: `fix: integer cents for all monetary values`
 
 ---
 
-### Task 12g: Auth — waiter login endpoint
+### Task 1.7.3: Auth — waiter login endpoint + pin secrecy
 
-**Objective:** POST `/api/auth/login` verifies waiter PIN server-side, returns a JWT or session token. PIN never sent to client.
+**Objective:** `POST /api/auth/login` verifies pin server-side, returns JWT. Pin never appears in any response.
 
 **Files:**
 - Create: `server/src/routes/auth.ts`
-- Create: `server/src/plugins/auth.ts` (Fastify decorator + hooks for token verification)
+- Create: `server/src/plugins/auth.ts` (Fastify decorator: `server.authenticate` onRequest hook)
 - Create: `server/tests/integration/auth.test.ts`
-- Modify: `server/src/routes/waiters.ts` (exclude `pin` from all responses via `select`)
+- Modify: `server/src/routes/waiters.ts` (all reads use `select` excluding `pin`)
+- Modify: `server/package.json` (add `@fastify/jwt`)
+
+**Decisions (final):** JWT stateless, 24h expiry, claims `{waiterId, eventId, permissions}`. Secret from env `JWT_SECRET` with dev default. Guarded: everything under `/api` except `/api/auth/login` and (later) guest QR endpoints. Guard wiring happens in Task 1.7.3 but is **permissive until Phase 3** (existing tests keep passing; enforcement flag `AUTH_ENFORCED=false` default until frontend sends tokens).
 
 **TDD Steps:**
-1. Write test: POST `/api/auth/login` with correct name+PIN → 200 with token
-2. Write test: POST with wrong PIN → 401
-3. Write test: POST with non-existent waiter → 404
-4. Write test: GET `/api/auth/me` with valid token → 200, returns waiter info without PIN
-5. Write test: GET `/api/auth/me` without token → 401
-6. Write test: GET `/events/:eventId/waiters` does NOT include pin field in response
-7. Implement: use `fastify-jwt` or simple HMAC token, exclude pin from select
+1. Test: POST login with correct waiterId+pin → 200 `{token, waiter}` (waiter without pin)
+2. Test: wrong pin → 401
+3. Test: non-existent waiter → 401 (not 404 — don't leak existence)
+4. Test: GET `/api/auth/me` with Bearer token → 200 waiter sans pin
+5. Test: GET `/api/auth/me` without token → 401
+6. Test: GET `/api/events/:id/waiters` response has no `pin` key anywhere
+7. Implement
 8. Run — PASS
-9. Commit: `feat: auth login endpoint and JWT middleware`
-
-**Decisions needed:**
-- JWT (stateless) vs session tokens (requires server state). For SQLite + offline context, stateless JWT is simpler.
-- Expiry: tokens valid for event duration (e.g., 24h). Configurable later.
+9. Commit: `feat: auth login endpoint, JWT plugin, pin secrecy`
 
 ---
 
-### Task 12h: Service layer extraction
+### Task 1.7.4: Service layer extraction
 
-**Objective:** Move business logic out of route handlers into `server/src/services/` for testability and reuse.
+**Objective:** Move business logic out of routes into `server/src/services/`. Binding rule: routes never import Prisma directly after this task.
 
 **Files:**
 - Create: `server/src/services/eventService.ts`
-- Create: `server/src/services/orderService.ts` (create order: validate → calculate total → create → assign tear-off → emit events hook)
+- Create: `server/src/services/orderService.ts`
 - Create: `server/src/services/productService.ts`
-- Modify: `server/src/routes/orders.ts` (delegate to orderService)
-- Modify: `server/src/routes/events.ts` (delegate to eventService)
+- Create: `server/src/services/waiterService.ts`
+- Create: `server/tests/unit/orderService.test.ts`
+- Modify: all four route files to delegate
 
 **TDD Steps:**
-1. Write unit test: `orderService.createOrder(input)` returns order with correct total
-2. Write unit test: rejects empty items
-3. Write unit test: rejects non-existent product
-4. Refactor routes to call services, routes stay thin
-5. Existing integration tests still pass (no behavior change)
-6. Commit: `refactor: extract service layer from routes`
+1. Unit test: `orderService.createOrder` returns order with correct totalCents
+2. Unit test: rejects empty items, non-existent product/waiter/event
+3. Refactor routes to thin shells (Zod → service → response)
+4. All 35+ existing integration tests still PASS (no behavior change)
+5. Commit: `refactor: extract service layer from routes`
 
 ---
 
-### Task 12i: Tear-off number auto-incrementing
+### Task 1.7.5: Tear-off number auto-increment
 
-**Objective:** Each order in an event gets an auto-incrementing tear-off number (per §5.1.1). Stored on Order.tearOffNumber.
+**Objective:** Per-event atomic tear-off counter assigned on order creation.
 
 **Files:**
-- Modify: `server/prisma/schema.prisma` (add `Event.lastTearOffNumber Int @default(0)`)
-- Modify: `server/src/services/orderService.ts` (increment and assign on order creation; use transaction)
-- Write unit test: first order → tearOffNumber=1, second → 2
-- Write unit test: different events have independent sequences
-- Commit: `feat: auto-incrementing tear-off numbers per event`
+- Modify: `server/prisma/schema.prisma` (Event.lastTearOffNumber Int @default(0))
+- Modify: `server/src/services/orderService.ts`
+- Modify: `server/tests/unit/orderService.test.ts`
 
-**Pitfall:** Must be atomic — two concurrent orders on the same event must not get the same number. Use a Prisma `$transaction` with `update({where: {id: eventId}, data: {lastTearOffNumber: {increment: 1}} })` then read the incremented value.
+**TDD Steps:**
+1. Test: first order in event → tearOffNumber 1, second → 2
+2. Test: two events have independent sequences
+3. Test: two concurrent creates get distinct numbers (Promise.all, assert set size 2)
+4. Implement with `prisma.$transaction`: `event.update({data: {lastTearOffNumber: {increment: 1}}})` then use returned value
+5. Run — PASS
+6. Commit: `feat: atomic per-event tear-off numbers`
 
 ---
 
-### Task 12j: Seed data script
+### Task 1.7.6: Seed data script
 
-**Objective:** Script to populate a development database with a complete event (stations, products, waiter) so Phase 2 frontend can be tested immediately.
+**Objective:** One-command dev database with a complete, realistic event.
 
 **Files:**
 - Create: `server/prisma/seed.ts`
-- Modify: `server/package.json` (add `"prisma": {"seed": "tsx prisma/seed.ts"}`)
+- Modify: `server/package.json` (`"prisma": {"seed": "tsx prisma/seed.ts"}`)
 
-**Contents:**
-- Create event "Testfest"
-- Create 3 stations: Bar, Küche, Kaffee (sorted)
-- Create ~15 products across stations with realistic prices (€3.50, €2.00, €8.50, etc.)
-- Create waiter "Alice" pin "1234", "Bob" pin "5678"
-- Create 2 AppLayouts (3 cols × 5 rows for each waiter)
+**Contents:** Event "Testfest"; stations Bar/Küche/Kaffee; ~15 products with real cent prices (350, 200, 850…); waiters Alice/1234, Bob/5678; one AppLayout.
 
 **Steps:**
-1. Write seed script using Prisma client
-2. Run `npx prisma db push --force-reset && npx prisma db seed`
-3. Verify via API: GET events, stations, products, waiters
-4. Commit: `feat: development seed data
+1. Write seed using Prisma client (idempotent: wipe + recreate the named event)
+2. `npx prisma db push --force-reset && npx prisma db seed`
+3. Verify via API: events/stations/products/waiters all list
+4. Commit: `feat: development seed data`
 
 ---
 
-## Phase 2: Frontend Core — Order Taking
+## Phase 2: Data Model Completion
 
-### Task 13: API client and types
+> Schema rework derived from the wiki-analysis gap review. One migration, done now — before the frontend writes against the API — so the client never sees the old shapes.
 
-**Objective:** TypeScript API client for the backend.
+### Task 2.1: Printer entity + migration
 
-**Files:**
-- Create: `client/src/api/client.ts` (fetch wrapper)
-- Create: `client/src/api/types.ts` (shared types)
-- Create: `client/tests/api.test.ts`
+**Objective:** Printers as first-class entities; Station/Waiter reference them by FK.
 
----
+**Schema:**
+```prisma
+model Printer {
+  id           String   @id @default(cuid())
+  name         String
+  type         String   @default("network") // "network" | "ignore" | "dummy"
+  ip           String?
+  charsPerLine Int      @default(42)
+  font         String   @default("A")
+  buzzer       Boolean  @default(false)
+  paperCut     String   @default("partial") // "full" | "partial" | "none"
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  stations     Station[]
+  waiters      Waiter[]
+  altFor       StationAltPrinter[]
+}
 
-### Task 14: Waiter login page
-
-**Objective:** Timer selects event → enters name + PIN → auth.
+model StationAltPrinter {  // alternative printers per table range / pickup code (wiki §9)
+  id          String  @id @default(cuid())
+  stationId   String
+  station     Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  printerId   String
+  printer     Printer @relation(fields: [printerId], references: [id])
+  tableFrom   String?
+  tableTo     String?
+  pickupCode  String?
+}
+```
+Station: replace `printerIp`/`printerType` with `printerId String?` FK. Waiter: same for its optional printer.
 
 **TDD Steps:**
-1. Write test: Login page renders event selector
-2. Write test: Form submits with name and PIN
-3. Implement with Tailwind, mobile-first
-4. Commit: `feat: waiter login page`
+1. Test: create printer, assign to station, read station includes printer
+2. Test: alt printer with table range persists
+3. Migrate schema, update affected routes/services/tests
+4. Run full suite — PASS
+5. Commit: `feat: first-class Printer entity with station/waiter FKs`
 
 ---
 
-### Task 15: Order taking page — product grid
+### Task 2.2: Printer CRUD routes
 
-**Objective:** Responsive button grid of products grouped by station/category.
+**Objective:** `/api/events/:eventId/printers` CRUD + `POST /api/printers/:id/test` (stub — real print lands in Phase 4; stub returns 200 for dummy, 501 for network until then).
+
+**TDD:** standard CRUD pattern (create/list/get/update/delete + 404s). Commit: `feat: printer CRUD API`
+
+---
+
+### Task 2.3: ProductComponent for composite products
+
+**Objective:** Join table enabling `stockMode: "composite"` to actually work in Phase 6.
+
+**Schema:**
+```prisma
+model ProductComponent {
+  id           String  @id @default(cuid())
+  compositeId  String
+  composite    Product @relation("Composite", fields: [compositeId], references: [id], onDelete: Cascade)
+  ingredientId String
+  ingredient   Product @relation("Ingredient", fields: [ingredientId], references: [id])
+  quantity     Float   // decimal quantities allowed (0.5L beer)
+}
+```
+Product gets `components ProductComponent[] @relation("Composite")` and `usedIn ProductComponent[] @relation("Ingredient")`.
 
 **TDD Steps:**
-1. Write test: ProductGrid renders buttons for products
-2. Write test: Tapping a product adds it to cart
-3. Write test: Tapping again increases quantity
-4. Implement with Tailwind grid, touch-friendly buttons (min 44x44px)
+1. Test: create composite "Schnitzel+Pommes" with components 1× Schnitzel + 1× Pommes
+2. Test: `productService.expandComponents(compositeId)` returns ingredient quantities
+3. Implement service expansion helper now (used by stock in Phase 6)
+4. Commit: `feat: composite product components`
+
+---
+
+### Task 2.4: Voucher entity
+
+**Objective:** Redemption-tracking entity for the voucher system (Phase 6 consumes it; schema lands now).
+
+**Schema:**
+```prisma
+model Voucher {
+  id              String   @id @default(cuid())
+  eventId         String
+  event           Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  code            String
+  valueCents      Int
+  status          String   @default("active") // "active" | "redeemed" | "expired"
+  redeemedOrderId String?
+  createdAt       DateTime @default(now())
+  redeemedAt      DateTime?
+  @@unique([eventId, code])
+}
+```
+
+**TDD:** model test — create, unique (eventId, code) constraint, status transitions. Commit: `feat: voucher entity`
+
+---
+
+### Task 2.5: Pickup codes + nullable tableNumber
+
+**Objective:** Support Abholscheine/Bonkasse modes: orders without table numbers.
+
+**Schema changes:**
+- `Order.tableNumber String?` (was required)
+- `Order.pickupCode String?`
+- `Waiter.pickupCode String?` (Abholkennzeichen — waiter's orders skip table entry)
+- `Order.sammelbonId String?` (reserved for Phase 6 collective receipts)
+
+**Validation rule (Zod, in orderService):** exactly one of `tableNumber` or `pickupCode` must be present.
+
+**TDD Steps:**
+1. Test: order with tableNumber only → OK
+2. Test: order with pickupCode only → OK, gets tearOffNumber
+3. Test: neither → 400; both → 400
+4. Migrate, update service + tests
+5. Commit: `feat: pickup-code orders, nullable table numbers`
+
+---
+
+### Task 2.6: Event test→live wipe
+
+**Objective:** Wiki §14 business rule: switching test→live deletes all orders (and later vouchers/messages) for that event.
+
+**TDD Steps:**
+1. Test: event with orders, PUT status test→live → orders gone, tear-off counter reset
+2. Test: live→test keeps data (no rule against it)
+3. Implement in `eventService.setStatus` with transaction
+4. Commit: `feat: test→live transition wipes event orders`
+
+---
+
+### Task 2.7: Client types sync
+
+**Objective:** Regenerate `client/src/api/types.ts` to match the new API shapes (cents, Printer, nullable tableNumber, pickupCode). Update `client/src/api/client.ts` with printer endpoints.
+
+**TDD:** client typecheck + existing client tests pass. Commit: `chore: sync client types with Phase 2 schema`
+
+---
+
+## Phase 3: Frontend Core — Order Taking
+
+> Prereq: seed script (1.7.6) provides data; auth (1.7.3) provides login. From this phase on, `AUTH_ENFORCED=true` and the client sends tokens.
+
+### Task 3.1: Hash-based routing shell
+
+**Objective:** Minimal router without a dependency: `#/` login, `#/order`, `#/orders`, `#/admin` (dev), `#/station/:id` (Phase 4). Hash routing avoids server-side route config in the single-container deployment.
+
+**Files:** Create `client/src/router.tsx`, modify `App.tsx`.
+**TDD:** renders login at `#/`; navigates on hashchange. Commit: `feat: hash routing shell`
+
+---
+
+### Task 3.2: Waiter login page
+
+**Objective:** Select event → select waiter → enter PIN → store token+session in zustand.
+
+**Files:** Create `client/src/pages/Login.tsx`; modify `stores/session.ts` (token, persist to localStorage).
+**TDD Steps:**
+1. Test: renders event selector populated from API
+2. Test: waiter list loads after event select
+3. Test: correct PIN → token stored, navigate to `#/order`
+4. Test: wrong PIN → error message (i18n key `login.wrongPin`)
+5. Implement mobile-first, large touch targets
+6. Commit: `feat: waiter login page`
+
+---
+
+### Task 3.3: Order page — product grid
+
+**Objective:** Products grouped by station, rendered as a touch grid (min 44×44px targets), tap to add to cart.
+
+**Files:** Create `client/src/pages/Order.tsx`, `client/src/components/ProductGrid.tsx`.
+**TDD Steps:**
+1. Test: grid renders products grouped by station
+2. Test: tap product → cart store gains item
+3. Test: tap again → quantity increments
+4. Test: unavailable products (`available=false`) hidden/disabled
 5. Commit: `feat: product selection grid`
 
 ---
 
-### Task 16: Order taking page — cart and submit
+### Task 3.4: Order page — cart + submit
 
-**Objective:** Cart summary, table number input, submit order.
+**Objective:** Cart summary with quantities/total (formatted from cents), table number OR pickup code input, submit → POST → success feedback → cart cleared.
 
 **TDD Steps:**
-1. Write test: Cart shows items with quantities and total
-2. Write test: Submit with table number → POST to API → success message
-3. Write test: Submit without table number → validation error
-4. Implement
+1. Test: cart shows items, quantities, formatted total (de-DE €)
+2. Test: submit with table number → API called, success message, cart cleared
+3. Test: submit without table number (and no pickup mode) → validation error
+4. Test: API error → error banner, cart preserved
 5. Commit: `feat: order cart and submission`
 
 ---
 
-### Task 17: Order overview page
+### Task 3.5: Waiter order overview
 
-**Objective:** Waiter sees their own orders with status.
+**Objective:** Waiter's own orders with status badges (open/preparing/partial/paid/cancelled), pull to refresh.
 
-**TDD Steps:**
-1. Write test: Shows list of orders with table, total, status
-2. Write test: Status badges show open/paid/cancelled
-3. Implement
-4. Commit: `feat: waiter order overview`
+**TDD:** list renders; badges map statuses; filter to current waiter. Commit: `feat: waiter order overview`
 
 ---
 
-### Task 18: PWA manifest and service worker
+### Task 3.6: Dev admin setup page
 
-**Objective:** Make the app installable and offline-capable.
+**Objective:** Bare-bones `#/admin` page: create event, stations, products, waiters, printers — so the full flow is drivable without curl. Not the Phase-5 admin UI; forms only, no styling polish.
 
-**Files:**
-- Modify: `client/vite.config.ts` (add vite-plugin-pwa)
-- Create: `client/public/manifest.json`
-
-**Steps:**
-1. Add vite-plugin-pwa to config
-2. Create manifest with name, icons, theme color
-3. Test: Lighthouse PWA check
-4. Commit: `feat: PWA manifest and service worker`
+**TDD:** create event → station → product → waiter via UI, then login flow works against created data. Commit: `feat: dev admin setup page`
 
 ---
 
-### Task 18a: Minimal admin setup page
+### Task 3.7: PWA manifest + service worker
 
-**Objective:** A bare-bones admin page to create events, stations, products, and waiters so Phase 2 order-taking can be tested end-to-end without manual API calls.
+**Objective:** Installable PWA shell (online-only data for now; offline order queue is Phase 7).
 
-**Files:**
-- Create: `client/src/pages/AdminSetup.tsx`
-- Modify: `client/src/App.tsx` (add simple routing: `#/admin` → AdminSetup, default → order flow)
-
-**TDD Steps:**
-1. Write test: Admin setup page renders form for event creation
-2. Write test: Can create event → station → products → waiter via UI
-3. Implement with simple forms (no styling polish needed yet)
-4. Commit: `feat: minimal admin setup page for development`
+**Files:** Modify `client/vite.config.ts` (vite-plugin-pwa), create `client/public/manifest.json` + icons.
+**Steps:** configure plugin, manifest (name, theme, icons), verify installable in Lighthouse. Commit: `feat: PWA manifest and service worker`
 
 ---
 
-## Phase 3: Station Display & Printers
+### Task 3.8: Serve client from Fastify
 
-### Task 19: Station display page — order list
+**Objective:** Production topology: Fastify serves `client/dist` via `@fastify/static` with SPA fallback to index.html. Single port, single container — the Docker shape from here on.
 
-**Objective:** Browser page showing incoming orders for a station.
-
-**TDD Steps:**
-1. Write test: Shows open orders sorted by time (oldest first)
-2. Write test: Each order shows table number + items
-3. Write test: "Mark done" button changes item status
-4. Implement
-5. Commit: `feat: station order display`
+**TDD:** integration test: GET `/` → 200 text/html; GET `/api/health` still JSON. Commit: `feat: serve client build from Fastify`
 
 ---
 
-### Task 20: Station display — product view
+## Phase 4: Station Display + Real-Time + Printers
 
-**Objective:** Alternative view aggregating items by product across all orders.
+> The product's core value. WebSocket is in THIS phase (merged from old Phase 4): a station display without live updates fails requirements §5.3.1.
 
+### Task 4.1: WebSocket server
+
+**Objective:** Socket.io attached to the Fastify server; rooms `event:{id}` and `station:{id}`; emit `order:created` / `order:updated` / `orderItem:status` from services.
+
+**Files:** Create `server/src/websocket/index.ts`; modify `services/orderService.ts` (post-commit emit hooks); create `server/tests/integration/websocket.test.ts`.
 **TDD Steps:**
-1. Write test: Shows products with total quantity across orders
-2. Write test: Shows table numbers for each product
-3. Implement
-4. Commit: `feat: station product aggregation view`
+1. Test: client joins event room, receives `order:created` after POST /api/orders
+2. Test: PATCH order status → `order:updated`
+3. Test: station room receives only orders containing its station's items
+4. Commit: `feat: WebSocket order events`
 
 ---
 
-### Task 21: ESC/POS printer service — connection
+### Task 4.2: Station display — order view (live)
 
-**Objective:** Backend service to send print jobs to network printers via ESC/POS.
-
-**Files:**
-- Create: `server/src/printer/escpos.ts`
-- Create: `server/tests/unit/printer.test.ts`
+**Objective:** `#/station/:id` page: open items for the station grouped by order, oldest first, wait-time counter, "Erledigt" per item → PATCH item status. Live updates via WebSocket — no refresh.
 
 **TDD Steps:**
-1. Write test: `formatReceipt(order)` returns ESC/POS buffer with table number, items, total
-2. Write test: `formatReceipt` includes station name as header
-3. Write test: `formatReceipt` handles multi-line product names
-4. Run — FAIL
-5. Implement using `escpos` or `node-thermal-printer` library
-6. Run — PASS
-7. Commit: `feat: ESC/POS receipt formatting`
+1. Test: renders open orders sorted oldest-first with table/pickup identifier
+2. Test: new order appears without reload (mock socket event)
+3. Test: mark item done → status PATCH → item leaves list
+4. Commit: `feat: live station order display`
 
 ---
 
-### Task 22: Print on order creation
+### Task 4.3: Station display — product view
 
-**Objective:** When an order is created, print receipts at relevant stations.
+**Objective:** Aggregation toggle: per-product totals across open orders with table numbers (batch prep view, wiki §7).
+
+**TDD:** products with total quantities; per-table breakdown. Commit: `feat: station product aggregation view`
+
+---
+
+### Task 4.4: ESC/POS receipt formatting
+
+**Objective:** `printerService.formatReceipt(order, station, printer)` → ESC/POS buffer: station header, table/pickup + tear-off number, items with quantities/comments, total (unless event.hidePrices), TEST watermark when event.status=test, chars-per-line wrap, paper cut command.
+
+**Files:** Create `server/src/printer/escpos.ts`, `server/tests/unit/escpos.test.ts`. Library: `node-thermal-printer` (per risk table).
+**TDD Steps:**
+1. Test: buffer contains table number, item lines, total
+2. Test: station name as header; long product names wrap at charsPerLine
+3. Test: test-mode event → "TEST" line present; hidePrices → no prices
+4. Commit: `feat: ESC/POS receipt formatting`
+
+---
+
+### Task 4.5: Print dispatch on order creation
+
+**Objective:** Post-commit hook in orderService: group items by station → per station, resolve printer (alt-printer rules by table range/pickup code → primary) → send. `ignore` → skip; `dummy` → log to file; network → TCP 9100. Print failure never fails the order; failed jobs logged (retry queue is Phase 7 hardening).
 
 **TDD Steps:**
-1. Write test: Order with drinks (station: bar) → print job sent to bar printer
-2. Write test: Order with food (station: kitchen) → print job sent to kitchen printer
-3. Write test: Order with items from 2 stations → 2 print jobs
-4. Implement: hook into order service, route to station printers
+1. Test: drinks order → job to bar printer only
+2. Test: mixed order → jobs to bar + kitchen, each with only its items
+3. Test: alt printer for table range receives the job instead of primary
+4. Test: dummy printer logs; network failure swallowed + logged, order still 201
 5. Commit: `feat: automatic station receipt printing`
 
 ---
 
-### Task 23: Printer configuration
+### Task 4.6: Printer test-print endpoint (real)
 
-**Objective:** Admin can configure printer IP per station.
+**Objective:** `POST /api/printers/:id/test` prints a test page (replaces Task 2.2 stub): printer name, font, chars-per-line ruler, cut.
 
-**Files:**
-- Modify: `server/prisma/schema.prisma` (already has printerIp on Station)
-- Create: `server/src/routes/printers.ts`
-- Write tests for printer test-print endpoint
-- Commit: `feat: printer configuration and test print`
-
----
-
-### Task 24: Dummy printer for testing
-
-**Objective:** "Dummy" printer type that logs instead of printing — for development.
-
-**TDD Steps:**
-1. Write test: Dummy printer logs order to console/file instead of network
-2. Implement
-3. Commit: `feat: dummy printer for development`
-
----
-
-## Phase 4: Real-Time
-
-### Task 25: WebSocket server setup
-
-**Objective:** Socket.io server for real-time order updates.
-
-**Files:**
-- Create: `server/src/websocket/index.ts`
-- Create: `server/tests/integration/websocket.test.ts`
-
-**TDD Steps:**
-1. Write test: Client connects, receives `order:created` event when order is posted
-2. Write test: Client receives `order:updated` when status changes
-3. Implement
-4. Commit: `feat: WebSocket real-time order updates`
-
----
-
-### Task 26: Frontend WebSocket integration
-
-**Objective:** Frontend subscribes to order updates and updates UI live.
-
-**TDD Steps:**
-1. Write test: Station display updates when new order arrives
-2. Write test: Waiter overview updates when order status changes
-3. Implement with Socket.io client
-4. Commit: `feat: real-time frontend updates`
-
----
-
-### Task 27: Real-time station display auto-refresh
-
-**Objective:** Station display updates without page reload.
-
-**TDD Steps:**
-1. Write test: New order appears without manual refresh
-2. Write test: Done orders disappear from list
-3. Implement
-4. Commit: `feat: station display auto-update`
+**TDD:** dummy → 200 with logged payload; unreachable network printer → 502 with error. Commit: `feat: printer test print`
 
 ---
 
 ## Phase 5: Admin & Configuration
 
-### Task 28: Admin layout and navigation
+### Task 5.1: Admin layout + navigation
 
-**Objective:** Admin interface with sidebar navigation (Events, Waiters, Stations, Products, Printers).
+Sidebar: Veranstaltungen, Kellner, Stationen, Produkte, Drucker, Export. Admin PIN gate (env `ADMIN_PIN`, JWT admin claim). Commit: `feat: admin layout and navigation`
 
-**TDD Steps:**
-1. Write test: Admin layout renders nav links
-2. Write test: Clicking nav link changes page
-3. Implement with Tailwind
-4. Commit: `feat: admin layout and navigation`
+### Task 5.2: Admin — event management
 
----
+List with test/live badges, create form, test→live toggle with wipe warning dialog. Commit: `feat: admin event management`
 
-### Task 29: Admin — Event management page
+### Task 5.3: Admin — stations + products
 
-**Objective:** CRUD page for events with test/live toggle.
+Station CRUD with printer assignment + kitchen-monitor toggle; product CRUD per station with price-in-cents input (€ display), sortOrder, availability. Commit: `feat: admin station and product management`
 
-**TDD Steps:**
-1. Write test: Shows event list with status badges
-2. Write test: Create event form (name, status)
-3. Write test: Toggle event from test → live
-4. Implement
-5. Commit: `feat: admin event management`
+### Task 5.4: Admin — waiters + printers
 
----
+Waiter CRUD with PIN set/reset, permission checkboxes, pickup code; printer CRUD with test-print button. Commit: `feat: admin waiter and printer management`
 
-### Task 30: Admin — Station and Product management
+### Task 5.5: Configuration export/import
 
-**Objective:** CRUD for stations and products with drag-sort.
-
-**TDD Steps:**
-1. Write test: Create station with name
-2. Write test: Add products to station with price
-3. Write test: Products show in station list
-4. Implement
-5. Commit: `feat: admin station and product management`
-
----
-
-### Task 31: Admin — Waiter management
-
-**Objective:** CRUD for waiters with PIN assignment and permissions.
-
-**TDD Steps:**
-1. Write test: Create waiter with name + PIN
-2. Write test: Toggle waiter active/inactive
-3. Implement
-4. Commit: `feat: admin waiter management`
-
----
-
-### Task 32: Configuration export/import
-
-**Objective:** Export full event configuration (stations, products, waiters, layouts) as JSON. Import to bootstrap a new event.
-
-**Files:**
-- Create: `server/src/services/configExportImport.ts`
-- Create: `server/src/routes/config.ts`
-- Create: `server/tests/integration/config.test.ts`
-
-**TDD Steps:**
-1. Write test: `exportConfig(eventId)` returns JSON with all stations, products, waiters
-2. Write test: `importConfig(json, newEventId)` creates all entities
-3. Write test: Imported config matches exported config
-4. Implement
-5. Commit: `feat: configuration export/import`
+`GET /api/events/:id/export` → JSON (stations, products, waiters sans pins, printers, layouts). `POST /api/events/import` → creates event from JSON. Round-trip test: export→import→export is idempotent. Commit: `feat: configuration export/import`
 
 ---
 
 ## Phase 6: Advanced Features
 
-### Task 33: Voucher system (Gutscheine)
+### Task 6.1: Voucher system
 
-**Objective:** Products flagged as vouchers, separate voucher station, redemption workflow.
+Voucher products + Bonkasse flow: sell vouchers (prints tear-off), redeem by code (status active→redeemed, links order). Uses Task 2.4 entity. Commit: `feat: voucher system`
 
-**TDD Steps:**
-1. Write test: Product with `isVoucher: true` — works like a pre-paid item
-2. Write test: Voucher order prints receipt with tear-off number
-3. Write test: Voucher can be redeemed (marked as used)
-4. Implement
-5. Commit: `feat: voucher system`
+### Task 6.2: Stock management
 
----
+Tracked stock decrement on order (already hooked in 1.7.4 service — enable checks), composite expansion via ProductComponent, stock=0 → unavailable, app-side stock adjustment. Commit: `feat: stock management`
 
-### Task 34: Stock management (Lagerstände)
+### Task 6.3: Settlement and reporting
 
-**Objective:** Per-product stock tracking with composite products.
+Per-waiter cash summary (expected cash incl. unpaid), per-event per-station revenue, CSV export. Commit: `feat: settlement and reporting`
 
-**TDD Steps:**
-1. Write test: Product with stock=10, order 3 → stock=7
-2. Write test: Product with stock=0 → unavailable, cannot order
-3. Write test: Composite product (Schnitzel+Pommes) decrements both ingredients
-4. Implement
-5. Commit: `feat: stock management`
+### Task 6.4: QR code table ordering
 
----
+`qrcode` lib: per-table PNG endpoint; guest page `#/guest/:eventId/:tableToken` (unguessable token per table) → order with `status: pending` → waiter confirms → normal flow. Commit: `feat: QR guest ordering`
 
-### Task 35: Settlement and reporting
+### Task 6.5: Kitchen monitor — full-screen order view
 
-**Objective:** Per-waiter cash summary, event-wide Excel/CSV export.
+Big-type wall display variant of station display with wait-time sorting and click-to-complete. Commit: `feat: kitchen monitor view`
 
-**TDD Steps:**
-1. Write test: `getWaiterSummary(waiterId)` returns total cash, order count
-2. Write test: `getEventSummary(eventId)` returns per-station revenue
-3. Write test: CSV export generates valid CSV
-4. Implement
-5. Commit: `feat: settlement and reporting`
+### Task 6.6: App layout customization
 
----
+Admin grid editor (columns×rows, color, product mapping) → waiter app renders saved layout. Commit: `feat: customizable app layout`
 
-### Task 36: QR code generation for tables
+### Task 6.7: Waiter permissions + transfers
 
-**Objective:** Generate QR codes per table that link to the ordering page.
-
-**Files:**
-- Create: `server/src/services/qrcode.ts`
-- Create: `server/src/routes/tables.ts`
-
-**TDD Steps:**
-1. Write test: `generateTableQR(eventId, tableNumber)` returns QR image buffer
-2. Write test: QR code decodes to correct URL
-3. Write test: GET `/api/events/:id/tables/:num/qrcode` returns PNG
-4. Implement with `qrcode` library
-5. Commit: `feat: QR code generation for tables`
-
----
-
-### Task 37: Guest ordering page (QR code entry point)
-
-**Objective:** Mobile page where guests scan QR, see products, place order. Waiter gets notification.
-
-**TDD Steps:**
-1. Write test: Page loads with table number from URL
-2. Write test: Guest sees available products
-3. Write test: Guest submits order → creates order with status `pending`
-4. Write test: Waiter app receives notification of pending order
-5. Implement
-6. Commit: `feat: guest QR code ordering page`
-
----
-
-### Task 38: Kitchen monitor — order view
-
-**Objective:** Full-screen kitchen display showing orders sorted by wait time.
-
-**TDD Steps:**
-1. Write test: Shows orders oldest-first with wait time counter
-2. Write test: Click order to mark as complete
-3. Write test: Completed orders slide off / fade
-4. Implement
-5. Commit: `feat: kitchen monitor order view`
-
----
-
-### Task 39: App layout customization
-
-**Objective:** Admin can configure button grid (columns, rows, colors, product mapping).
-
-**TDD Steps:**
-1. Write test: Save layout with 3 cols, 4 rows, product assignments
-2. Write test: Waiter app renders grid from saved layout
-3. Write test: Layout persists per event
-4. Implement
-5. Commit: `feat: customizable app layout`
-
----
-
-### Task 40: Waiter permissions and transfers
-
-**Objective:** Per-waiter permission flags, order transfer between waiters.
-
-**TDD Steps:**
-1. Write test: Waiter without `canCancel` → cancel request rejected
-2. Write test: Transfer order from waiter A to waiter B
-3. Write test: Waiter with `canCashOut` → can settle for others
-4. Implement
-5. Commit: `feat: waiter permissions and transfers`
+Enforce canCancel/canCashOut/canTransfer in services; order transfer between waiters; Sammelbon collective receipts (uses reserved `sammelbonId`). Commit: `feat: waiter permissions, transfers, collective receipts`
 
 ---
 
 ## Phase 7: Polish
 
-### Task 41: Offline mode (Service Workers + IndexedDB)
+### Task 7.1: Offline order queue
 
-**Objective:** Orders queued locally when WiFi drops, sync on reconnect.
+IndexedDB queue with client-generated idempotency keys (unique on Order), background sync on reconnect, conflict-free retry. Commit: `feat: offline order queue with sync`
 
-**TDD Steps:**
-1. Write test: Order created while offline → stored in IndexedDB
-2. Write test: On reconnect → queued orders sync to backend
-3. Implement with Workbox / custom service worker
-4. Commit: `feat: offline order queue with sync`
+### Task 7.2: Print retry queue
 
----
+Failed print jobs persisted (table or file queue), retried with backoff, admin visibility. Commit: `feat: print job retry queue`
 
-### Task 42: i18n — German, English, French
+### Task 7.3: i18n completion
 
-**Objective:** All UI strings externalized, de.json complete, en.json + fr.json translations.
+Audit: no hardcoded strings (test), de complete, en+fr complete, language switcher. Commit: `feat: i18n completion de/en/fr`
 
-**TDD Steps:**
-1. Write test: All components use `t()` function, no hardcoded strings
-2. Write test: Language switcher changes displayed text
-3. Write test: German translations complete (no missing keys)
-4. Implement with react-i18next
-5. Commit: `feat: i18n with German, English, French`
+### Task 7.4: Docker deployment
 
----
+Multi-stage Dockerfile (build client → production server serving static), docker-compose with SQLite volume, ARM variant documented for Raspberry Pi. Verify `docker compose up` → healthy. Commit: `feat: Docker deployment`
 
-### Task 43: Docker deployment
+### Task 7.5: Documentation
 
-**Objective:** Multi-stage Dockerfile + docker-compose for single-command deployment.
-
-**Files:**
-- Create: `docker/Dockerfile`
-- Create: `docker/docker-compose.yml`
-- Create: `docker/Dockerfile.rpi` (Raspberry Pi ARM image)
-
-**Steps:**
-1. Backend: Node.js slim image, prisma generate, sqlite
-2. Frontend: Build static, serve with `vite preview` or nginx
-3. Compose: backend + frontend + volume for sqlite
-4. Test: `docker-compose up` → both services healthy
-5. Commit: `feat: Docker deployment`
-
----
-
-### Task 44: Documentation and README update
-
-**Objective:** Update README with setup, development, and deployment instructions.
-
-**Steps:**
-1. Update README with architecture diagram
-2. Add development setup guide
-3. Add deployment guide (Docker, Raspberry Pi)
-4. Add contributor guide
-5. Commit: `docs: comprehensive README and setup guide`
+README: architecture diagram (from docs/ARCHITECTURE.md), dev setup, deployment (Docker + RPi), contributor guide. Keep ARCHITECTURE.md in sync. Commit: `docs: README and setup guides`
 
 ---
 
@@ -1078,23 +592,14 @@ echo "✓ Pre-commit checks passed"
 
 After each phase:
 ```bash
-# Run all tests
-npm test
-
-# Build everything
-npm run build
-
-# Start dev environment
-npm run dev
-
-# Manual smoke test:
-# 1. Open http://localhost:5173 (client)
-# 2. Create event in admin
-# 3. Add station + products
-# 4. Log in as waiter
-# 5. Take order
-# 6. Check station display
-# 7. Print receipt (with dummy printer)
+npm run typecheck && npm test && npm run build   # local CI (pre-commit runs this too)
+npm run test:e2e                                  # with dev servers running
+npm run dev                                       # manual smoke:
+# 1. Seed: npx prisma db seed (server/)
+# 2. http://localhost:5173 → login as Alice/1234
+# 3. Take order → appears live on station display (#/station/:id)
+# 4. Receipt printed (dummy printer log)
+# 5. Mark items done → disappears from station view
 ```
 
 ---
@@ -1103,21 +608,24 @@ npm run dev
 
 | Risk | Mitigation |
 |------|------------|
-| Float rounding for monetary values | Phase 1.7 Task 12f: switch to Decimal or integer cents before any real prices are used |
-| PIN leaks to client via API | Phase 1.7 Task 12g: exclude pin from select, add auth endpoint |
-| No products CRUD route | Phase 1.7 Task 12e: implement before Phase 2 |
-| ESC/POS library compatibility | Start with `node-thermal-printer`, test with Epson TM-T20 |
-| Real-time on flaky WiFi | Offline queue + optimistic UI updates |
-| SQLite concurrency with many waiters | WAL mode, connection pooling, stress test early |
-| PWA offline complexity | Start with online-only, add offline in Phase 7 |
-| QR code security | Random unguessable URLs, per-event tokens |
-| Tear-off number race condition | Prisma `$transaction` with atomic increment |
+| Money rounding | **Resolved:** integer cents (Task 1.7.2) |
+| PIN leaks | **Resolved in plan:** Task 1.7.3 pin secrecy + auth |
+| Missing products CRUD | **Resolved in plan:** Task 1.7.1 |
+| Tear-off race condition | Prisma transaction with atomic increment (Task 1.7.5) |
+| ESC/POS library compatibility | node-thermal-printer; test with Epson TM-T20; dummy driver for dev |
+| Real-time on flaky WiFi | Socket.io reconnects; offline queue (7.1); optimistic UI |
+| SQLite concurrency (20+ waiters) | WAL mode; single-writer is fine at this scale; stress test in Phase 4 |
+| PWA offline complexity | Online-only until Phase 7; idempotency keys make sync safe |
+| QR guest-order abuse | Unguessable per-table tokens; waiter confirmation gate |
+| Scope creep (TSE, floor plan, multi-tenant) | Explicit non-goals in ARCHITECTURE.md §10 |
 
 ## Open Questions
 
-1. **Frontend framework**: React (larger ecosystem) vs Vue (simpler) — **Decision: React** ✅
-2. **State management**: Zustand (simple) vs Redux (mature) — **Recommendation: Zustand**
-3. **ORM**: Prisma (type-safe, migrations) vs Drizzle (lightweight) — **Recommendation: Prisma** (SQLite + Postgres swap)
-4. **Test framework**: Vitest (fast, Vite-native) vs Jest (mature) — **Recommendation: Vitest**
-5. **License**: GPL-3.0 vs AGPL-3.0 — **Recommendation: GPL-3.0** (simpler, sufficient for desktop/server use)
-6. **Monetary representation**: Prisma `Decimal` (maps to SQLite REAL, still IEEE 754) vs integer cents (`priceInCent: Int`) — **Decision needed in Task 12f**. Integer cents is the only truly safe option on SQLite.
+1. ~~Frontend framework~~ — **React** ✅
+2. ~~State management~~ — **zustand** ✅
+3. ~~ORM~~ — **Prisma** ✅
+4. ~~Test framework~~ — **Vitest** ✅
+5. ~~License~~ — **GPL-3.0** ✅
+6. ~~Monetary representation~~ — **integer cents** ✅ (Task 1.7.2)
+7. **Admin auth model** — single env `ADMIN_PIN` sufficient for v1? (assumed yes; multi-user admin deferred with Veranstalter entity)
+8. **Guest QR ordering payment** — confirm-then-pay-at-table assumed; no cashless integration in v1

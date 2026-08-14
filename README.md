@@ -34,10 +34,16 @@ Orderwas is a **Bestellsystem** (ordering system) and **Boniersystem** (receipt 
 
 ## Tech Stack
 
-- **Frontend:** Progressive Web App (PWA) — works on any device
-- **Backend:** Node.js/Python/Go REST API
-- **Database:** SQLite (primary), PostgreSQL (swappable)
+- **Frontend:** Progressive Web App (PWA) — React 18 + Vite 5 + Tailwind
+- **Backend:** Node.js 20 + TypeScript + Fastify 5 + Socket.io
+- **Database:** SQLite (primary), PostgreSQL (swappable) via Prisma
 - **Deployment:** Docker container
+
+## Documentation
+
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — system architecture, data model design intent, layering rules, non-goals (binding)
+- **[docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)** — full requirements from Orderjutsu/Bierblock analysis
+- **[docs/DESIGN-DECISIONS.md](docs/DESIGN-DECISIONS.md)** — Philipp's requirements and rationale
 - **Network:** Local WiFi or LAN
 - **Printers:** ESC/POS protocol over network
 - **Localization:** German (DE), English (EN), French (FR)
