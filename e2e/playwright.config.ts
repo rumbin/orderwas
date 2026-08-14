@@ -17,6 +17,21 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // Don't start servers here — we manage them in the script
-  // so we can ensure the DB is fresh and printers are dummy
+  // Auto-start backend + frontend for E2E, so `npm run ci` works unattended
+  webServer: [
+    {
+      command: 'npx tsx src/index.ts',
+      cwd: '../server',
+      port: 3000,
+      timeout: 10000,
+      reuseExistingServer: true,
+    },
+    {
+      command: 'npx vite --port 5173',
+      cwd: '../client',
+      port: 5173,
+      timeout: 10000,
+      reuseExistingServer: true,
+    },
+  ],
 })
