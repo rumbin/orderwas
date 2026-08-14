@@ -5,6 +5,7 @@ import eventRoutes from '@/routes/events'
 import stationRoutes from '@/routes/stations'
 import { waitersRoutes } from '@/routes/waiters'
 import { ordersRoutes } from '@/routes/orders'
+import { productsRoutes } from '@/routes/products'
 
 export type AppServer = FastifyInstance
 
@@ -28,6 +29,7 @@ export function buildServer(): AppServer {
   server.register(stationRoutes, { prefix: '/api' })
   server.register(waitersRoutes, { prefix: '/api' })
   server.register(ordersRoutes, { prefix: '/api' })
+  server.register(productsRoutes, { prefix: '/api' })
 
   server.get('/health', async () => {
     return { status: 'ok' }

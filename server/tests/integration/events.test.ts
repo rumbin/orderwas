@@ -12,10 +12,20 @@ describe('Event CRUD routes', () => {
 
   afterAll(async () => {
     await server.close()
+    await prisma.orderItem.deleteMany({})
+    await prisma.order.deleteMany({})
+    await prisma.product.deleteMany({})
+    await prisma.waiter.deleteMany({})
+    await prisma.station.deleteMany({})
     await prisma.event.deleteMany({})
   })
 
   beforeEach(async () => {
+    await prisma.orderItem.deleteMany({})
+    await prisma.order.deleteMany({})
+    await prisma.product.deleteMany({})
+    await prisma.waiter.deleteMany({})
+    await prisma.station.deleteMany({})
     await prisma.event.deleteMany({})
   })
 

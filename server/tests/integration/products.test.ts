@@ -1,0 +1,224 @@
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
+import { buildServer, type AppServer } from '@/index'
+import { prisma } from '@/db/client'
+
+describe('Product CRUD routes', () => {
+  let server: AppServer
+  let eventId: string
+  let stationId: string
+
+  beforeAll(async () => {
+    server = buildServer()
+    await server.listen({ port: 0, host: '127.0.0.1' })
+  })
+
+  afterAll(async () => {
+    await server.close()
+    // Delete in FK-safe order: orderItems → orders → products → waiters → stations → events
+    await prisma.orderItem.deleteMany({})
+    await prisma.order.deleteMany({})
+    await prisma.product.deleteMany({})
+    await prisma.waiter.deleteMany({})
+    await prisma.station.deleteMany({})
+    await prisma.event.deleteMany({})
+  })
+
+  beforeEach(async () => {
+    await prisma.orderItem.deleteMany({})
+    await prisma.order.deleteMany({})
+    await prisma.product.deleteMany({})
+    await prisma.waiter.deleteMany({})
+    await prisma.station.deleteMany({})
+    await prisma.event.deleteMany({})
+    const ev = await prisma.event.create({ data: { name: 'Product Test Event' } })
+    eventId = ev.id
+    const station = await prisma.station.create({ data: { name: 'Bar', eventId } })
+    stationId = station.id
+  })
+
+  // POST /api/stations/:stationId/products
+  it('POST creates a product under a station', async () => {
+    const res = await server.inject({
+      method: 'POST',
+      url: `/api/stations/${stationId}/products`,
+      payload: { name: 'Bier', price: 3, taxRate: 20 },
+    })
+    expect(res.statusCode).toBe(201)
+    const body = res.json()
+    expect(body.id).toBeDefined()
+    expect(body.name).toBe('Bier')
+    expect(body.price).toBe(3)
+    expect(body.taxRate).toBe(20)
+    expect(body.stationId).toBe(stationId)
+    expect(body.available).toBe(true)
+    expect(body.isVoucher).toBe(false)
+    expect(body.addable).toBe(true)
+    expect(body.stockMode).toBe('none')
+  })
+
+  it('POST accepts optional fields', async () => {
+    const res = await server.inject({
+      method: 'POST',
+      url: `/api/stations/${stationId}/products`,
+      payload: {
+        name: 'Schnitzel',
+        price: 8.5,
+        shortName: 'Schni',
+        taxRate: 10,
+        isVoucher: false,
+        addable: true,
+        stockMode: 'tracked',
+        stockCount: 50,
+        sortOrder: 5,
+      },
+    })
+    expect(res.statusCode).toBe(201)
+    const body = res.json()
+    expect(body.shortName).toBe('Schni')
+    expect(body.stockMode).toBe('tracked')
+    expect(body.stockCount).toBe(50)
+    expect(body.sortOrder).toBe(5)
+  })
+
+  it('POST returns 400 for missing name', async () => {
+    const res = await server.inject({
+      method: 'POST',
+      url: `/api/stations/${stationId}/products`,
+      payload: { price: 3 },
+    })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('POST returns 400 for missing price', async () => {
+    const res = await server.inject({
+      method: 'POST',
+      url: `/api/stations/${stationId}/products`,
+      payload: { name: 'Bier' },
+    })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('POST returns 404 for non-existent station', async () => {
+    const res = await server.inject({
+      method: 'POST',
+      url: '/api/stations/nonexistent/products',
+      payload: { name: 'Bier', price: 3 },
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  // GET /api/stations/:stationId/products
+  it('GET lists products for a station sorted by sortOrder', async () => {
+    await prisma.product.create({ data: { name: 'B', price: 2, stationId, sortOrder: 2 } })
+    await prisma.product.create({ data: { name: 'A', price: 1, stationId, sortOrder: 1 } })
+    await prisma.product.create({ data: { name: 'C', price: 3, stationId, sortOrder: 3 } })
+
+    const res = await server.inject({
+      method: 'GET',
+      url: `/api/stations/${stationId}/products`,
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json()
+    expect(body).toHaveLength(3)
+    expect(body.map((p: { name: string }) => p.name)).toEqual(['A', 'B', 'C'])
+  })
+
+  it('GET returns 404 for non-existent station', async () => {
+    const res = await server.inject({
+      method: 'GET',
+      url: '/api/stations/nonexistent/products',
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  // GET /api/products/:id
+  it('GET /api/products/:id returns a single product', async () => {
+    const created = await prisma.product.create({ data: { name: 'Cola', price: 2.5, stationId } })
+
+    const res = await server.inject({
+      method: 'GET',
+      url: `/api/products/${created.id}`,
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json()
+    expect(body.id).toBe(created.id)
+    expect(body.name).toBe('Cola')
+    expect(body.price).toBe(2.5)
+  })
+
+  it('GET /api/products/:id returns 404 for missing product', async () => {
+    const res = await server.inject({
+      method: 'GET',
+      url: '/api/products/nonexistent',
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  // PUT /api/products/:id
+  it('PUT updates a product', async () => {
+    const created = await prisma.product.create({ data: { name: 'Bier', price: 3, stationId } })
+
+    const res = await server.inject({
+      method: 'PUT',
+      url: `/api/products/${created.id}`,
+      payload: { name: 'Helles Bier', price: 3.5, available: false, sortOrder: 10 },
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json()
+    expect(body.name).toBe('Helles Bier')
+    expect(body.price).toBe(3.5)
+    expect(body.available).toBe(false)
+    expect(body.sortOrder).toBe(10)
+  })
+
+  it('PUT returns 404 for missing product', async () => {
+    const res = await server.inject({
+      method: 'PUT',
+      url: '/api/products/nonexistent',
+      payload: { name: 'Nope' },
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  // DELETE /api/products/:id
+  it('DELETE removes a product', async () => {
+    const created = await prisma.product.create({ data: { name: 'Water', price: 1, stationId } })
+
+    const res = await server.inject({
+      method: 'DELETE',
+      url: `/api/products/${created.id}`,
+    })
+    expect(res.statusCode).toBe(204)
+
+    const exists = await prisma.product.findUnique({ where: { id: created.id } })
+    expect(exists).toBeNull()
+  })
+
+  it('DELETE returns 404 for missing product', async () => {
+    const res = await server.inject({
+      method: 'DELETE',
+      url: '/api/products/nonexistent',
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('DELETE returns 409 when product is referenced by an OrderItem', async () => {
+    const product = await prisma.product.create({ data: { name: 'Bier', price: 3, stationId } })
+    // Create a waiter and an order that references this product
+    const waiter = await prisma.waiter.create({ data: { name: 'Alice', pin: '1234', eventId } })
+    await prisma.order.create({
+      data: {
+        tableNumber: '1',
+        waiterId: waiter.id,
+        eventId,
+        items: { create: [{ productId: product.id, quantity: 2 }] },
+      },
+    })
+
+    const res = await server.inject({
+      method: 'DELETE',
+      url: `/api/products/${product.id}`,
+    })
+    expect(res.statusCode).toBe(409)
+  })
+})
