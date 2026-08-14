@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
-import { prisma } from '@/db/client'
+import * as eventService from '@/services/eventService'
 
 const createEventSchema = z.object({
   name: z.string().min(1),
@@ -21,25 +21,19 @@ export default async function eventRoutes(server: FastifyInstance): Promise<void
     if (!parsed.success) {
       return reply.code(400).send({ error: parsed.error.flatten() })
     }
-    const event = await prisma.event.create({
-      data: {
-        name: parsed.data.name,
-        ...(parsed.data.status !== undefined ? { status: parsed.data.status } : {}),
-      },
-    })
+    const event = await eventService.createEvent(parsed.data)
     return reply.code(201).send(event)
   })
 
   // List events
   server.get('/events', async () => {
-    const events = await prisma.event.findMany({ orderBy: { createdAt: 'asc' } })
-    return events
+    return eventService.listEvents()
   })
 
   // Get single event
   server.get('/events/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
-    const event = await prisma.event.findUnique({ where: { id } })
+    const event = await eventService.getEvent(id)
     if (!event) {
       return reply.code(404).send({ error: 'Event not found' })
     }
@@ -53,25 +47,20 @@ export default async function eventRoutes(server: FastifyInstance): Promise<void
     if (!parsed.success) {
       return reply.code(400).send({ error: parsed.error.flatten() })
     }
-    const event = await prisma.event.findUnique({ where: { id } })
-    if (!event) {
+    const updated = await eventService.updateEvent(id, parsed.data)
+    if (!updated) {
       return reply.code(404).send({ error: 'Event not found' })
     }
-    const updated = await prisma.event.update({
-      where: { id },
-      data: parsed.data,
-    })
     return updated
   })
 
   // Delete event
   server.delete('/events/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
-    const event = await prisma.event.findUnique({ where: { id } })
-    if (!event) {
+    const deleted = await eventService.deleteEvent(id)
+    if (!deleted) {
       return reply.code(404).send({ error: 'Event not found' })
     }
-    await prisma.event.delete({ where: { id } })
     return reply.code(204).send()
   })
 }
