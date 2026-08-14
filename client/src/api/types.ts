@@ -29,8 +29,8 @@ export interface Product {
   id: string
   name: string
   shortName: string | null
-  price: number
-  taxRate: number
+  priceCents: number
+  taxRateBps: number
   stationId: string
   available: boolean
   isVoucher: boolean
@@ -76,7 +76,7 @@ export interface Order {
   waiter?: Waiter
   eventId: string
   status: 'open' | 'preparing' | 'partial' | 'paid' | 'cancelled'
-  total: number
+  totalCents: number
   comment: string | null
   tearOffNumber: number | null
   pickupCode: string | null

@@ -61,5 +61,5 @@ export const useCartStore = create<CartState>((set, get) => ({
     })),
   clear: () => set({ items: [], tableNumber: '' }),
   total: () =>
-    get().items.reduce((sum, i) => sum + i.product.price * i.quantity, 0),
+    get().items.reduce((sum, i) => sum + i.product.priceCents * i.quantity, 0),
 }))

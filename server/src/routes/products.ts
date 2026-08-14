@@ -4,9 +4,9 @@ import { prisma } from '@/db/client'
 
 const createProductSchema = z.object({
   name: z.string().min(1),
-  price: z.number(),
+  priceCents: z.number().int(),
   shortName: z.string().optional(),
-  taxRate: z.number().default(20.0),
+  taxRateBps: z.number().int().optional(),
   isVoucher: z.boolean().optional(),
   addable: z.boolean().optional(),
   stockMode: z.enum(['none', 'tracked', 'composite']).optional(),
@@ -16,9 +16,9 @@ const createProductSchema = z.object({
 
 const updateProductSchema = z.object({
   name: z.string().min(1).optional(),
-  price: z.number().optional(),
+  priceCents: z.number().int().optional(),
   shortName: z.string().nullable().optional(),
-  taxRate: z.number().optional(),
+  taxRateBps: z.number().int().optional(),
   available: z.boolean().optional(),
   isVoucher: z.boolean().optional(),
   addable: z.boolean().optional(),

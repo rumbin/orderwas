@@ -41,14 +41,14 @@ describe('Product CRUD routes', () => {
     const res = await server.inject({
       method: 'POST',
       url: `/api/stations/${stationId}/products`,
-      payload: { name: 'Bier', price: 3, taxRate: 20 },
+      payload: { name: 'Bier', priceCents: 300, taxRateBps: 2000 },
     })
     expect(res.statusCode).toBe(201)
     const body = res.json()
     expect(body.id).toBeDefined()
     expect(body.name).toBe('Bier')
-    expect(body.price).toBe(3)
-    expect(body.taxRate).toBe(20)
+    expect(body.priceCents).toBe(300)
+    expect(body.taxRateBps).toBe(2000)
     expect(body.stationId).toBe(stationId)
     expect(body.available).toBe(true)
     expect(body.isVoucher).toBe(false)
@@ -62,9 +62,9 @@ describe('Product CRUD routes', () => {
       url: `/api/stations/${stationId}/products`,
       payload: {
         name: 'Schnitzel',
-        price: 8.5,
+        priceCents: 850,
         shortName: 'Schni',
-        taxRate: 10,
+        taxRateBps: 1000,
         isVoucher: false,
         addable: true,
         stockMode: 'tracked',
@@ -84,12 +84,12 @@ describe('Product CRUD routes', () => {
     const res = await server.inject({
       method: 'POST',
       url: `/api/stations/${stationId}/products`,
-      payload: { price: 3 },
+      payload: { priceCents: 300 },
     })
     expect(res.statusCode).toBe(400)
   })
 
-  it('POST returns 400 for missing price', async () => {
+  it('POST returns 400 for missing priceCents', async () => {
     const res = await server.inject({
       method: 'POST',
       url: `/api/stations/${stationId}/products`,
@@ -102,16 +102,16 @@ describe('Product CRUD routes', () => {
     const res = await server.inject({
       method: 'POST',
       url: '/api/stations/nonexistent/products',
-      payload: { name: 'Bier', price: 3 },
+      payload: { name: 'Bier', priceCents: 300 },
     })
     expect(res.statusCode).toBe(404)
   })
 
   // GET /api/stations/:stationId/products
   it('GET lists products for a station sorted by sortOrder', async () => {
-    await prisma.product.create({ data: { name: 'B', price: 2, stationId, sortOrder: 2 } })
-    await prisma.product.create({ data: { name: 'A', price: 1, stationId, sortOrder: 1 } })
-    await prisma.product.create({ data: { name: 'C', price: 3, stationId, sortOrder: 3 } })
+    await prisma.product.create({ data: { name: 'B', priceCents: 200, stationId, sortOrder: 2 } })
+    await prisma.product.create({ data: { name: 'A', priceCents: 100, stationId, sortOrder: 1 } })
+    await prisma.product.create({ data: { name: 'C', priceCents: 300, stationId, sortOrder: 3 } })
 
     const res = await server.inject({
       method: 'GET',
@@ -133,7 +133,7 @@ describe('Product CRUD routes', () => {
 
   // GET /api/products/:id
   it('GET /api/products/:id returns a single product', async () => {
-    const created = await prisma.product.create({ data: { name: 'Cola', price: 2.5, stationId } })
+    const created = await prisma.product.create({ data: { name: 'Cola', priceCents: 250, stationId } })
 
     const res = await server.inject({
       method: 'GET',
@@ -143,7 +143,7 @@ describe('Product CRUD routes', () => {
     const body = res.json()
     expect(body.id).toBe(created.id)
     expect(body.name).toBe('Cola')
-    expect(body.price).toBe(2.5)
+    expect(body.priceCents).toBe(250)
   })
 
   it('GET /api/products/:id returns 404 for missing product', async () => {
@@ -156,17 +156,17 @@ describe('Product CRUD routes', () => {
 
   // PUT /api/products/:id
   it('PUT updates a product', async () => {
-    const created = await prisma.product.create({ data: { name: 'Bier', price: 3, stationId } })
+    const created = await prisma.product.create({ data: { name: 'Bier', priceCents: 300, stationId } })
 
     const res = await server.inject({
       method: 'PUT',
       url: `/api/products/${created.id}`,
-      payload: { name: 'Helles Bier', price: 3.5, available: false, sortOrder: 10 },
+      payload: { name: 'Helles Bier', priceCents: 350, available: false, sortOrder: 10 },
     })
     expect(res.statusCode).toBe(200)
     const body = res.json()
     expect(body.name).toBe('Helles Bier')
-    expect(body.price).toBe(3.5)
+    expect(body.priceCents).toBe(350)
     expect(body.available).toBe(false)
     expect(body.sortOrder).toBe(10)
   })
@@ -182,7 +182,7 @@ describe('Product CRUD routes', () => {
 
   // DELETE /api/products/:id
   it('DELETE removes a product', async () => {
-    const created = await prisma.product.create({ data: { name: 'Water', price: 1, stationId } })
+    const created = await prisma.product.create({ data: { name: 'Water', priceCents: 100, stationId } })
 
     const res = await server.inject({
       method: 'DELETE',
@@ -203,7 +203,7 @@ describe('Product CRUD routes', () => {
   })
 
   it('DELETE returns 409 when product is referenced by an OrderItem', async () => {
-    const product = await prisma.product.create({ data: { name: 'Bier', price: 3, stationId } })
+    const product = await prisma.product.create({ data: { name: 'Bier', priceCents: 300, stationId } })
     // Create a waiter and an order that references this product
     const waiter = await prisma.waiter.create({ data: { name: 'Alice', pin: '1234', eventId } })
     await prisma.order.create({

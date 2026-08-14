@@ -63,9 +63,32 @@ describe('Orders API - POST /api/orders', () => {
     expect(body.waiterId).toBe(waiter.id)
     expect(body.eventId).toBe(event.id)
     expect(body.status).toBe('open')
-    expect(body.total).toBe(14) // 2×3 + 1×8
+    expect(body.totalCents).toBe(1400) // 2×300 + 1×800
     const items = body.items as unknown[]
     expect(items.length).toBe(2)
+  })
+
+  it('calculates total correctly with non-trivial cent prices (no rounding)', async () => {
+    const data = await setup()
+    const { waiter, event } = data
+    // Create a product with €3.50 = 350 cents
+    const product = await prisma.product.create({
+      data: { name: 'Special', priceCents: 350, stationId: data.station.id },
+    })
+
+    const res = await server.inject({
+      method: 'POST',
+      url: '/api/orders',
+      payload: {
+        tableNumber: '42',
+        waiterId: waiter.id,
+        eventId: event.id,
+        items: [{ productId: product.id, quantity: 3 }],
+      },
+    })
+    expect(res.statusCode).toBe(201)
+    const body = res.json() as Record<string, unknown>
+    expect(body.totalCents).toBe(1050) // 3 × 350 = 1050 exactly, no float error
   })
 
   it('rejects an order without items (400 validation error)', async () => {
@@ -162,7 +185,7 @@ describe('Orders API - GET /api/orders/:id', () => {
     const body = res.json() as Record<string, unknown>
     expect(body.id).toBe(id)
     expect(body.tableNumber).toBe('20')
-    expect(body.total).toBe(9) // 3×3
+    expect(body.totalCents).toBe(900) // 3×300
     expect((body.items as unknown[]).length).toBe(1)
   })
 })

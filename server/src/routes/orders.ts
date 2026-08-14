@@ -38,13 +38,13 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
 
     // Fetch product prices and validate all product IDs
     const productIds = items.map((i) => i.productId)
-    const products = await prisma.product.findMany({ where: { id: { in: productIds } }, select: { id: true, price: true } })
+    const products = await prisma.product.findMany({ where: { id: { in: productIds } }, select: { id: true, priceCents: true } })
     if (products.length !== new Set(productIds).size) {
       return reply.status(400).send({ error: 'One or more products do not exist' })
     }
 
-    const priceMap = new Map(products.map((p) => [p.id, p.price] as const))
-    const total = items.reduce((sum, item) => sum + (priceMap.get(item.productId) ?? 0) * item.quantity, 0)
+    const priceMap = new Map(products.map((p) => [p.id, p.priceCents] as const))
+    const totalCents = items.reduce((sum, item) => sum + (priceMap.get(item.productId) ?? 0) * item.quantity, 0)
 
     try {
       const order = await prisma.order.create({
@@ -52,7 +52,7 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
           tableNumber,
           waiterId,
           eventId,
-          total,
+          totalCents,
           items: {
             create: items.map((item) => ({
               productId: item.productId,
@@ -62,7 +62,7 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
           },
         },
         include: {
-          items: { include: { product: { select: { id: true, name: true, price: true } } } },
+          items: { include: { product: { select: { id: true, name: true, priceCents: true } } } },
         },
       })
       return reply.status(201).send(order)
@@ -77,7 +77,7 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
     const orders = await prisma.order.findMany({
       where: { eventId },
       include: {
-        items: { include: { product: { select: { id: true, name: true, price: true } } } },
+        items: { include: { product: { select: { id: true, name: true, priceCents: true } } } },
       },
       orderBy: { createdAt: 'asc' },
     })
@@ -90,7 +90,7 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
     const order = await prisma.order.findUnique({
       where: { id },
       include: {
-        items: { include: { product: { select: { id: true, name: true, price: true } } } },
+        items: { include: { product: { select: { id: true, name: true, priceCents: true } } } },
       },
     })
     if (!order) return reply.status(404).send({ error: 'Order not found' })

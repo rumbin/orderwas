@@ -40,8 +40,8 @@ model Product {
   id         String   @id @default(cuid())
   name       String
   shortName  String?
-  price      Float
-  taxRate    Float    @default(20.0)
+  priceCents Int
+  taxRateBps Int      @default(2000) // basis points: 2000 = 20.00%
   stationId  String
   station    Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
   available  Boolean  @default(true)
@@ -86,7 +86,7 @@ model Order {
   eventId       String
   event         Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
   status        String      @default("open") // "open" | "preparing" | "partial" | "paid" | "cancelled"
-  total         Float       @default(0)
+  totalCents    Int         @default(0)
   comment       String?
   tearOffNumber Int?
   pickupCode    String?

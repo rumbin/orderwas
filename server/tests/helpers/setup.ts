@@ -14,12 +14,12 @@ export interface TestData {
     beer: {
       id: string
       name: string
-      price: number
+      priceCents: number
     }
     schnitzel: {
       id: string
       name: string
-      price: number
+      priceCents: number
     }
   }
   waiter: {
@@ -56,19 +56,19 @@ export async function createTestData(server: FastifyInstance): Promise<TestData>
   const beer = await prisma.product.create({
     data: {
       name: 'Beer',
-      price: 3,
+      priceCents: 300,
       stationId: station.id,
     },
-    select: { id: true, name: true, price: true },
+    select: { id: true, name: true, priceCents: true },
   })
 
   const schnitzel = await prisma.product.create({
     data: {
       name: 'Schnitzel',
-      price: 8,
+      priceCents: 800,
       stationId: station.id,
     },
-    select: { id: true, name: true, price: true },
+    select: { id: true, name: true, priceCents: true },
   })
 
   const waiterRes = await server.inject({
