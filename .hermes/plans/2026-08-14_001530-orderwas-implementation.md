@@ -64,9 +64,20 @@ Proves the architecture works end-to-end.
 Build verification, lint, typecheck, E2E smoke tests, and pre-commit hooks.
 Must be in place before Phase 2 so every subsequent phase is validated.
 
+### Phase 1.7: Backend Foundation Gaps (Tasks 12e-12j)
+Fill gaps from Phase 1 and lay groundwork for Phase 2+:
+- Products CRUD route (was skipped in Phase 1)
+- Auth: login endpoint + JWT/session middleware
+- Service layer extraction (order creation logic → services/)
+- Float → Decimal for all monetary fields
+- Exclude PIN from waiter API responses
+- Tear-off number auto-incrementing per event
+- Seed data script for development
+
 ### Phase 2: Frontend Core — Order Taking (Tasks 13-18)
 Responsive PWA where a waiter can select products and submit orders.
-Connects to the backend API from Phase 1.
+Connects to the backend API from Phase 1/1.7.
+Includes minimal admin setup page for stations/products/waiters.
 
 ### Phase 3: Station Display & Printers (Tasks 19-24)
 Kitchen monitor view + ESC/POS printer support.
@@ -460,6 +471,151 @@ echo "✓ Pre-commit checks passed"
 
 ---
 
+## Phase 1.7: Backend Foundation Gaps
+
+> **Review note:** These tasks fill gaps left by Phase 1 and lay groundwork for Phase 2+.
+> Monetary values on Float is a correctness bug (€3.50 × 3 = €10.499999998).
+> Products CRUD was planned as Task 6+10 but never implemented.
+> Waiter PIN leaks to clients. No auth exists. No service layer.
+
+### Task 12e: Products CRUD route
+
+**Objective:** REST CRUD for products under a station. Client API client already references these endpoints.
+
+**Files:**
+- Create: `server/src/routes/products.ts`
+- Create: `server/tests/integration/products.test.ts`
+- Modify: `server/src/index.ts` (register products route)
+
+**Endpoints:**
+- POST `/api/stations/:stationId/products` — create product (name, price, taxRate, isVoucher, addable, stockMode, stockCount, sortOrder, shortName)
+- GET `/api/stations/:stationId/products` — list products for station, ordered by sortOrder
+- GET `/api/products/:id` — single product
+- PUT `/api/products/:id` — update product
+- DELETE `/api/products/:id` — delete product (cascade orderItem via schema if needed, or block if referenced)
+
+**TDD Steps:**
+1. Write integration test: POST creates product → 201
+2. Write test: GET lists products for station → 200 array
+3. Write test: PUT updates price → 200
+4. Write test: DELETE removes product → 204
+5. Write test: POST non-existent stationId → 404
+6. Run — FAIL
+7. Implement with Zod validation
+8. Run — PASS
+9. Commit: `feat: product CRUD API`
+
+---
+
+### Task 12f: Float → Decimal for monetary fields
+
+**Objective:** Replace Float with Decimal for price, total, taxRate, stockCount to prevent floating-point rounding errors.
+
+**Files:**
+- Modify: `server/prisma/schema.prisma`
+- Modify: `server/src/routes/orders.ts` (total calculation)
+- Modify: `server/tests/integration/orders.test.ts` (total assertions use Number(), toMatchObject or toBeCloseTo)
+- Modify: `client/src/api/types.ts` (price: string, total: string — Prisma Decimal serializes as string)
+
+**TDD Steps:**
+1. Add test: order with prices €3.50 × 3 → total = €10.50 (not 10.499999998)
+2. Run — FAIL (Float arithmetic)
+3. Change schema: price → Decimal @db.Real, total → Decimal @db.Real, taxRate → Decimal @db.Real, stockCount → Decimal @db.Real
+4. Run `npx prisma db push --force-reset`
+5. Update order route to use Prisma Decimal arithmetic (convert via Number for API response or serialize as string)
+6. Run — PASS
+7. Commit: `fix: use Decimal for monetary values to prevent rounding errors`
+
+**Pitfall:** SQLite has no native Decimal type — Prisma maps Decimal to REAL (float64). `@db.Real` is still IEEE 754. The real fix is to store cents as integers or use `Decimal` with Prisma's JS `Decimal` type and round explicitly. Alternative: store prices as integer cents (`priceInCent: Int`) and compute in integer space. The API can expose `price: number` (cents / 100) or keep Prisma `Decimal` + always `.toFixed(2)` on output. Choose one approach and document it.
+
+---
+
+### Task 12g: Auth — waiter login endpoint
+
+**Objective:** POST `/api/auth/login` verifies waiter PIN server-side, returns a JWT or session token. PIN never sent to client.
+
+**Files:**
+- Create: `server/src/routes/auth.ts`
+- Create: `server/src/plugins/auth.ts` (Fastify decorator + hooks for token verification)
+- Create: `server/tests/integration/auth.test.ts`
+- Modify: `server/src/routes/waiters.ts` (exclude `pin` from all responses via `select`)
+
+**TDD Steps:**
+1. Write test: POST `/api/auth/login` with correct name+PIN → 200 with token
+2. Write test: POST with wrong PIN → 401
+3. Write test: POST with non-existent waiter → 404
+4. Write test: GET `/api/auth/me` with valid token → 200, returns waiter info without PIN
+5. Write test: GET `/api/auth/me` without token → 401
+6. Write test: GET `/events/:eventId/waiters` does NOT include pin field in response
+7. Implement: use `fastify-jwt` or simple HMAC token, exclude pin from select
+8. Run — PASS
+9. Commit: `feat: auth login endpoint and JWT middleware`
+
+**Decisions needed:**
+- JWT (stateless) vs session tokens (requires server state). For SQLite + offline context, stateless JWT is simpler.
+- Expiry: tokens valid for event duration (e.g., 24h). Configurable later.
+
+---
+
+### Task 12h: Service layer extraction
+
+**Objective:** Move business logic out of route handlers into `server/src/services/` for testability and reuse.
+
+**Files:**
+- Create: `server/src/services/eventService.ts`
+- Create: `server/src/services/orderService.ts` (create order: validate → calculate total → create → assign tear-off → emit events hook)
+- Create: `server/src/services/productService.ts`
+- Modify: `server/src/routes/orders.ts` (delegate to orderService)
+- Modify: `server/src/routes/events.ts` (delegate to eventService)
+
+**TDD Steps:**
+1. Write unit test: `orderService.createOrder(input)` returns order with correct total
+2. Write unit test: rejects empty items
+3. Write unit test: rejects non-existent product
+4. Refactor routes to call services, routes stay thin
+5. Existing integration tests still pass (no behavior change)
+6. Commit: `refactor: extract service layer from routes`
+
+---
+
+### Task 12i: Tear-off number auto-incrementing
+
+**Objective:** Each order in an event gets an auto-incrementing tear-off number (per §5.1.1). Stored on Order.tearOffNumber.
+
+**Files:**
+- Modify: `server/prisma/schema.prisma` (add `Event.lastTearOffNumber Int @default(0)`)
+- Modify: `server/src/services/orderService.ts` (increment and assign on order creation; use transaction)
+- Write unit test: first order → tearOffNumber=1, second → 2
+- Write unit test: different events have independent sequences
+- Commit: `feat: auto-incrementing tear-off numbers per event`
+
+**Pitfall:** Must be atomic — two concurrent orders on the same event must not get the same number. Use a Prisma `$transaction` with `update({where: {id: eventId}, data: {lastTearOffNumber: {increment: 1}} })` then read the incremented value.
+
+---
+
+### Task 12j: Seed data script
+
+**Objective:** Script to populate a development database with a complete event (stations, products, waiter) so Phase 2 frontend can be tested immediately.
+
+**Files:**
+- Create: `server/prisma/seed.ts`
+- Modify: `server/package.json` (add `"prisma": {"seed": "tsx prisma/seed.ts"}`)
+
+**Contents:**
+- Create event "Testfest"
+- Create 3 stations: Bar, Küche, Kaffee (sorted)
+- Create ~15 products across stations with realistic prices (€3.50, €2.00, €8.50, etc.)
+- Create waiter "Alice" pin "1234", "Bob" pin "5678"
+- Create 2 AppLayouts (3 cols × 5 rows for each waiter)
+
+**Steps:**
+1. Write seed script using Prisma client
+2. Run `npx prisma db push --force-reset && npx prisma db seed`
+3. Verify via API: GET events, stations, products, waiters
+4. Commit: `feat: development seed data
+
+---
+
 ## Phase 2: Frontend Core — Order Taking
 
 ### Task 13: API client and types
@@ -536,6 +692,22 @@ echo "✓ Pre-commit checks passed"
 2. Create manifest with name, icons, theme color
 3. Test: Lighthouse PWA check
 4. Commit: `feat: PWA manifest and service worker`
+
+---
+
+### Task 18a: Minimal admin setup page
+
+**Objective:** A bare-bones admin page to create events, stations, products, and waiters so Phase 2 order-taking can be tested end-to-end without manual API calls.
+
+**Files:**
+- Create: `client/src/pages/AdminSetup.tsx`
+- Modify: `client/src/App.tsx` (add simple routing: `#/admin` → AdminSetup, default → order flow)
+
+**TDD Steps:**
+1. Write test: Admin setup page renders form for event creation
+2. Write test: Can create event → station → products → waiter via UI
+3. Implement with simple forms (no styling polish needed yet)
+4. Commit: `feat: minimal admin setup page for development`
 
 ---
 
@@ -931,16 +1103,21 @@ npm run dev
 
 | Risk | Mitigation |
 |------|------------|
+| Float rounding for monetary values | Phase 1.7 Task 12f: switch to Decimal or integer cents before any real prices are used |
+| PIN leaks to client via API | Phase 1.7 Task 12g: exclude pin from select, add auth endpoint |
+| No products CRUD route | Phase 1.7 Task 12e: implement before Phase 2 |
 | ESC/POS library compatibility | Start with `node-thermal-printer`, test with Epson TM-T20 |
 | Real-time on flaky WiFi | Offline queue + optimistic UI updates |
 | SQLite concurrency with many waiters | WAL mode, connection pooling, stress test early |
 | PWA offline complexity | Start with online-only, add offline in Phase 7 |
 | QR code security | Random unguessable URLs, per-event tokens |
+| Tear-off number race condition | Prisma `$transaction` with atomic increment |
 
 ## Open Questions
 
-1. **Frontend framework**: React (larger ecosystem) vs Vue (simpler) — **Recommendation: React**
+1. **Frontend framework**: React (larger ecosystem) vs Vue (simpler) — **Decision: React** ✅
 2. **State management**: Zustand (simple) vs Redux (mature) — **Recommendation: Zustand**
 3. **ORM**: Prisma (type-safe, migrations) vs Drizzle (lightweight) — **Recommendation: Prisma** (SQLite + Postgres swap)
 4. **Test framework**: Vitest (fast, Vite-native) vs Jest (mature) — **Recommendation: Vitest**
 5. **License**: GPL-3.0 vs AGPL-3.0 — **Recommendation: GPL-3.0** (simpler, sufficient for desktop/server use)
+6. **Monetary representation**: Prisma `Decimal` (maps to SQLite REAL, still IEEE 754) vs integer cents (`priceInCent: Int`) — **Decision needed in Task 12f**. Integer cents is the only truly safe option on SQLite.
