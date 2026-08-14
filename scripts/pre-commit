@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -e
+
+echo "▶ Running typecheck..."
+npx tsc --noEmit -p server/tsconfig.json 2>&1
+npx tsc --noEmit -p client/tsconfig.json 2>&1
+echo "✓ Typecheck passed"
+
+echo "▶ Running unit tests..."
+npm -w server run test 2>&1
+npm -w client run test 2>&1
+echo "✓ Unit tests passed"
+
+echo "▶ Running build..."
+npm -w server run build 2>&1
+npm -w client run build 2>&1
+echo "✓ Build passed"
+
+echo "✓ All pre-commit checks passed"

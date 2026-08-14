@@ -60,6 +60,10 @@ Set up monorepo, tooling, Docker. No business logic.
 Vertical slice: Event → Products → Order → API response.
 Proves the architecture works end-to-end.
 
+### Phase 1.5: Local CI Pipeline (Tasks 12a-12d)
+Build verification, lint, typecheck, E2E smoke tests, and pre-commit hooks.
+Must be in place before Phase 2 so every subsequent phase is validated.
+
 ### Phase 2: Frontend Core — Order Taking (Tasks 13-18)
 Responsive PWA where a waiter can select products and submit orders.
 Connects to the backend API from Phase 1.
@@ -349,6 +353,110 @@ Same pattern as Task 9, for products with stationId association.
 4. Implement
 5. Run — PASS
 6. Commit: `feat: order listing and status update`
+
+---
+
+## Phase 1.5: Local CI Pipeline
+
+### Task 12a: Typecheck and lint scripts
+
+**Objective:** Add `typecheck` and `lint` scripts to both workspaces and the root.
+
+**Files:**
+- Modify: `package.json` (root) — add `typecheck`, `lint`, `ci` scripts
+- Modify: `server/package.json` — add `typecheck` script
+- Modify: `client/package.json` — add `typecheck` script
+- Create: `server/.eslintrc.json` (or eslint flat config)
+- Create: `client/.eslintrc.json`
+
+**TDD Steps:**
+1. Run `npx tsc --noEmit -p server/tsconfig.json` — must pass
+2. Run `npx tsc --noEmit -p client/tsconfig.json` — must pass
+3. Add root scripts:
+   - `"typecheck": "npm -w server run typecheck && npm -w client run typecheck"`
+   - `"ci": "npm run typecheck && npm test && npm run build && npm run test:e2e"`
+4. Commit: `chore: typecheck and ci scripts`
+
+---
+
+### Task 12b: Build verification
+
+**Objective:** Verify both server and client build successfully from clean state.
+
+**Files:**
+- Modify: `server/package.json` — ensure `"build": "tsc"` works
+- Modify: `client/package.json` — ensure `"build": "tsc && vite build"` works
+
+**Steps:**
+1. Run `npm -w server run build` — must produce `dist/` without errors
+2. Run `npm -w client run build` — must produce `dist/` without errors
+3. Fix any build failures
+4. Add `"build:check": "npm -w server run build && npm -w client run build"` to root
+5. Commit: `chore: build verification`
+
+---
+
+### Task 12c: Playwright E2E setup + smoke test
+
+**Objective:** End-to-end test that starts the backend, serves the frontend, and verifies the health endpoint and the app renders.
+
+**Files:**
+- Create: `e2e/playwright.config.ts` — runs against `localhost:5173` with backend at `localhost:3000`
+- Create: `e2e/smoke.spec.ts` — loads the app, checks for "Orderwas" heading, hits `/api/health`
+- Create: `e2e/package.json` — playwright dependency
+- Create: `scripts/start-e2e.sh` — starts backend + frontend in background for tests
+
+**TDD Steps:**
+1. Write `e2e/smoke.spec.ts`:
+   ```typescript
+   import { test, expect } from '@playwright/test'
+
+   test('frontend renders the app heading', async ({ page }) => {
+     await page.goto('http://localhost:5173')
+     await expect(page.locator('h1')).toContainText(/orderwas/i)
+   })
+
+   test('backend health endpoint returns ok', async ({ request }) => {
+     const response = await request.get('http://localhost:3000/health')
+     expect(response.ok()).toBeTruthy()
+     const body = await response.json()
+     expect(body.status).toBe('ok')
+   })
+   ```
+2. Install playwright browsers: `npx playwright install chromium`
+3. Add `"test:e2e": "npx playwright test --config e2e/playwright.config.ts"` to root
+4. Run — verify pass (requires backend + frontend running)
+5. Commit: `test: playwright smoke e2e test`
+
+---
+
+### Task 12d: Pre-commit hooks (git hooks, no external tools)
+
+**Objective:** Run typecheck + unit tests before every commit. No pre-commit binary — use plain git hooks.
+
+**Files:**
+- Create: `scripts/pre-commit` — shell script that runs typecheck + unit tests
+- Create: `scripts/install-hooks.sh` — symlinks `scripts/pre-commit` → `.git/hooks/pre-commit`
+- Modify: `package.json` — add `"postinstall": "bash scripts/install-hooks.sh"`
+
+**Script `scripts/pre-commit`:**
+```bash
+#!/usr/bin/env bash
+set -e
+echo "▶ Running typecheck..."
+npm run typecheck 2>&1
+echo "▶ Running unit tests..."
+npm test 2>&1
+echo "▶ Running build..."
+npm run build 2>&1
+echo "✓ Pre-commit checks passed"
+```
+
+**Steps:**
+1. Create the scripts
+2. Run `bash scripts/install-hooks.sh`
+3. Test: make a trivial change and `git commit` — hook runs
+4. Commit: `chore: pre-commit hooks for typecheck + tests + build`
 
 ---
 

@@ -10,11 +10,16 @@
     "dev:server": "npm -w server run dev",
     "dev:client": "npm -w client run dev",
     "test": "npm -w server run test && npm -w client run test",
+    "test:e2e": "npx playwright test --config e2e/playwright.config.ts",
+    "typecheck": "npx tsc --noEmit -p server/tsconfig.json && npx tsc --noEmit -p client/tsconfig.json",
     "build": "npm -w server run build && npm -w client run build",
+    "ci": "npm run typecheck && npm test && npm run build",
     "test:server": "npm -w server run test",
-    "test:client": "npm -w client run test"
+    "test:client": "npm -w client run test",
+    "postinstall": "bash scripts/install-hooks.sh 2>/dev/null || true"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "concurrently": "^9.0.0"
   }
 }
