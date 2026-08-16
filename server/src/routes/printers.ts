@@ -1,6 +1,10 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
 import * as printerService from '@/services/printerService'
+import { formatTestPage, type PrinterConfig } from '@/printer/escpos'
+import { writeFileSync, mkdirSync } from 'fs'
+import { resolve } from 'path'
+import * as net from 'net'
 
 const createPrinterSchema = z.object({
   name: z.string().min(1),
@@ -72,16 +76,74 @@ export const printersRoutes: FastifyPluginAsync = async (server: FastifyInstance
     return reply.status(204).send()
   })
 
-  // POST /printers/:id/test — test print (stub for Phase 4)
+  // POST /printers/:id/test — test print (real ESC/POS)
   server.post('/printers/:id/test', async (request, reply) => {
     const { id } = request.params as { id: string }
     const printer = await printerService.getPrinter(id)
     if (!printer) return reply.status(404).send({ error: 'Printer not found' })
 
-    if (printer.type === 'dummy') {
-      return reply.status(200).send({ message: 'Test print sent to dummy printer', logged: true })
+    const config: PrinterConfig = {
+      charsPerLine: printer.charsPerLine,
+      font: printer.font,
+      paperCut: printer.paperCut as 'full' | 'partial' | 'none',
     }
-    // Real network printing lands in Phase 4
-    return reply.status(501).send({ error: 'Network printing not yet implemented' })
+
+    const buffer = formatTestPage(printer.name, config)
+
+    if (printer.type === 'dummy') {
+      // Log to file
+      const dir = resolve(process.cwd(), 'tmp', 'printer-logs')
+      mkdirSync(dir, { recursive: true })
+      const filepath = resolve(dir, `test-${Date.now()}-${printer.name}.bin`)
+      writeFileSync(filepath, buffer)
+      return reply.status(200).send({
+        message: 'Test print sent to dummy printer',
+        logged: true,
+        bytes: buffer.length,
+        filepath,
+      })
+    }
+
+    if (printer.type === 'network') {
+      if (!printer.ip) {
+        return reply.status(400).send({ error: 'Network printer has no IP configured' })
+      }
+      try {
+        await sendTestToNetwork(printer.ip, 9100, buffer)
+        return reply.status(200).send({
+          message: `Test print sent to ${printer.ip}:9100`,
+          bytes: buffer.length,
+        })
+      } catch (err) {
+        return reply.status(502).send({
+          error: `Printer unreachable: ${(err as Error).message}`,
+        })
+      }
+    }
+
+    // type === 'ignore' — no-op
+    return reply.status(200).send({ message: 'Printer type is "ignore" — no test print sent' })
+  })
+}
+
+function sendTestToNetwork(ip: string, port: number, buffer: Buffer): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const socket = new net.Socket()
+    socket.setTimeout(5000)
+    socket.on('error', (err: Error) => {
+      socket.destroy()
+      reject(err)
+    })
+    socket.on('timeout', () => {
+      socket.destroy()
+      reject(new Error('Connection timed out'))
+    })
+    socket.on('connect', () => {
+      socket.write(buffer, () => {
+        socket.end()
+        resolve()
+      })
+    })
+    socket.connect(port, ip)
   })
 }

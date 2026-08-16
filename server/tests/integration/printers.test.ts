@@ -147,12 +147,28 @@ describe('Printer CRUD routes', () => {
     const res = await server.inject({ method: 'POST', url: `/api/printers/${created.id}/test` })
     expect(res.statusCode).toBe(200)
     expect(res.json().message).toContain('Test print')
+    expect(res.json().bytes).toBeGreaterThan(0)
   })
 
-  it('POST /printers/:id/test returns 501 for network printer (not yet implemented)', async () => {
-    const created = await prisma.printer.create({ data: { name: 'Net', type: 'network', ip: '1.2.3.4', eventId } })
+  it('POST /printers/:id/test returns 502 for unreachable network printer', async () => {
+    const created = await prisma.printer.create({ data: { name: 'Net', type: 'network', ip: '192.168.99.99', eventId } })
 
     const res = await server.inject({ method: 'POST', url: `/api/printers/${created.id}/test` })
-    expect(res.statusCode).toBe(501)
+    expect(res.statusCode).toBe(502)
+  })
+
+  it('POST /printers/:id/test returns 400 for network printer without IP', async () => {
+    const created = await prisma.printer.create({ data: { name: 'NoIP', type: 'network', eventId } })
+
+    const res = await server.inject({ method: 'POST', url: `/api/printers/${created.id}/test` })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('POST /printers/:id/test returns 200 for ignore printer (no-op)', async () => {
+    const created = await prisma.printer.create({ data: { name: 'Ign', type: 'ignore', eventId } })
+
+    const res = await server.inject({ method: 'POST', url: `/api/printers/${created.id}/test` })
+    expect(res.statusCode).toBe(200)
+    expect(res.json().message).toContain('ignore')
   })
 })
