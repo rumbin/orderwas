@@ -4,6 +4,7 @@ import Login from '@/pages/Login'
 import OrderPage from '@/pages/Order'
 import OrdersPage from '@/pages/Orders'
 import AdminSetup from '@/pages/AdminSetup'
+import StationDisplay from '@/pages/StationDisplay'
 
 export default function App() {
   const route = useRouter()
@@ -25,14 +26,10 @@ export default function App() {
     return <AdminSetup navigate={route.navigate} />
   }
 
-  // Station route placeholder (Phase 4)
+  // Station display route
   const stationMatch = matchRoute('/station/:id', route.path)
   if (stationMatch) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Station display coming in Phase 4</p>
-      </div>
-    )
+    return <StationDisplay navigate={route.navigate} stationId={stationMatch.id} />
   }
 
   return (
