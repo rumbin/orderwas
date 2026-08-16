@@ -4,6 +4,7 @@ import cors from '@fastify/cors'
 import fastifyStatic from '@fastify/static'
 import { resolve } from 'path'
 import { existsSync } from 'fs'
+import { fileURLToPath } from 'url'
 import eventRoutes from '@/routes/events'
 import stationRoutes from '@/routes/stations'
 import { waitersRoutes } from '@/routes/waiters'
@@ -46,6 +47,7 @@ export function buildServer(): AppServer {
   })
 
   // Serve client build (production: single container, single port)
+  const __dirname = fileURLToPath(new URL('.', import.meta.url))
   const clientDist = resolve(__dirname, '../../client/dist')
   if (existsSync(clientDist)) {
     server.register(fastifyStatic, {
