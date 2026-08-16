@@ -12,6 +12,7 @@ import { productsRoutes } from '@/routes/products'
 import { printersRoutes } from '@/routes/printers'
 import { authRoutes } from '@/routes/auth'
 import authPlugin from '@/plugins/auth'
+import { attachWebSocket } from '@/websocket'
 
 export type AppServer = FastifyInstance
 
@@ -72,6 +73,8 @@ async function main() {
 
   try {
     await server.listen({ port, host })
+    // Attach WebSocket to the underlying HTTP server
+    attachWebSocket(server.server)
     server.log.info(`Orderwas server running on http://${host}:${port}`)
   } catch (err) {
     server.log.error(err)

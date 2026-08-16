@@ -1,5 +1,6 @@
 import { prisma } from '@/db/client'
 import type { Prisma } from '@prisma/client'
+import { orderEvents, type OrderEventPayload } from '@/websocket'
 
 export interface CreateOrderInput {
   tableNumber?: string
@@ -46,7 +47,7 @@ export async function createOrder(input: CreateOrderInput) {
   const productIds = items.map((i) => i.productId)
   const products = await prisma.product.findMany({
     where: { id: { in: productIds } },
-    select: { id: true, priceCents: true },
+    select: { id: true, priceCents: true, stationId: true, name: true },
   })
   if (products.length !== new Set(productIds).size) {
     throw new OrderValidationError('One or more products do not exist')
@@ -83,10 +84,33 @@ export async function createOrder(input: CreateOrderInput) {
         },
       },
       include: {
-        items: { include: { product: { select: { id: true, name: true, priceCents: true } } } },
+        items: { include: { product: { select: { id: true, name: true, priceCents: true, stationId: true } } } },
       },
     })
   })
+
+  // Emit WebSocket event (post-commit, failure-isolated)
+  const payload: OrderEventPayload = {
+    order: {
+      id: order.id,
+      eventId: order.eventId,
+      tableNumber: order.tableNumber,
+      pickupCode: order.pickupCode,
+      tearOffNumber: order.tearOffNumber,
+      status: order.status,
+      totalCents: order.totalCents,
+      items: order.items.map((item) => ({
+        id: item.id,
+        productId: item.productId,
+        productName: item.product.name,
+        stationId: item.product.stationId,
+        quantity: item.quantity,
+        status: item.status,
+        comment: item.comment,
+      })),
+    },
+  }
+  orderEvents.emit('order:created', payload)
 
   return order
 }
@@ -128,10 +152,24 @@ export async function updateOrderStatus(id: string, status: string) {
   }
 
   try {
-    return await prisma.order.update({
+    const order = await prisma.order.update({
       where: { id },
       data: { status: status as OrderStatus },
     })
+    // Emit WebSocket event
+    orderEvents.emit('order:updated', {
+      order: {
+        id: order.id,
+        eventId: order.eventId,
+        tableNumber: order.tableNumber,
+        pickupCode: order.pickupCode,
+        tearOffNumber: order.tearOffNumber,
+        status: order.status,
+        totalCents: order.totalCents,
+        items: [],
+      },
+    })
+    return order
   } catch (err) {
     const code = (err as { code?: string }).code
     if (code === 'P2025') throw new OrderValidationError('Order not found', 404)
