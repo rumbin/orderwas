@@ -4,11 +4,26 @@ import type {
   Product,
   Waiter,
   Order,
+  Printer,
 } from './types'
 
-export type { Event, Station, Product, Waiter, Order, OrderItem } from './types'
+export type { Event, Station, Product, Waiter, Order, OrderItem, Printer, Voucher } from './types'
 
 const BASE_URL = '/api'
+
+function authHeaders(): Record<string, string> {
+  const stored = localStorage.getItem('orderwas-session')
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored)
+      const token = parsed?.state?.token
+      if (token) return { Authorization: `Bearer ${token}` }
+    } catch {
+      // ignore
+    }
+  }
+  return {}
+}
 
 async function request<T>(
   path: string,
@@ -18,6 +33,7 @@ async function request<T>(
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...authHeaders(),
       ...options?.headers,
     },
   })
@@ -27,7 +43,6 @@ async function request<T>(
     throw new Error(body.error ?? `HTTP ${response.status}`)
   }
 
-  // Handle 204 No Content (DELETE responses)
   if (response.status === 204) {
     return undefined as T
   }
@@ -36,6 +51,13 @@ async function request<T>(
 }
 
 export const api = {
+  // Auth
+  login: (waiterId: string, pin: string) =>
+    request<{ token: string; waiter: Waiter }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ waiterId, pin }),
+    }),
+
   // Events
   getEvents: () => request<Event[]>('/events'),
   getEvent: (id: string) => request<Event>(`/events/${id}`),
@@ -68,16 +90,26 @@ export const api = {
 
   // Waiters
   getWaiters: (eventId: string) => request<Waiter[]>(`/events/${eventId}/waiters`),
-  createWaiter: (eventId: string, data: Partial<Waiter>) =>
+  createWaiter: (eventId: string, data: Partial<Waiter> & { pin?: string }) =>
     request<Waiter>(`/events/${eventId}/waiters`, { method: 'POST', body: JSON.stringify(data) }),
   updateWaiter: (id: string, data: Partial<Waiter>) =>
     request<Waiter>(`/waiters/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteWaiter: (id: string) =>
     request<void>(`/waiters/${id}`, { method: 'DELETE' }),
 
+  // Printers
+  getPrinters: (eventId: string) => request<Printer[]>(`/events/${eventId}/printers`),
+  createPrinter: (eventId: string, data: Partial<Printer>) =>
+    request<Printer>(`/events/${eventId}/printers`, { method: 'POST', body: JSON.stringify(data) }),
+  updatePrinter: (id: string, data: Partial<Printer>) =>
+    request<Printer>(`/printers/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deletePrinter: (id: string) =>
+    request<void>(`/printers/${id}`, { method: 'DELETE' }),
+
   // Orders
   createOrder: (data: {
-    tableNumber: string
+    tableNumber?: string
+    pickupCode?: string
     waiterId: string
     eventId: string
     items: { productId: string; quantity?: number; comment?: string }[]
