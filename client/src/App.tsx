@@ -3,7 +3,7 @@ import { useSessionStore } from '@/stores/session'
 import Login from '@/pages/Login'
 import OrderPage from '@/pages/Order'
 import OrdersPage from '@/pages/Orders'
-import AdminSetup from '@/pages/AdminSetup'
+import Admin from '@/pages/Admin'
 import StationDisplay from '@/pages/StationDisplay'
 
 export default function App() {
@@ -23,7 +23,7 @@ export default function App() {
   }
 
   if (route.path === '/admin') {
-    return <AdminSetup navigate={route.navigate} />
+    return <Admin navigate={route.navigate} />
   }
 
   // Station display route
