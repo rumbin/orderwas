@@ -1,6 +1,7 @@
 import { prisma } from '@/db/client'
 import type { Prisma } from '@prisma/client'
 import { orderEvents, type OrderEventPayload } from '@/websocket'
+import { dispatchOrderPrints } from '@/printer/dispatch'
 
 export interface CreateOrderInput {
   tableNumber?: string
@@ -111,6 +112,27 @@ export async function createOrder(input: CreateOrderInput) {
     },
   }
   orderEvents.emit('order:created', payload)
+
+  // Fire-and-forget: dispatch print jobs (never fails the order)
+  dispatchOrderPrints({
+    id: order.id,
+    eventId: order.eventId,
+    tableNumber: order.tableNumber,
+    pickupCode: order.pickupCode,
+    tearOffNumber: order.tearOffNumber,
+    status: order.status,
+    totalCents: order.totalCents,
+    items: order.items.map((item) => ({
+      id: item.id,
+      productId: item.productId,
+      productName: item.product.name,
+      stationId: item.product.stationId,
+      quantity: item.quantity,
+      status: item.status,
+      comment: item.comment,
+      priceCents: item.product.priceCents,
+    })),
+  }).catch((err) => console.error('[printer] dispatch error:', err))
 
   return order
 }
