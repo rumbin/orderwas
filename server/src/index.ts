@@ -1,6 +1,9 @@
 import Fastify, { type FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 import cors from '@fastify/cors'
+import fastifyStatic from '@fastify/static'
+import { resolve } from 'path'
+import { existsSync } from 'fs'
 import eventRoutes from '@/routes/events'
 import stationRoutes from '@/routes/stations'
 import { waitersRoutes } from '@/routes/waiters'
@@ -40,6 +43,24 @@ export function buildServer(): AppServer {
   server.get('/health', async () => {
     return { status: 'ok' }
   })
+
+  // Serve client build (production: single container, single port)
+  const clientDist = resolve(__dirname, '../../client/dist')
+  if (existsSync(clientDist)) {
+    server.register(fastifyStatic, {
+      root: clientDist,
+      prefix: '/',
+      wildcard: false, // let our SPA fallback handle routing
+    })
+
+    // SPA fallback: any non-API, non-file route serves index.html
+    server.setNotFoundHandler(async (request, reply) => {
+      if (request.url.startsWith('/api') || request.url.startsWith('/health')) {
+        return reply.code(404).send({ error: 'Not found' })
+      }
+      return reply.sendFile('index.html')
+    })
+  }
 
   return server
 }
