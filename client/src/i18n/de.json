@@ -57,7 +57,8 @@
     "stations": "Stationen",
     "products": "Produkte",
     "printers": "Drucker",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "confirmDeleteProduct": "Produkt \u201e{{name}}\u201c wirklich löschen?"
   },
   "common": {
     "save": "Speichern",

@@ -136,8 +136,8 @@ export default function OrdersPage({ navigate }: { navigate: (path: string) => v
       <div className="bg-white shadow-sm sticky top-0 z-10 px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-bold text-gray-900">{t('order.myOrders')}</h1>
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/order')} className="text-sm text-blue-600">
-            ← {t('order.products')}
+          <button onClick={() => navigate('/order')} className="bg-blue-600 text-white rounded-md px-3 py-1.5 text-sm font-medium">
+            + {t('order.newOrder')}
           </button>
           <button onClick={loadOrders} className="text-sm text-blue-600">↻</button>
         </div>

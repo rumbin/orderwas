@@ -37,7 +37,8 @@
     "stations": "Stations",
     "products": "Products",
     "printers": "Printers",
-    "settings": "Settings"
+    "settings": "Settings",
+    "confirmDeleteProduct": "Really delete product \"{{name}}\"?"
   },
   "common": {
     "save": "Save",
