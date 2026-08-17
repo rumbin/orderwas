@@ -205,15 +205,20 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
           const count = cart.items
             .filter((i) => i.product.id === product.id)
             .reduce((sum, i) => sum + i.quantity, 0)
+          const outOfStock = product.stockMode === 'tracked' && product.stockCount <= 0
+          const lowStock = product.stockMode === 'tracked' && product.stockCount > 0 && product.stockCount <= 5
           return (
             <button
               key={product.id}
-              onClick={() => handleAddProduct(product)}
+              onClick={() => !outOfStock && handleAddProduct(product)}
+              disabled={outOfStock}
               data-testid={`product-${product.name}`}
               className={`relative min-h-[88px] rounded-lg border-2 p-3 text-left transition active:scale-95 ${
-                count > 0
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
+                outOfStock
+                  ? 'border-gray-200 bg-gray-100 opacity-50 cursor-not-allowed'
+                  : count > 0
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
               <div className="font-medium text-gray-900 text-sm leading-tight">{product.name}</div>
@@ -221,6 +226,11 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
               {product.extras?.length ? (
                 <div className="text-[10px] text-blue-600 mt-0.5">⚙ {product.extras.length} {t('order.extrasLabel')}</div>
               ) : null}
+              {product.stockMode === 'tracked' && (
+                <div className={`text-[10px] mt-0.5 ${outOfStock ? 'text-red-600 font-medium' : lowStock ? 'text-amber-600' : 'text-gray-400'}`}>
+                  {outOfStock ? t('order.outOfStock') : `${product.stockCount} ${t('order.inStock')}`}
+                </div>
+              )}
               {count > 0 && (
                 <span className="absolute top-1 right-1 bg-blue-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
                   {count}

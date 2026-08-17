@@ -9,6 +9,7 @@ import {
   deleteProduct,
   ProductReferencedError,
 } from '@/services/productService'
+import { adjustStock } from '@/services/stockService'
 
 const createProductSchema = z.object({
   name: z.string().min(1),
@@ -139,6 +140,26 @@ export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance
     } catch (err) {
       const code = (err as { code?: string }).code
       if (code === 'P2025') return reply.status(404).send({ error: 'Extra not found' })
+      return reply.status(400).send({ error: (err as Error).message })
+    }
+  })
+
+  // PATCH /products/:id/stock — manual stock adjustment (delta)
+  const adjustStockSchema = z.object({
+    delta: z.number(),
+  })
+
+  server.patch('/products/:id/stock', async (request, reply) => {
+    const { id } = request.params as { id: string }
+    const parsed = adjustStockSchema.safeParse(request.body)
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
+
+    try {
+      const updated = await adjustStock(id, parsed.data.delta)
+      return updated
+    } catch (err) {
+      const code = (err as { code?: string }).code
+      if (code === 'P2025') return reply.status(404).send({ error: 'Product not found' })
       return reply.status(400).send({ error: (err as Error).message })
     }
   })

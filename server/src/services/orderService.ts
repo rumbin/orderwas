@@ -2,6 +2,7 @@ import { prisma } from '@/db/client'
 import type { Prisma } from '@prisma/client'
 import { orderEvents, type OrderEventPayload } from '@/websocket'
 import { dispatchOrderPrints } from '@/printer/dispatch'
+import { checkStockAvailability, decrementStock, restoreStock } from '@/services/stockService'
 
 export interface OptionSelection {
   extraId: string
@@ -110,13 +111,25 @@ export async function createOrder(input: CreateOrderInput) {
     items.reduce((sum, item) => sum + (productMap.get(item.productId)?.priceCents ?? 0) * item.quantity, 0) +
     optionsDeltaTotal
 
-  // Atomically increment the event's tear-off counter and create the order
+  // Check stock availability before entering the transaction
+  const stockCheck = await checkStockAvailability(items)
+  if (!stockCheck.ok) {
+    const details = stockCheck.errors
+      .map((e) => `${e.productName}: ${e.available} available, ${e.requested} requested`)
+      .join('; ')
+    throw new OrderValidationError(`Insufficient stock: ${details}`, 409)
+  }
+
+  // Atomically increment the event's tear-off counter, create the order, and decrement stock
   const order = await prisma.$transaction(async (tx) => {
     const updatedEvent = await tx.event.update({
       where: { id: eventId },
       data: { lastTearOffNumber: { increment: 1 } },
       select: { lastTearOffNumber: true },
     })
+
+    // Stock decrement happens after order creation (still inside the transaction)
+    await decrementStock(tx, items)
 
     return tx.order.create({
       data: {
@@ -269,10 +282,22 @@ export async function cancelOrder(id: string) {
   }
 
   const order = await prisma.$transaction(async (tx) => {
+    // Fetch items before cancelling (for stock restore)
+    const orderItems = await tx.orderItem.findMany({
+      where: { orderId: id, status: { not: 'cancelled' } },
+      select: { productId: true, quantity: true },
+    })
+
     await tx.orderItem.updateMany({
       where: { orderId: id, status: { not: 'cancelled' } },
       data: { status: 'cancelled' },
     })
+
+    // Restore stock for cancelled items
+    if (orderItems.length > 0) {
+      await restoreStock(tx, orderItems.map((i) => ({ productId: i.productId, quantity: i.quantity })))
+    }
+
     return tx.order.update({ where: { id }, data: { status: 'cancelled' } })
   })
 

@@ -20,7 +20,9 @@
     "success": "Order submitted!",
     "quantity": "Quantity",
     "add": "Add",
-    "remove": "Remove"
+    "remove": "Remove",
+    "outOfStock": "Out of stock",
+    "inStock": "in stock"
   },
   "station": {
     "title": "Station",

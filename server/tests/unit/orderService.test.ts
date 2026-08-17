@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
 import { buildServer, type AppServer } from '@/index'
 import { prisma } from '@/db/client'
-import { createOrder, OrderValidationError } from '@/services/orderService'
+import { createOrder, cancelOrder, OrderValidationError } from '@/services/orderService'
 
 describe('orderService.createOrder', () => {
   let server: AppServer
@@ -20,6 +20,7 @@ describe('orderService.createOrder', () => {
     await server.close()
     await prisma.orderItem.deleteMany({})
     await prisma.order.deleteMany({})
+    await prisma.productComponent.deleteMany({})
     await prisma.product.deleteMany({})
     await prisma.waiter.deleteMany({})
     await prisma.station.deleteMany({})
@@ -29,6 +30,7 @@ describe('orderService.createOrder', () => {
   beforeEach(async () => {
     await prisma.orderItem.deleteMany({})
     await prisma.order.deleteMany({})
+    await prisma.productComponent.deleteMany({})
     await prisma.product.deleteMany({})
     await prisma.waiter.deleteMany({})
     await prisma.station.deleteMany({})
@@ -205,5 +207,109 @@ describe('orderService.createOrder', () => {
       numbers.push(order.tearOffNumber!)
     }
     expect(numbers).toEqual([1, 2, 3, 4, 5])
+  })
+
+  // --- Stock management integration ---
+
+  it('tracked product: decrements stock on order creation', async () => {
+    // Create a tracked product
+    const tracked = await prisma.product.create({
+      data: { name: 'Cola', priceCents: 250, stationId, stockMode: 'tracked', stockCount: 20 },
+    })
+
+    await createOrder({
+      tableNumber: '1',
+      waiterId,
+      eventId,
+      items: [{ productId: tracked.id, quantity: 5 }],
+    })
+
+    const after = await prisma.product.findUnique({ where: { id: tracked.id } })
+    expect(after!.stockCount).toBe(15)
+  })
+
+  it('tracked product: rejects order when stock insufficient', async () => {
+    const tracked = await prisma.product.create({
+      data: { name: 'Cola', priceCents: 250, stationId, stockMode: 'tracked', stockCount: 3 },
+    })
+
+    await expect(
+      createOrder({
+        tableNumber: '2',
+        waiterId,
+        eventId,
+        items: [{ productId: tracked.id, quantity: 5 }],
+      }),
+    ).rejects.toThrow(OrderValidationError)
+  })
+
+  it('composite product: decrements ingredient stocks', async () => {
+    // Create ingredients
+    const schnitzel = await prisma.product.create({
+      data: { name: 'Schnitzel', priceCents: 0, stationId, stockMode: 'tracked', stockCount: 10 },
+    })
+    const pommes = await prisma.product.create({
+      data: { name: 'Pommes', priceCents: 0, stationId, stockMode: 'tracked', stockCount: 15 },
+    })
+    // Create composite
+    const composite = await prisma.product.create({
+      data: { name: 'Schni+Pommes', priceCents: 1200, stationId, stockMode: 'composite' },
+    })
+    await prisma.productComponent.create({
+      data: { compositeId: composite.id, ingredientId: schnitzel.id, quantity: 1 },
+    })
+    await prisma.productComponent.create({
+      data: { compositeId: composite.id, ingredientId: pommes.id, quantity: 1 },
+    })
+
+    await createOrder({
+      tableNumber: '3',
+      waiterId,
+      eventId,
+      items: [{ productId: composite.id, quantity: 3 }],
+    })
+
+    const s = await prisma.product.findUnique({ where: { id: schnitzel.id } })
+    const p = await prisma.product.findUnique({ where: { id: pommes.id } })
+    expect(s!.stockCount).toBe(7) // 10 - 3
+    expect(p!.stockCount).toBe(12) // 15 - 3
+  })
+
+  it('noStock product: no stock check performed', async () => {
+    const noStock = await prisma.product.create({
+      data: { name: 'Wasser', priceCents: 100, stationId, stockMode: 'none' },
+    })
+
+    const order = await createOrder({
+      tableNumber: '4',
+      waiterId,
+      eventId,
+      items: [{ productId: noStock.id, quantity: 999 }],
+    })
+    expect(order.id).toBeDefined()
+  })
+
+  it('stock is restored when order is cancelled', async () => {
+    const tracked = await prisma.product.create({
+      data: { name: 'Fanta', priceCents: 250, stationId, stockMode: 'tracked', stockCount: 20 },
+    })
+
+    const order = await createOrder({
+      tableNumber: '5',
+      waiterId,
+      eventId,
+      items: [{ productId: tracked.id, quantity: 8 }],
+    })
+
+    // Stock should be 12 after order
+    let product = await prisma.product.findUnique({ where: { id: tracked.id } })
+    expect(product!.stockCount).toBe(12)
+
+    // Cancel the order
+    await cancelOrder(order.id)
+
+    // Stock should be restored to 20
+    product = await prisma.product.findUnique({ where: { id: tracked.id } })
+    expect(product!.stockCount).toBe(20)
   })
 })

@@ -88,6 +88,8 @@ export const api = {
     request<Product>(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteProduct: (id: string) =>
     request<void>(`/products/${id}`, { method: 'DELETE' }),
+  adjustStock: (id: string, delta: number) =>
+    request<{ id: string; name: string; stockCount: number; stockMode: string }>(`/products/${id}/stock`, { method: 'PATCH', body: JSON.stringify({ delta }) }),
 
   // Waiters
   getWaiters: (eventId: string) => request<Waiter[]>(`/events/${eventId}/waiters`),

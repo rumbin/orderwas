@@ -273,6 +273,7 @@ function AdminProducts({ stations, products, onLoadProducts, setProducts }: {
                   <th className="py-2">Name</th>
                   <th>Preis</th>
                   <th>Verfügbar</th>
+                  <th>Lager</th>
                   <th></th>
                 </tr>
               </thead>
@@ -289,6 +290,33 @@ function AdminProducts({ stations, products, onLoadProducts, setProducts }: {
                       >
                         {p.available ? 'Ja' : 'Nein'}
                       </button>
+                    </td>
+                    <td>
+                      {p.stockMode !== 'none' ? (
+                        <div className="flex items-center gap-1">
+                          <span className={`text-xs ${p.stockCount <= 0 ? 'text-red-600 font-medium' : p.stockCount <= 5 ? 'text-amber-600' : 'text-gray-600'}`}>
+                            {p.stockCount}
+                          </span>
+                          <button
+                            onClick={async () => {
+                              const delta = prompt(`Lagerbestand für "${p.name}" ändern (negativ = abbauen, positiv = auffüllen):`)
+                              if (delta === null) return
+                              const num = parseInt(delta)
+                              if (isNaN(num)) return
+                              await api.adjustStock(p.id, num)
+                              // Reload products
+                              const prods = await api.getProducts(activeStation)
+                              setProducts((prev) => ({ ...prev, [activeStation]: prods }))
+                            }}
+                            className="text-gray-400 hover:text-gray-600 text-xs"
+                            title="Lagerbestand anpassen"
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-xs">—</span>
+                      )}
                     </td>
                     <td>
                       <button

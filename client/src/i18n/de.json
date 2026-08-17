@@ -40,7 +40,9 @@
     "confirmPay": "Bestellung als bezahlt markieren?",
     "confirmCancel": "Bestellung wirklich stornieren?",
     "confirmReopen": "Bestellung wieder öffnen?",
-    "closedOrders": "Abgeschlossene Bestellungen"
+    "closedOrders": "Abgeschlossene Bestellungen",
+    "outOfStock": "Ausverkauft",
+    "inStock": "auf Lager"
   },
   "station": {
     "title": "Station",
