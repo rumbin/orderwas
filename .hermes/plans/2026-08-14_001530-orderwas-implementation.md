@@ -532,57 +532,179 @@ Waiter CRUD with PIN set/reset, permission checkboxes, pickup code; printer CRUD
 
 ---
 
-## Phase 6: Advanced Features
+## Phase 6: Order Flow Completion & Lifecycle E2E
 
-### Task 6.1: Voucher system
+> Born from live sandbox review (2026-08-17). Goals: complete the core order flow end-to-end — including item comments/extras, per-item status transitions, cancel flows — and prove every step with full-lifecycle E2E tests (API state + UI screens + printer dispatch + station display).
+
+### Task 6.1: Order item comments (free text) + per-item comment editing
+
+**Objective:** "Bratwurst ohne Senf, mit Ketchup" — Orderjutsu parity. Comments on order items exist in schema (`OrderItem.comment`) and print already, but cannot be entered in the UI.
+
+**Backend:** `PATCH /api/order-items/:id` (comment, status) — thin route + `orderItemService.updateItem`.
+**Frontend:** Order page: long-press/tap on cart item opens comment sheet (free text, min 44px targets); Orders page shows comments.
+**TDD:**
+1. API: PATCH comment → persisted, returned in GET order
+2. API: PATCH status open→prepared (per-item lifecycle)
+3. UI test: cart item tap → comment dialog → comment saved
+**Commit:** `feat: order item comments and per-item status editing`
+
+---
+
+### Task 6.2: Station display — per-item status transitions + auto-refresh hardening
+
+**Objective:** "Erledigt" button actually persists (currently optimistic-only placeholder) and reflects across all displays. Also harden auto-refresh: on `order:created`/`orderItem:status` events reload data; add reconnect handling (Socket.io `reconnect` → full reload).
+
+**Backend:** emit `orderItem:status` from `orderItemService.updateItem` (event bus) with station room targeting.
+**Frontend:** StationDisplay: "Erledigt" → PATCH item → local state update + event already propagates; waiter Orders page reflects item statuses; reconnect → reload.
+**TDD:**
+1. API: item status open→prepared→delivered transitions valid
+2. WS: item status change emits to station room
+3. UI: mark done → item leaves open list (still visible with ✓)
+4. UI: cancelled order → disappears from station display
+**Commit:** `feat: per-item status lifecycle on station display`
+
+---
+
+### Task 6.3: Order cancel + item cancel with permission gate
+
+**Objective:** Full-order cancel (station/waiter) and per-item cancel, respecting `Waiter.canCancel`.
+
+**Backend:** `orderService.cancelOrder` (status→cancelled, emits `order:updated`); `orderItemService.cancelItem`; permission check via JWT claims (waiter.canCancel) in `authenticate` decorator — reject 403.
+**Frontend:** Orders page: cancel button (visible only with canCancel) with confirm; Station display: per-item cancel; Order page: remove item before submit (cart clear per item already exists — keep).
+**TDD:**
+1. API: cancel open order → status cancelled; items all cancelled
+2. API: cancel without canCancel → 403
+3. API: per-item cancel → totalCents recomputed? (decision: keep total, mark item cancelled — matches printed receipt; test total unchanged)
+4. UI: cancel order button → confirm → order disappears from station display (WS event)
+**Commit:** `feat: order and item cancellation with canCancel gate`
+
+---
+
+### Task 6.4: Landing page — role navigation hub
+
+**Objective:** Root page navigates to all role views (Kellner-App, Stations-Anzeige, Admin, Küche-Monitor later) instead of auto-redirecting to login.
+
+**Frontend:** New `#/` = landing page with large tiles: "Kellner" (→ login/order), "Station" (→ station picker listing event's stations), "Admin" (→ admin). Keep session check: logged-in waiter clicking Kellner → straight to order page.
+**TDD:**
+1. UI: renders tiles for all roles
+2. UI: station picker lists stations of selected event, links to #/station/:id
+3. E2E: landing → station picker → station display renders
+**Commit:** `feat: landing page with role navigation`
+
+---
+
+### Task 6.5: New order after submission (order flow loop)
+
+**Objective:** After successful submit, waitress can immediately start the next order without friction.
+
+**Frontend:** Order page: after submit success → show tear-off number + "Neue Bestellung" button clearing table number (cart already cleared); keep success message visible until next interaction. Auto-focus table input.
+**TDD:**
+1. UI: submit → success banner shows tearOffNumber, table input cleared
+2. UI: "Neue Bestellung" → cart empty, table input focused, banner gone
+**Commit:** `feat: order flow loop with tear-off confirmation`
+
+---
+
+### Task 6.6: Structured extras (Auswahl) — product option groups
+
+**Objective:** Orderjutsu parity: products with option groups (e.g. Bratwurst: Senf ja/nein, Ketchup ja/nein, Currysoße). Admin defines extras per product; order page shows option picker on tap; receipt prints selected options; option values can carry price delta.
+
+**Schema:** `ProductExtra { id, productId, name ("Senf"), sortOrder }`, `ProductExtraOption { id, extraId, name ("Ja"/"Nein"/"Mit Ketchup"), priceDeltaCents (default 0), sortOrder }`. Multiple select mode flag on extra (radio vs checkbox).
+**Backend:** CRUD nested under products; order creation accepts `items[].optionSelections: [{extraId, optionId}]`; validation: options belong to product's extras; total += priceDeltaCents; persisted on OrderItem as JSON (`OrderItem.options Json?`); printed as comment-like lines.
+**Frontend:** Admin: extras editor per product (group name, options, price deltas); Order page: tapping product with extras opens option sheet before adding to cart; cart shows selected options; comment field still free-text.
+**TDD:**
+1. Schema/model: create product with radio extra (2 options) + checkbox extra
+2. API: create order with option selections → total includes deltas
+3. API: invalid option (wrong extraId) → 400
+4. ESC/POS: selected options printed under item
+5. UI: option sheet renders, selection reflected in cart, total updates
+**Commit:** `feat: structured product extras with price deltas`
+
+---
+
+### Task 6.7: Full order lifecycle E2E suite
+
+**Objective:** Prove the entire order lifecycle through API **and** UI: add → modify → submit → station display shows → print dispatched → item fulfilled → order paid/cancelled. State must be consistent on every endpoint and screen at each step.
+
+**E2E tests (`e2e/order-lifecycle.spec.ts`), each step asserting API state + UI state:**
+1. Login as Alice → add products (different stations) with extras/comments → modify (qty, remove, edit comment) → verify cart math
+2. Submit → API: order open, correct totalCents incl. deltas; UI: tear-off shown; station displays (Bar + Küche pages) show the order within WS latency; printer queue: dummy log file exists with correct content (table, items, options)
+3. Mark item prepared (Bar display) → API: item prepared; display: leaves open list; waiter Orders page: shows ✓
+4. Cancel one item (canCancel) → API: item cancelled, order total unchanged; displays updated
+5. Pay order (waiter) → API: status paid; all displays drop the order
+6. Cancel full order (station) → API: status cancelled; displays drop
+7. Re-run lifecycle with pickupCode order (no table)
+8. Idle screen state: empty displays show "Keine offenen Bestellungen"
+**Fixture:** dedicated E2E event seeded per run (id-prefix `e2e_`), cleaned after.
+**Commit:** `feat: full order lifecycle E2E suite`
+
+---
+
+### Task 6.8: Waiter order actions — pay & reopen (foundation for settlement)
+
+**Objective:** Waiter can mark order paid (cash-out); paid orders leave displays; totalCents stays (audit trail). Reopen → back to open (permission canCashOut).
+
+**Backend:** `orderService.markPaid` (only open/partial → paid; emits `order:updated`); permission gate canCashOut. `reopenOrder` (paid → open) same gate.
+**Frontend:** Orders page: "Bezahlen" button on open orders (canCashOut only), confirm dialog; paid section (collapsed list).
+**TDD:**
+1. API: markPaid open→paid; invalid transitions rejected
+2. API: reopen paid→open
+3. UI: pay button → order moves to paid section; station display drops it
+**Commit:** `feat: order payment marking with canCashOut gate`
+
+---
+
+## Phase 7: Advanced Features (former Phase 6)
+
+### Task 7.1: Voucher system
 
 Voucher products + Bonkasse flow: sell vouchers (prints tear-off), redeem by code (status active→redeemed, links order). Uses Task 2.4 entity. Commit: `feat: voucher system`
 
-### Task 6.2: Stock management
+### Task 7.2: Stock management
 
 Tracked stock decrement on order (already hooked in 1.7.4 service — enable checks), composite expansion via ProductComponent, stock=0 → unavailable, app-side stock adjustment. Commit: `feat: stock management`
 
-### Task 6.3: Settlement and reporting
+### Task 7.3: Settlement and reporting
 
 Per-waiter cash summary (expected cash incl. unpaid), per-event per-station revenue, CSV export. Commit: `feat: settlement and reporting`
 
-### Task 6.4: QR code table ordering
+### Task 7.4: QR code table ordering
 
 `qrcode` lib: per-table PNG endpoint; guest page `#/guest/:eventId/:tableToken` (unguessable token per table) → order with `status: pending` → waiter confirms → normal flow. Commit: `feat: QR guest ordering`
 
-### Task 6.5: Kitchen monitor — full-screen order view
+### Task 7.5: Kitchen monitor — full-screen order view
 
 Big-type wall display variant of station display with wait-time sorting and click-to-complete. Commit: `feat: kitchen monitor view`
 
-### Task 6.6: App layout customization
+### Task 7.6: App layout customization
 
 Admin grid editor (columns×rows, color, product mapping) → waiter app renders saved layout. Commit: `feat: customizable app layout`
 
-### Task 6.7: Waiter permissions + transfers
+### Task 7.7: Waiter permissions + transfers
 
 Enforce canCancel/canCashOut/canTransfer in services; order transfer between waiters; Sammelbon collective receipts (uses reserved `sammelbonId`). Commit: `feat: waiter permissions, transfers, collective receipts`
 
 ---
 
-## Phase 7: Polish
+## Phase 8: Polish
 
-### Task 7.1: Offline order queue
+### Task 8.1: Offline order queue
 
 IndexedDB queue with client-generated idempotency keys (unique on Order), background sync on reconnect, conflict-free retry. Commit: `feat: offline order queue with sync`
 
-### Task 7.2: Print retry queue
+### Task 8.2: Print retry queue
 
 Failed print jobs persisted (table or file queue), retried with backoff, admin visibility. Commit: `feat: print job retry queue`
 
-### Task 7.3: i18n completion
+### Task 8.3: i18n completion
 
 Audit: no hardcoded strings (test), de complete, en+fr complete, language switcher. Commit: `feat: i18n completion de/en/fr`
 
-### Task 7.4: Docker deployment
+### Task 8.4: Docker deployment
 
 Multi-stage Dockerfile (build client → production server serving static), docker-compose with SQLite volume, ARM variant documented for Raspberry Pi. Verify `docker compose up` → healthy. Commit: `feat: Docker deployment`
 
-### Task 7.5: Documentation
+### Task 8.5: Documentation
 
 README: architecture diagram (from docs/ARCHITECTURE.md), dev setup, deployment (Docker + RPi), contributor guide. Keep ARCHITECTURE.md in sync. Commit: `docs: README and setup guides`
 

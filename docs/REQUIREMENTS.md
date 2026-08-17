@@ -864,3 +864,34 @@ Key themes from user interviews:
 ---
 
 *This document is based on comprehensive analysis of Orderjutsu's website, wiki, YouTube videos, and competitor research. All information is current as of August 2026.*
+
+---
+
+## 17. Requirements from Live Review (2026-08-17)
+
+Feedback from Philipp's first live sandbox review of the running system.
+
+### 17.1 Station Display Real-Time
+- Station displays MUST auto-update on new orders (WebSocket push, no manual refresh). [Task 6.2]
+
+### 17.2 Landing Page Navigation
+- The root page must offer navigation to ALL role views: waiter app, station displays, admin section — not just auto-redirect to waiter login. [Task 6.4]
+
+### 17.3 Order Flow Loop
+- After submitting an order, the waitress must be able to immediately start the next order with minimal friction (show tear-off number, clear state, focus next table input). [Task 6.5]
+
+### 17.4 Product Modifications / Extras (Orderjutsu Parity)
+- Customers order products with modifications (e.g. "Bratwurst without mustard, with ketchup"). Orderjutsu allows per-product structured option groups. Requirements:
+  - Admin can define option groups per product (radio/checkbox, option labels, optional price deltas)
+  - Waiter sees option picker when adding a modified product
+  - Selected options print on the station receipt and persist on the order item
+  - Free-text comments remain available in addition [Task 6.6]
+
+### 17.5 Full Order Lifecycle E2E Tests
+- Integration/E2E tests must cover the ENTIRE order lifecycle and assert expected state on API endpoints AND UI screens:
+  - Add products to order, modify, remove items
+  - Submit order
+  - Order appears on station displays (live) and in printer queue
+  - Mark items/orders fulfilled
+  - Cancel items or full orders (with permission gate)
+  - Everything E2E-tested end to end [Task 6.7]
