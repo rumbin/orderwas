@@ -3,6 +3,12 @@
     "title": "Orderwas",
     "tagline": "Bestellsystem für Vereinsfeste"
   },
+  "landing": {
+    "waiter": "Kellner",
+    "station": "Station",
+    "admin": "Admin",
+    "selectStation": "Station wählen"
+  },
   "login": {
     "selectEvent": "Veranstaltung wählen",
     "selectWaiter": "Kellner wählen",
@@ -14,13 +20,25 @@
     "tableNumber": "Tischnummer",
     "products": "Produkte",
     "cart": "Warenkorb",
+    "myOrders": "Meine Bestellungen",
     "total": "Summe",
     "submit": "Bestellung abschließen",
     "empty": "Noch keine Produkte ausgewählt",
     "success": "Bestellung aufgegeben!",
+    "newOrder": "Neue Bestellung",
     "quantity": "Menge",
     "add": "Hinzufügen",
-    "remove": "Entfernen"
+    "remove": "Entfernen",
+    "editComment": "Anmerkung bearbeiten",
+    "commentFor": "Anmerkung für",
+    "commentPlaceholder": "z.B. ohne Senf, mit Ketchup",
+    "pay": "Bezahlen",
+    "cancelOrder": "Bestellung stornieren",
+    "reopen": "Wieder öffnen",
+    "confirmPay": "Bestellung als bezahlt markieren?",
+    "confirmCancel": "Bestellung wirklich stornieren?",
+    "confirmReopen": "Bestellung wieder öffnen?",
+    "closedOrders": "Abgeschlossene Bestellungen"
   },
   "station": {
     "title": "Station",

@@ -1,6 +1,16 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
-import { createOrder, listOrdersByEvent, getOrder, updateOrderStatus, OrderValidationError } from '@/services/orderService'
+import {
+  createOrder,
+  listOrdersByEvent,
+  getOrder,
+  updateOrderStatus,
+  cancelOrder,
+  markPaid,
+  reopenOrder,
+  OrderValidationError,
+} from '@/services/orderService'
+import { updateItem, cancelItem, OrderItemValidationError } from '@/services/orderItemService'
 
 const createOrderItemSchema = z.object({
   productId: z.string().min(1),
@@ -21,6 +31,13 @@ const createOrderBody = z.object({
 
 const updateOrderStatusBody = z.object({
   status: z.enum(['open', 'preparing', 'partial', 'paid', 'cancelled']),
+})
+
+const updateOrderItemBody = z.object({
+  comment: z.string().optional(),
+  status: z.enum(['open', 'prepared', 'delivered', 'cancelled']).optional(),
+}).refine((data) => data.comment !== undefined || data.status !== undefined, {
+  message: 'Nothing to update',
 })
 
 export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
@@ -54,7 +71,7 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
     return order
   })
 
-  // PATCH /orders/:id — update order status
+  // PATCH /orders/:id — update order status (generic)
   server.patch('/orders/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = updateOrderStatusBody.safeParse(request.body)
@@ -65,6 +82,87 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
       return reply.status(200).send(order)
     } catch (err) {
       if (err instanceof OrderValidationError) {
+        return reply.status(err.statusCode).send({ error: err.message })
+      }
+      return reply.status(400).send({ error: (err as Error).message })
+    }
+  })
+
+  // POST /orders/:id/cancel — cancel full order (requires canCancel)
+  server.post('/orders/:id/cancel', {
+    preHandler: server.requirePermission('canCancel'),
+  }, async (request, reply) => {
+    const { id } = request.params as { id: string }
+    try {
+      const order = await cancelOrder(id)
+      return reply.status(200).send(order)
+    } catch (err) {
+      if (err instanceof OrderValidationError) {
+        return reply.status(err.statusCode).send({ error: err.message })
+      }
+      return reply.status(400).send({ error: (err as Error).message })
+    }
+  })
+
+  // POST /orders/:id/pay — mark order paid (requires canCashOut)
+  server.post('/orders/:id/pay', {
+    preHandler: server.requirePermission('canCashOut'),
+  }, async (request, reply) => {
+    const { id } = request.params as { id: string }
+    try {
+      const order = await markPaid(id)
+      return reply.status(200).send(order)
+    } catch (err) {
+      if (err instanceof OrderValidationError) {
+        return reply.status(err.statusCode).send({ error: err.message })
+      }
+      return reply.status(400).send({ error: (err as Error).message })
+    }
+  })
+
+  // POST /orders/:id/reopen — reopen paid order (requires canCashOut)
+  server.post('/orders/:id/reopen', {
+    preHandler: server.requirePermission('canCashOut'),
+  }, async (request, reply) => {
+    const { id } = request.params as { id: string }
+    try {
+      const order = await reopenOrder(id)
+      return reply.status(200).send(order)
+    } catch (err) {
+      if (err instanceof OrderValidationError) {
+        return reply.status(err.statusCode).send({ error: err.message })
+      }
+      return reply.status(400).send({ error: (err as Error).message })
+    }
+  })
+
+  // PATCH /order-items/:id — update item comment/status
+  server.patch('/order-items/:id', async (request, reply) => {
+    const { id } = request.params as { id: string }
+    const parsed = updateOrderItemBody.safeParse(request.body)
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
+
+    try {
+      const item = await updateItem(id, parsed.data)
+      return reply.status(200).send(item)
+    } catch (err) {
+      if (err instanceof OrderItemValidationError) {
+        return reply.status(err.statusCode).send({ error: err.message })
+      }
+      return reply.status(400).send({ error: (err as Error).message })
+    }
+  })
+
+  // POST /order-items/:id/cancel — cancel single item (requires canCancel)
+  server.post('/order-items/:id/cancel', {
+    preHandler: server.requirePermission('canCancel'),
+  }, async (request, reply) => {
+    const { id } = request.params as { id: string }
+    try {
+      const item = await cancelItem(id)
+      return reply.status(200).send(item)
+    } catch (err) {
+      if (err instanceof OrderItemValidationError) {
         return reply.status(err.statusCode).send({ error: err.message })
       }
       return reply.status(400).send({ error: (err as Error).message })

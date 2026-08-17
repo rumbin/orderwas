@@ -1,5 +1,6 @@
 import { useRouter, matchRoute } from '@/router'
 import { useSessionStore } from '@/stores/session'
+import Landing from '@/pages/Landing'
 import Login from '@/pages/Login'
 import OrderPage from '@/pages/Order'
 import OrdersPage from '@/pages/Orders'
@@ -10,10 +11,18 @@ export default function App() {
   const route = useRouter()
   const isLoggedIn = useSessionStore((s) => s.isLoggedIn())
 
-  // Route matching
-  if (route.path === '/' || route.path === '/order') {
+  // Landing page — role navigation hub
+  if (route.path === '/') {
+    return <Landing navigate={route.navigate} />
+  }
+
+  if (route.path === '/login') {
+    if (isLoggedIn) return <OrderPage navigate={route.navigate} />
+    return <Login navigate={route.navigate} />
+  }
+
+  if (route.path === '/order') {
     if (!isLoggedIn) return <Login navigate={route.navigate} />
-    if (route.path === '/') return <OrderPage navigate={route.navigate} />
     return <OrderPage navigate={route.navigate} />
   }
 

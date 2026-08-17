@@ -201,3 +201,100 @@ export async function updateOrderStatus(id: string, status: string) {
 
 // Type helper for transaction context
 export type TxClient = Prisma.TransactionClient
+
+/**
+ * Cancels a full order: status → cancelled and all items cancelled.
+ * Only open/preparing/partial orders can be cancelled.
+ */
+export async function cancelOrder(id: string) {
+  const existing = await prisma.order.findUnique({
+    where: { id },
+    select: { id: true, status: true, eventId: true },
+  })
+  if (!existing) throw new OrderValidationError('Order not found', 404)
+  if (!['open', 'preparing', 'partial'].includes(existing.status)) {
+    throw new OrderValidationError(`Cannot cancel order in status '${existing.status}'`, 409)
+  }
+
+  const order = await prisma.$transaction(async (tx) => {
+    await tx.orderItem.updateMany({
+      where: { orderId: id, status: { not: 'cancelled' } },
+      data: { status: 'cancelled' },
+    })
+    return tx.order.update({ where: { id }, data: { status: 'cancelled' } })
+  })
+
+  orderEvents.emit('order:updated', {
+    order: {
+      id: order.id,
+      eventId: order.eventId,
+      tableNumber: order.tableNumber,
+      pickupCode: order.pickupCode,
+      tearOffNumber: order.tearOffNumber,
+      status: order.status,
+      totalCents: order.totalCents,
+      items: [],
+    },
+  })
+  return order
+}
+
+/**
+ * Marks an order paid (cash-out). Only open/preparing/partial → paid.
+ */
+export async function markPaid(id: string) {
+  const existing = await prisma.order.findUnique({
+    where: { id },
+    select: { status: true },
+  })
+  if (!existing) throw new OrderValidationError('Order not found', 404)
+  if (!['open', 'preparing', 'partial'].includes(existing.status)) {
+    throw new OrderValidationError(`Cannot pay order in status '${existing.status}'`, 409)
+  }
+
+  const order = await prisma.order.update({ where: { id }, data: { status: 'paid' } })
+
+  orderEvents.emit('order:updated', {
+    order: {
+      id: order.id,
+      eventId: order.eventId,
+      tableNumber: order.tableNumber,
+      pickupCode: order.pickupCode,
+      tearOffNumber: order.tearOffNumber,
+      status: order.status,
+      totalCents: order.totalCents,
+      items: [],
+    },
+  })
+  return order
+}
+
+/**
+ * Reopens a paid order (e.g. payment mistake). Only paid → open.
+ */
+export async function reopenOrder(id: string) {
+  const existing = await prisma.order.findUnique({
+    where: { id },
+    select: { status: true },
+  })
+  if (!existing) throw new OrderValidationError('Order not found', 404)
+  if (existing.status !== 'paid') {
+    throw new OrderValidationError(`Cannot reopen order in status '${existing.status}'`, 409)
+  }
+
+  const order = await prisma.order.update({ where: { id }, data: { status: 'open' } })
+
+  orderEvents.emit('order:updated', {
+    order: {
+      id: order.id,
+      eventId: order.eventId,
+      tableNumber: order.tableNumber,
+      pickupCode: order.pickupCode,
+      tearOffNumber: order.tearOffNumber,
+      status: order.status,
+      totalCents: order.totalCents,
+      items: [],
+    },
+  })
+  return order
+}

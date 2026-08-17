@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/api/client'
 import { useSessionStore } from '@/stores/session'
@@ -18,8 +18,11 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   const [activeStation, setActiveStation] = useState<string>('')
   const [tableNumber, setTableNumber] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [success, setSuccess] = useState('')
+  const [success, setSuccess] = useState<{ tearOffNumber: number | null } | null>(null)
   const [error, setError] = useState('')
+  const [commentTarget, setCommentTarget] = useState<string | null>(null) // productId
+  const [commentText, setCommentText] = useState('')
+  const tableInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!event) return
@@ -43,26 +46,41 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   const total = cart.total()
 
   const handleAddProduct = (product: Product) => {
+    setSuccess(null)
     cart.addItem(product)
+  }
+
+  const openCommentEditor = (productId: string) => {
+    const item = cart.items.find((i) => i.product.id === productId)
+    setCommentText(item?.comment ?? '')
+    setCommentTarget(productId)
+  }
+
+  const saveComment = () => {
+    if (commentTarget) {
+      cart.setItemComment(commentTarget, commentText)
+    }
+    setCommentTarget(null)
+    setCommentText('')
   }
 
   const handleSubmit = async () => {
     if (!tableNumber || cart.items.length === 0) return
     setSubmitting(true)
     setError('')
-    setSuccess('')
+    setSuccess(null)
     try {
-      await api.createOrder({
+      const order = await api.createOrder({
         tableNumber,
         waiterId: waiter.id,
         eventId: event.id,
         items: cart.items.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
-          comment: item.comment,
+          comment: item.comment || undefined,
         })),
       })
-      setSuccess(t('order.success'))
+      setSuccess({ tearOffNumber: order.tearOffNumber })
       cart.clear()
       setTableNumber('')
     } catch (err) {
@@ -72,6 +90,11 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
     }
   }
 
+  const startNextOrder = () => {
+    setSuccess(null)
+    tableInputRef.current?.focus()
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pb-32">
       {/* Header */}
@@ -79,14 +102,30 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
         <h1 className="text-lg font-bold text-gray-900">{event.name}</h1>
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-600">{waiter.name}</span>
-          <button
-            onClick={() => navigate('/orders')}
-            className="text-sm text-blue-600"
-          >
-            {t('order.cart')}
+          <button onClick={() => navigate('/orders')} className="text-sm text-blue-600">
+            {t('order.myOrders')}
           </button>
         </div>
       </div>
+
+      {/* Success banner with tear-off + next-order button */}
+      {success && !error && (
+        <div className="sticky top-[57px] z-10 bg-green-50 border-b border-green-200 px-4 py-3 flex items-center justify-between">
+          <div className="text-green-800">
+            <span className="font-medium">{t('order.success')}</span>
+            {success.tearOffNumber != null && (
+              <span className="ml-2 font-bold">#{success.tearOffNumber}</span>
+            )}
+          </div>
+          <button
+            onClick={startNextOrder}
+            className="bg-green-600 text-white rounded-md px-4 py-2 font-medium"
+            data-testid="next-order"
+          >
+            {t('order.newOrder')}
+          </button>
+        </div>
+      )}
 
       {/* Station tabs */}
       {stations.length > 1 && (
@@ -136,14 +175,12 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
       {/* Cart bar (fixed bottom) */}
       {cart.items.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 z-20">
-          {success && (
-            <div className="mb-3 p-2 bg-green-50 text-green-700 text-sm rounded">{success}</div>
-          )}
           {error && (
             <div className="mb-3 p-2 bg-red-50 text-red-700 text-sm rounded">{error}</div>
           )}
           <div className="flex items-center gap-3 max-w-2xl mx-auto">
             <input
+              ref={tableInputRef}
               type="text"
               value={tableNumber}
               onChange={(e) => setTableNumber(e.target.value)}
@@ -154,9 +191,12 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
             <div className="flex-1 overflow-x-auto">
               <div className="flex gap-2">
                 {cart.items.map((item) => (
-                  <div key={item.product.id} className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-sm whitespace-nowrap">
+                  <div key={item.product.id} className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-sm whitespace-nowrap" data-testid={`cart-item-${item.product.id}`}>
                     <span className="font-bold">{item.quantity}×</span>
-                    <span>{item.product.name}</span>
+                    <button onClick={() => openCommentEditor(item.product.id)} className="hover:text-blue-600" title={t('order.editComment')}>
+                      <span>{item.product.name}</span>
+                      {item.comment && <span className="text-blue-600"> 💬</span>}
+                    </button>
                     <button
                       onClick={() => cart.decrementItem(item.product.id)}
                       className="ml-1 text-gray-500 hover:text-red-500"
@@ -179,6 +219,41 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
             >
               {submitting ? t('common.loading') : t('order.submit')}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Comment editor dialog */}
+      {commentTarget && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-30" onClick={() => setCommentTarget(null)}>
+          <div className="bg-white rounded-t-lg sm:rounded-lg p-4 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-medium mb-2">
+              {t('order.commentFor')}: {cart.items.find((i) => i.product.id === commentTarget)?.product.name}
+            </h3>
+            <input
+              type="text"
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder={t('order.commentPlaceholder')}
+              className="w-full rounded-md border border-gray-300 p-3 text-lg"
+              data-testid="comment-input"
+              autoFocus
+            />
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={saveComment}
+                className="flex-1 bg-blue-600 text-white rounded-md py-3 font-medium"
+                data-testid="comment-save"
+              >
+                {t('common.save')}
+              </button>
+              <button
+                onClick={() => { if (commentTarget) { cart.setItemComment(commentTarget, ''); } setCommentTarget(null); }}
+                className="px-4 bg-gray-100 rounded-md py-3"
+              >
+                {t('common.delete')}
+              </button>
+            </div>
           </div>
         </div>
       )}

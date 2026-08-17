@@ -18,6 +18,7 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
   const [view, setView] = useState<'orders' | 'products'>('orders')
   const [loading, setLoading] = useState(true)
   const [, setTick] = useState(0) // force re-render for wait time
+  const [connected, setConnected] = useState(false)
 
   // Load station and its open orders
   const loadOrders = useCallback(async () => {
@@ -26,10 +27,9 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
       const st = await api.getStation(stationId)
       setStation(st)
       const allOrders = await api.getOrders(st.eventId)
-      // Filter to orders with items for this station that are still open/preparing
       const stationOrders = allOrders.filter(
         (o) => ['open', 'preparing', 'partial'].includes(o.status) &&
-          o.items.some((i) => i.product.stationId === stationId)
+          o.items.some((i) => i.product.stationId === stationId && !['prepared', 'delivered', 'cancelled'].includes(i.status))
       )
       setOrders(stationOrders)
     } finally {
@@ -47,32 +47,29 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
     return () => clearInterval(interval)
   }, [])
 
-  // WebSocket: live updates
-  const handleOrderCreated = useCallback((payload: OrderEventPayload) => {
-    // Reload to get the full order with items
+  // WebSocket: live updates — any order event triggers a reload (simplest correct strategy)
+  const handleOrderCreated = useCallback(() => {
     loadOrders()
   }, [loadOrders])
 
-  const handleOrderUpdated = useCallback((payload: OrderEventPayload) => {
-    setOrders((prev) => {
-      // Remove orders that are no longer open
-      if (['paid', 'cancelled'].includes(payload.order.status)) {
-        return prev.filter((o) => o.id !== payload.order.id)
-      }
-      return prev.map((o) => o.id === payload.order.id ? { ...o, status: payload.order.status as Order['status'] } : o)
-    })
-  }, [])
+  const handleOrderUpdated = useCallback(() => {
+    loadOrders()
+  }, [loadOrders])
 
-  useWebSocket(stationId, handleOrderCreated, handleOrderUpdated)
+  useWebSocket(stationId, handleOrderCreated, handleOrderUpdated, setConnected)
 
-  // Mark an item as done
-  const handleMarkDone = async (orderId: string, itemId: string) => {
+  // Mark an item as done (persisted!)
+  const handleMarkDone = async (itemId: string) => {
     // Optimistic: remove item from view
-    setOrders((prev) => prev.map((o) => {
-      if (o.id !== orderId) return o
-      return { ...o, items: o.items.map((i) => i.id === itemId ? { ...i, status: 'prepared' } : i) }
-    }))
-    // TODO: need a PATCH endpoint for individual item status — using order status for now
+    setOrders((prev) => prev.map((o) => ({
+      ...o,
+      items: o.items.map((i) => i.id === itemId ? { ...i, status: 'prepared' } : i),
+    })))
+    try {
+      await api.updateOrderItem(itemId, { status: 'prepared' })
+    } catch {
+      loadOrders() // revert on failure
+    }
   }
 
   // Product aggregation view
@@ -108,6 +105,7 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
           <button onClick={() => navigate('/')} className="text-gray-400 text-sm">←</button>
           <h1 className="text-2xl font-bold">{station.name}</h1>
           <span className="text-sm text-gray-400">{t('station.openOrders')}: {orders.length}</span>
+          <span className={`w-2.5 h-2.5 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`} title={connected ? 'Live' : 'Offline'} />
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -134,7 +132,9 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
           ) : (
             orders.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()).map((order) => {
               const waitSeconds = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 1000)
-              const stationItems = order.items.filter((i) => i.product.stationId === stationId)
+              const stationItems = order.items.filter(
+                (i) => i.product.stationId === stationId && !['prepared', 'delivered', 'cancelled'].includes(i.status)
+              )
               return (
                 <div
                   key={order.id}
@@ -163,13 +163,13 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
                         </div>
                         {item.status === 'open' && (
                           <button
-                            onClick={() => handleMarkDone(order.id, item.id)}
+                            onClick={() => handleMarkDone(item.id)}
                             className="bg-green-600 hover:bg-green-700 text-xs px-2 py-1 rounded"
+                            data-testid={`done-${item.id}`}
                           >
                             {t('station.markDone')}
                           </button>
                         )}
-                        {item.status === 'prepared' && <span className="text-green-400 text-xs">✓</span>}
                       </div>
                     ))}
                   </div>

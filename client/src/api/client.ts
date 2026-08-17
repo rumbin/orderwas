@@ -5,6 +5,7 @@ import type {
   Waiter,
   Order,
   Printer,
+  OrderItem,
 } from './types'
 
 export type { Event, Station, Product, Waiter, Order, OrderItem, Printer, Voucher } from './types'
@@ -118,4 +119,14 @@ export const api = {
   getOrder: (id: string) => request<Order>(`/orders/${id}`),
   updateOrderStatus: (id: string, status: string) =>
     request<Order>(`/orders/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  cancelOrder: (id: string, token: string) =>
+    request<Order>(`/orders/${id}/cancel`, { method: 'POST', headers: { authorization: `Bearer ${token}` } }),
+  payOrder: (id: string, token: string) =>
+    request<Order>(`/orders/${id}/pay`, { method: 'POST', headers: { authorization: `Bearer ${token}` } }),
+  reopenOrder: (id: string, token: string) =>
+    request<Order>(`/orders/${id}/reopen`, { method: 'POST', headers: { authorization: `Bearer ${token}` } }),
+  updateOrderItem: (id: string, data: { comment?: string; status?: string }) =>
+    request<OrderItem>(`/order-items/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  cancelOrderItem: (id: string, token: string) =>
+    request<OrderItem>(`/order-items/${id}/cancel`, { method: 'POST', headers: { authorization: `Bearer ${token}` } }),
 }

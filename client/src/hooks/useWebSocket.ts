@@ -26,6 +26,7 @@ export function useWebSocket(
   stationId: string | null,
   onOrderCreated: (payload: OrderEventPayload) => void,
   onOrderUpdated: (payload: OrderEventPayload) => void,
+  onConnectionChange?: (connected: boolean) => void,
 ) {
   const socketRef = useRef<Socket | null>(null)
 
@@ -40,14 +41,20 @@ export function useWebSocket(
 
     socket.on('connect', () => {
       socket.emit('join:station', stationId)
+      onConnectionChange?.(true)
+    })
+
+    socket.on('disconnect', () => {
+      onConnectionChange?.(false)
     })
 
     socket.on('order:created', onOrderCreated)
     socket.on('order:updated', onOrderUpdated)
+    socket.on('orderItem:status', onOrderUpdated) // treat as order update → reload
 
     return () => {
       socket.disconnect()
       socketRef.current = null
     }
-  }, [stationId, onOrderCreated, onOrderUpdated])
+  }, [stationId, onOrderCreated, onOrderUpdated, onConnectionChange])
 }

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import App from '@/App'
 
-// Mock the session store with all methods used by Login
+// Mock the session store
 vi.mock('@/stores/session', () => ({
   useSessionStore: (selector?: any) => {
     const state = {
@@ -26,6 +26,7 @@ vi.mock('@/api/client', () => ({
     getEvents: vi.fn().mockResolvedValue([]),
     getWaiters: vi.fn().mockResolvedValue([]),
     login: vi.fn(),
+    getStations: vi.fn().mockResolvedValue([]),
   },
 }))
 
@@ -35,8 +36,18 @@ vi.mock('react-i18next', () => ({
 }))
 
 describe('App', () => {
-  it('renders login page at root hash', async () => {
+  it('renders landing page with role tiles at root hash', async () => {
     window.location.hash = ''
+    render(<App />)
+    await waitFor(() => {
+      expect(screen.getByTestId('tile-waiter')).toBeDefined()
+      expect(screen.getByTestId('tile-station')).toBeDefined()
+      expect(screen.getByTestId('tile-admin')).toBeDefined()
+    })
+  })
+
+  it('renders login page at #/login', async () => {
+    window.location.hash = '#/login'
     render(<App />)
     await waitFor(() => {
       expect(screen.getByTestId('event-select')).toBeDefined()
