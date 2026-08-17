@@ -21,6 +21,7 @@ model Event {
   orders            Order[]
   printers          Printer[]
   vouchers          Voucher[]
+  auditLogs         AuditLog[]
 }
 
 model Station {
@@ -194,4 +195,22 @@ model AppLayout {
   buttons   String   @default("[]") // JSON array of {name, color, productId, row, col}
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  eventId    String
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  actorId    String?  // waiter ID or null for system/automated
+  actorName  String?  // denormalized for display
+  action     String   // "order.created", "order.cancelled", "stock.adjusted", "stock.settled"
+  entityType String   // "Order", "Product", "Event", etc.
+  entityId   String?  // ID of the affected entity
+  beforeData String?  // JSON snapshot before change
+  afterData  String?  // JSON snapshot after change
+  quantity   Float?   // for stock: delta or absolute count
+  createdAt  DateTime @default(now())
+  @@index([eventId, action])
+  @@index([eventId, entityType, entityId])
+  @@index([createdAt])
 }

@@ -3,6 +3,7 @@ import type { Prisma } from '@prisma/client'
 import { orderEvents, type OrderEventPayload } from '@/websocket'
 import { dispatchOrderPrints } from '@/printer/dispatch'
 import { checkStockAvailability, decrementStock, restoreStock } from '@/services/stockService'
+import { logAudit } from '@/services/auditService'
 
 export interface OptionSelection {
   extraId: string
@@ -199,6 +200,22 @@ export async function createOrder(input: CreateOrderInput) {
     })),
   }).catch((err) => console.error('[printer] dispatch error:', err))
 
+  // Audit log (fire-and-forget)
+  logAudit({
+    eventId,
+    actorId: waiterId,
+    action: 'order.created',
+    entityType: 'Order',
+    entityId: order.id,
+    afterData: {
+      tableNumber: order.tableNumber,
+      pickupCode: order.pickupCode,
+      tearOffNumber: order.tearOffNumber,
+      totalCents: order.totalCents,
+      itemCount: order.items.length,
+    },
+  }).catch((err) => console.error('[audit] log error:', err))
+
   return order
 }
 
@@ -313,6 +330,17 @@ export async function cancelOrder(id: string) {
       items: [],
     },
   })
+
+  // Audit log
+  logAudit({
+    eventId: order.eventId,
+    action: 'order.cancelled',
+    entityType: 'Order',
+    entityId: order.id,
+    beforeData: { status: existing.status },
+    afterData: { status: 'cancelled' },
+  }).catch((err) => console.error('[audit] log error:', err))
+
   return order
 }
 

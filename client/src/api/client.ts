@@ -131,4 +131,27 @@ export const api = {
     request<OrderItem>(`/order-items/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   cancelOrderItem: (id: string, token: string) =>
     request<OrderItem>(`/order-items/${id}/cancel`, { method: 'POST', headers: { authorization: `Bearer ${token}` } }),
+
+  // Audit & Reporting
+  getAuditLogs: (eventId: string, opts?: { action?: string; entityType?: string }) => {
+    const params = new URLSearchParams()
+    if (opts?.action) params.set('action', opts.action)
+    if (opts?.entityType) params.set('entityType', opts.entityType)
+    const qs = params.toString()
+    return request<any[]>(`/events/${eventId}/audit${qs ? `?${qs}` : ''}`)
+  },
+  getStockHistory: (eventId: string, productId: string) =>
+    request<any[]>(`/events/${eventId}/audit/stock/${productId}`),
+  settleStock: (productId: string, physicalCount: number) =>
+    request<any>(`/products/${productId}/settle`, { method: 'POST', body: JSON.stringify({ physicalCount }) }),
+  bulkSettle: (eventId: string, settlements: { productId: string; physicalCount: number }[]) =>
+    request<any[]>(`/events/${eventId}/settle`, { method: 'POST', body: JSON.stringify({ settlements }) }),
+  getPeakTimes: (eventId: string) =>
+    request<{ hour: number; count: number }[]>(`/events/${eventId}/report/peak-times`),
+  getStationRevenue: (eventId: string) =>
+    request<{ stationId: string; stationName: string; totalItems: number; revenueCents: number }[]>(`/events/${eventId}/report/station-revenue`),
+  getWaiterSummary: (eventId: string) =>
+    request<any[]>(`/events/${eventId}/report/waiters`),
+  getProductConsumption: (eventId: string) =>
+    request<any[]>(`/events/${eventId}/report/products`),
 }
