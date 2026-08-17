@@ -27,6 +27,7 @@ export function useWebSocket(
   onOrderCreated: (payload: OrderEventPayload) => void,
   onOrderUpdated: (payload: OrderEventPayload) => void,
   onConnectionChange?: (connected: boolean) => void,
+  eventId?: string | null,
 ) {
   const socketRef = useRef<Socket | null>(null)
 
@@ -41,6 +42,8 @@ export function useWebSocket(
 
     socket.on('connect', () => {
       socket.emit('join:station', stationId)
+      // Also join the event room: order:updated events are only broadcast there
+      if (eventId) socket.emit('join:event', eventId)
       onConnectionChange?.(true)
     })
 
@@ -56,5 +59,5 @@ export function useWebSocket(
       socket.disconnect()
       socketRef.current = null
     }
-  }, [stationId, onOrderCreated, onOrderUpdated, onConnectionChange])
+  }, [stationId, eventId, onOrderCreated, onOrderUpdated, onConnectionChange])
 }

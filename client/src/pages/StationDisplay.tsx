@@ -56,7 +56,7 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
     loadOrders()
   }, [loadOrders])
 
-  useWebSocket(stationId, handleOrderCreated, handleOrderUpdated, setConnected)
+  useWebSocket(stationId, handleOrderCreated, handleOrderUpdated, setConnected, station?.eventId ?? null)
 
   // Mark an item as done (persisted!)
   const handleMarkDone = async (itemId: string) => {
@@ -144,8 +144,8 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-xl font-bold">
-                        {t('station.table')} {order.tableNumber ?? order.pickupCode}
+                      <span className="text-xl font-bold" data-testid="order-identifier">
+                        {order.tableNumber ? `${t('station.table')} ${order.tableNumber}` : `${order.pickupCode}`}
                       </span>
                       {order.tearOffNumber && <span className="text-sm text-gray-400">#{order.tearOffNumber}</span>}
                     </div>

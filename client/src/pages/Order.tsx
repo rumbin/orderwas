@@ -209,6 +209,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
             <button
               key={product.id}
               onClick={() => handleAddProduct(product)}
+              data-testid={`product-${product.name}`}
               className={`relative min-h-[88px] rounded-lg border-2 p-3 text-left transition active:scale-95 ${
                 count > 0
                   ? 'border-blue-500 bg-blue-50'
