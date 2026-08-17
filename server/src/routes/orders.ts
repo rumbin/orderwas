@@ -8,6 +8,7 @@ import {
   cancelOrder,
   markPaid,
   reopenOrder,
+  transferOrder,
   OrderValidationError,
 } from '@/services/orderService'
 import { updateItem, cancelItem, OrderItemValidationError } from '@/services/orderItemService'
@@ -42,6 +43,10 @@ const updateOrderItemBody = z.object({
   status: z.enum(['open', 'prepared', 'delivered', 'cancelled']).optional(),
 }).refine((data) => data.comment !== undefined || data.status !== undefined, {
   message: 'Nothing to update',
+})
+
+const transferOrderBody = z.object({
+  waiterId: z.string().min(1),
 })
 
 export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
@@ -131,6 +136,25 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
     const { id } = request.params as { id: string }
     try {
       const order = await reopenOrder(id)
+      return reply.status(200).send(order)
+    } catch (err) {
+      if (err instanceof OrderValidationError) {
+        return reply.status(err.statusCode).send({ error: err.message })
+      }
+      return reply.status(400).send({ error: (err as Error).message })
+    }
+  })
+
+  // PATCH /orders/:id/transfer — transfer order to different waiter (requires canTransfer)
+  server.patch('/orders/:id/transfer', {
+    preHandler: server.requirePermission('canTransfer'),
+  }, async (request, reply) => {
+    const { id } = request.params as { id: string }
+    const parsed = transferOrderBody.safeParse(request.body)
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
+
+    try {
+      const order = await transferOrder(id, parsed.data.waiterId)
       return reply.status(200).send(order)
     } catch (err) {
       if (err instanceof OrderValidationError) {

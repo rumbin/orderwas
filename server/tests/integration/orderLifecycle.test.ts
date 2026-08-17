@@ -238,4 +238,114 @@ describe('Order lifecycle: comments, status, cancel, pay', () => {
     })
     expect(res.statusCode).toBe(409)
   })
+
+  // --- Transfer (7.7) ---
+  it('PATCH /orders/:id/transfer reassigns order to different waiter', async () => {
+    // Alice creates a transfer-capable waiter
+    const charlie = await prisma.waiter.create({
+      data: { name: 'Charlie', pin: '3333', eventId, canTransfer: true },
+    })
+    const charlieLogin = await server.inject({
+      method: 'POST', url: '/api/auth/login',
+      payload: { waiterId: charlie.id, pin: '3333' },
+    })
+    const charlieToken = charlieLogin.json().token
+
+    const order = await createOrder()
+    expect(order.waiterId).toBe(aliceId)
+
+    const res = await server.inject({
+      method: 'PATCH', url: `/api/orders/${order.id}/transfer`,
+      headers: { authorization: `Bearer ${charlieToken}` },
+      payload: { waiterId: bobId },
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json().waiterId).toBe(bobId)
+
+    // Verify persisted
+    const getRes = await server.inject({ method: 'GET', url: `/api/orders/${order.id}` })
+    expect(getRes.json().waiterId).toBe(bobId)
+  })
+
+  it('PATCH /orders/:id/transfer returns 403 without canTransfer', async () => {
+    const order = await createOrder()
+    const res = await server.inject({
+      method: 'PATCH', url: `/api/orders/${order.id}/transfer`,
+      headers: { authorization: `Bearer ${bobToken}` },
+      payload: { waiterId: aliceId },
+    })
+    expect(res.statusCode).toBe(403)
+  })
+
+  it('PATCH /orders/:id/transfer returns 401 without token', async () => {
+    const order = await createOrder()
+    const res = await server.inject({
+      method: 'PATCH', url: `/api/orders/${order.id}/transfer`,
+      payload: { waiterId: bobId },
+    })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('PATCH /orders/:id/transfer rejects same waiter (409)', async () => {
+    const charlie = await prisma.waiter.create({
+      data: { name: 'Charlie2', pin: '4444', eventId, canTransfer: true },
+    })
+    const charlieLogin = await server.inject({
+      method: 'POST', url: '/api/auth/login',
+      payload: { waiterId: charlie.id, pin: '4444' },
+    })
+    const charlieToken = charlieLogin.json().token
+
+    const order = await createOrder()
+    const res = await server.inject({
+      method: 'PATCH', url: `/api/orders/${order.id}/transfer`,
+      headers: { authorization: `Bearer ${charlieToken}` },
+      payload: { waiterId: aliceId },
+    })
+    expect(res.statusCode).toBe(409)
+  })
+
+  it('PATCH /orders/:id/transfer rejects non-existent waiter (404)', async () => {
+    const charlie = await prisma.waiter.create({
+      data: { name: 'Charlie3', pin: '5555', eventId, canTransfer: true },
+    })
+    const charlieLogin = await server.inject({
+      method: 'POST', url: '/api/auth/login',
+      payload: { waiterId: charlie.id, pin: '5555' },
+    })
+    const charlieToken = charlieLogin.json().token
+
+    const order = await createOrder()
+    const res = await server.inject({
+      method: 'PATCH', url: `/api/orders/${order.id}/transfer`,
+      headers: { authorization: `Bearer ${charlieToken}` },
+      payload: { waiterId: 'nonexistent-waiter' },
+    })
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('PATCH /orders/:id/transfer rejects cancelled order (409)', async () => {
+    const charlie = await prisma.waiter.create({
+      data: { name: 'Charlie4', pin: '6666', eventId, canTransfer: true, canCancel: true },
+    })
+    const charlieLogin = await server.inject({
+      method: 'POST', url: '/api/auth/login',
+      payload: { waiterId: charlie.id, pin: '6666' },
+    })
+    const charlieToken = charlieLogin.json().token
+
+    const order = await createOrder()
+    // Cancel the order first
+    await server.inject({
+      method: 'POST', url: `/api/orders/${order.id}/cancel`,
+      headers: { authorization: `Bearer ${charlieToken}` },
+    })
+    // Try to transfer cancelled order
+    const res = await server.inject({
+      method: 'PATCH', url: `/api/orders/${order.id}/transfer`,
+      headers: { authorization: `Bearer ${charlieToken}` },
+      payload: { waiterId: bobId },
+    })
+    expect(res.statusCode).toBe(409)
+  })
 })

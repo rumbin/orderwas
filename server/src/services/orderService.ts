@@ -375,6 +375,63 @@ export async function markPaid(id: string) {
 }
 
 /**
+ * Transfers an order to a different waiter. Both waiters must belong to the same event.
+ * Validates existence, updates waiterId, emits WebSocket event, logs audit.
+ */
+export async function transferOrder(id: string, newWaiterId: string, actorId?: string) {
+  const existing = await prisma.order.findUnique({
+    where: { id },
+    select: { id: true, status: true, eventId: true, waiterId: true },
+  })
+  if (!existing) throw new OrderValidationError('Order not found', 404)
+  if (existing.status === 'cancelled') {
+    throw new OrderValidationError('Cannot transfer a cancelled order', 409)
+  }
+
+  // New waiter must exist and belong to the same event
+  const newWaiter = await prisma.waiter.findUnique({
+    where: { id: newWaiterId },
+    select: { id: true, eventId: true },
+  })
+  if (!newWaiter) throw new OrderValidationError('New waiter does not exist', 404)
+  if (newWaiter.eventId !== existing.eventId) {
+    throw new OrderValidationError('New waiter does not belong to this event', 409)
+  }
+
+  if (existing.waiterId === newWaiterId) {
+    throw new OrderValidationError('Order is already assigned to this waiter', 409)
+  }
+
+  const order = await prisma.order.update({ where: { id }, data: { waiterId: newWaiterId } })
+
+  orderEvents.emit('order:updated', {
+    order: {
+      id: order.id,
+      eventId: order.eventId,
+      tableNumber: order.tableNumber,
+      pickupCode: order.pickupCode,
+      tearOffNumber: order.tearOffNumber,
+      status: order.status,
+      totalCents: order.totalCents,
+      items: [],
+    },
+  })
+
+  // Audit log (fire-and-forget)
+  logAudit({
+    eventId: existing.eventId,
+    actorId: actorId,
+    action: 'order.transferred',
+    entityType: 'Order',
+    entityId: order.id,
+    beforeData: { waiterId: existing.waiterId },
+    afterData: { waiterId: newWaiterId },
+  }).catch((err) => console.error('[audit] log error:', err))
+
+  return order
+}
+
+/**
  * Reopens a paid order (e.g. payment mistake). Only paid → open.
  */
 export async function reopenOrder(id: string) {
