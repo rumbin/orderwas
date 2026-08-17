@@ -20,6 +20,10 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
+    "@types/qrcode": "^1.5.6",
     "concurrently": "^9.0.0"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
   }
 }

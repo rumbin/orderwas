@@ -6,6 +6,8 @@ import OrderPage from '@/pages/Order'
 import OrdersPage from '@/pages/Orders'
 import Admin from '@/pages/Admin'
 import StationDisplay from '@/pages/StationDisplay'
+import KitchenMonitor from '@/pages/KitchenMonitor'
+import GuestOrder from '@/pages/GuestOrder'
 
 export default function App() {
   const route = useRouter()
@@ -33,6 +35,18 @@ export default function App() {
 
   if (route.path === '/admin') {
     return <Admin navigate={route.navigate} />
+  }
+
+  // Guest ordering route (via QR code)
+  const guestMatch = matchRoute('/guest/:eventId/:token', route.path)
+  if (guestMatch) {
+    return <GuestOrder eventId={guestMatch.eventId} token={guestMatch.token} />
+  }
+
+  // Kitchen monitor route (full-screen wall display)
+  const monitorMatch = matchRoute('/station/:id/monitor', route.path)
+  if (monitorMatch) {
+    return <KitchenMonitor stationId={monitorMatch.id} />
   }
 
   // Station display route
