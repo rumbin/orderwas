@@ -117,6 +117,17 @@ export interface Order {
   items: OrderItem[]
 }
 
+export interface AppLayout {
+  id: string
+  eventId: string
+  waiterId: string | null
+  columns: number
+  rows: number
+  buttons: string // JSON string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface Voucher {
   id: string
   eventId: string

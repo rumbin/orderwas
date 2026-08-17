@@ -6,9 +6,10 @@ import type {
   Order,
   Printer,
   OrderItem,
+  AppLayout,
 } from './types'
 
-export type { Event, Station, Product, Waiter, Order, OrderItem, Printer, Voucher } from './types'
+export type { Event, Station, Product, Waiter, Order, OrderItem, Printer, Voucher, AppLayout } from './types'
 
 const BASE_URL = '/api'
 
@@ -99,6 +100,17 @@ export const api = {
     request<Waiter>(`/waiters/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteWaiter: (id: string) =>
     request<void>(`/waiters/${id}`, { method: 'DELETE' }),
+
+  // Layouts
+  getLayouts: (eventId: string) => request<AppLayout[]>(`/events/${eventId}/layouts`),
+  createLayout: (eventId: string, data: Partial<AppLayout>) =>
+    request<AppLayout>(`/events/${eventId}/layouts`, { method: 'POST', body: JSON.stringify(data) }),
+  updateLayout: (id: string, data: Partial<AppLayout>) =>
+    request<AppLayout>(`/layouts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteLayout: (id: string) =>
+    request<void>(`/layouts/${id}`, { method: 'DELETE' }),
+  getWaiterLayout: (waiterId: string) =>
+    request<AppLayout | null>(`/waiters/${waiterId}/layout`),
 
   // Printers
   getPrinters: (eventId: string) => request<Printer[]>(`/events/${eventId}/printers`),

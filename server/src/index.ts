@@ -14,6 +14,9 @@ import { printersRoutes } from '@/routes/printers'
 import { configRoutes } from '@/routes/config'
 import { authRoutes } from '@/routes/auth'
 import { auditRoutes } from '@/routes/audit'
+import { voucherRoutes } from '@/routes/vouchers'
+import { qrRoutes } from '@/routes/qr'
+import { layoutsRoutes } from '@/routes/layouts'
 import authPlugin from '@/plugins/auth'
 import { attachWebSocket } from '@/websocket'
 
@@ -45,6 +48,9 @@ export function buildServer(): AppServer {
   server.register(printersRoutes, { prefix: '/api' })
   server.register(configRoutes, { prefix: '/api' })
   server.register(auditRoutes, { prefix: '/api' })
+  server.register(voucherRoutes, { prefix: '/api' })
+  server.register(qrRoutes, { prefix: '/api' })
+  server.register(layoutsRoutes, { prefix: '/api' })
 
   server.get('/health', async () => {
     return { status: 'ok' }

@@ -6,8 +6,9 @@ import { AdminEvents } from '@/pages/admin/Events'
 import { AdminStations } from '@/pages/admin/Stations'
 import { AdminWaiters } from '@/pages/admin/Waiters'
 import { AdminPrinters } from '@/pages/admin/Printers'
+import { AdminAppLayout } from '@/pages/admin/AppLayout'
 
-type AdminTab = 'events' | 'stations' | 'products' | 'waiters' | 'printers' | 'export'
+type AdminTab = 'events' | 'stations' | 'products' | 'waiters' | 'printers' | 'appLayout' | 'export'
 
 export default function Admin({ navigate }: { navigate: (path: string) => void }) {
   const { t } = useTranslation()
@@ -66,6 +67,7 @@ export default function Admin({ navigate }: { navigate: (path: string) => void }
     { id: 'products', label: t('admin.products'), icon: '🍺' },
     { id: 'waiters', label: t('admin.waiters'), icon: '🧑' },
     { id: 'printers', label: t('admin.printers'), icon: '🖨️' },
+    { id: 'appLayout', label: t('admin.appLayout'), icon: '🔲' },
     { id: 'export', label: 'Export', icon: '📦' },
   ]
 
@@ -156,6 +158,8 @@ export default function Admin({ navigate }: { navigate: (path: string) => void }
             <AdminWaiters eventId={selectedEventId} waiters={waiters} onChanged={loadEventData} />
           ) : tab === 'printers' ? (
             <AdminPrinters eventId={selectedEventId} printers={printers} onChanged={loadEventData} />
+          ) : tab === 'appLayout' ? (
+            <AdminAppLayout eventId={selectedEventId} />
           ) : (
             <AdminExport eventId={selectedEventId} />
           )}

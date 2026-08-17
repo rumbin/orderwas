@@ -59,6 +59,7 @@
     "stations": "Stationen",
     "products": "Produkte",
     "printers": "Drucker",
+    "appLayout": "App Layout",
     "settings": "Einstellungen",
     "confirmDeleteProduct": "Produkt \u201e{{name}}\u201c wirklich löschen?"
   },
@@ -72,6 +73,8 @@
     "yes": "Ja",
     "no": "Nein",
     "loading": "Laden...",
+    "saving": "Speichern...",
+    "saved": "Gespeichert!",
     "error": "Fehler",
     "confirm": "Bestätigen"
   }
