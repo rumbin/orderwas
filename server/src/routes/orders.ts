@@ -16,6 +16,10 @@ const createOrderItemSchema = z.object({
   productId: z.string().min(1),
   quantity: z.number().int().positive().optional().default(1),
   comment: z.string().optional(),
+  optionSelections: z.array(z.object({
+    extraId: z.string().min(1),
+    optionId: z.string().min(1),
+  })).optional(),
 })
 
 const createOrderBody = z.object({

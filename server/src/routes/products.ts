@@ -35,6 +35,23 @@ const updateProductSchema = z.object({
   sortOrder: z.number().int().optional(),
 })
 
+const createExtraSchema = z.object({
+  name: z.string().min(1),
+  multiSelect: z.boolean().optional(),
+  sortOrder: z.number().int().optional(),
+  options: z.array(z.object({
+    name: z.string().min(1),
+    priceDeltaCents: z.number().int().optional(),
+    sortOrder: z.number().int().optional(),
+  })).min(1),
+})
+
+const updateExtraSchema = z.object({
+  name: z.string().min(1).optional(),
+  multiSelect: z.boolean().optional(),
+  sortOrder: z.number().int().optional(),
+})
+
 export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
   // POST /stations/:stationId/products — create product under a station
   server.post('/stations/:stationId/products', async (request, reply) => {
@@ -88,6 +105,40 @@ export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance
       if (err instanceof ProductReferencedError) {
         return reply.status(409).send({ error: err.message })
       }
+      return reply.status(400).send({ error: (err as Error).message })
+    }
+  })
+
+  // POST /products/:id/extras — create extra group with options
+  server.post('/products/:id/extras', async (request, reply) => {
+    const { id } = request.params as { id: string }
+    const parsed = createExtraSchema.safeParse(request.body)
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
+
+    const product = await prisma.product.findUnique({ where: { id }, select: { id: true } })
+    if (!product) return reply.status(404).send({ error: 'Product not found' })
+
+    const { options, ...extraData } = parsed.data
+    const extra = await prisma.productExtra.create({
+      data: {
+        productId: id,
+        ...extraData,
+        options: { create: options },
+      },
+      include: { options: true },
+    })
+    return reply.status(201).send(extra)
+  })
+
+  // DELETE /extras/:id — delete extra group (cascades options)
+  server.delete('/extras/:id', async (request, reply) => {
+    const { id } = request.params as { id: string }
+    try {
+      await prisma.productExtra.delete({ where: { id } })
+      return reply.status(204).send()
+    } catch (err) {
+      const code = (err as { code?: string }).code
+      if (code === 'P2025') return reply.status(404).send({ error: 'Extra not found' })
       return reply.status(400).send({ error: (err as Error).message })
     }
   })

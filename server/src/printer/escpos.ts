@@ -9,6 +9,7 @@ export interface ReceiptItem {
   quantity: number
   priceCents?: number
   comment?: string | null
+  options?: Array<{ extraName: string; optionName: string; priceDeltaCents: number }> | null
 }
 
 export interface ReceiptData {
@@ -143,6 +144,16 @@ export function formatReceipt(data: ReceiptData, config: PrinterConfig): Buffer 
     for (const line of itemLines) {
       parts.push(text(line))
       parts.push(lf())
+    }
+    // Selected extras (structured options) — printed like comments
+    if (item.options?.length) {
+      for (const opt of item.options) {
+        const optLine = `  + ${opt.extraName}: ${opt.optionName}`
+        for (const line of wrapText(optLine, charsPerLine)) {
+          parts.push(text(line))
+          parts.push(lf())
+        }
+      }
     }
     if (item.comment) {
       parts.push(text(`  » ${item.comment}`))

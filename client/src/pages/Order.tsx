@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/api/client'
 import { useSessionStore } from '@/stores/session'
-import { useCartStore } from '@/stores/cart'
+import { useCartStore, type SelectedOption } from '@/stores/cart'
 import type { Station, Product } from '@/api/types'
 
 function formatCents(cents: number): string {
@@ -20,8 +20,11 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState<{ tearOffNumber: number | null } | null>(null)
   const [error, setError] = useState('')
-  const [commentTarget, setCommentTarget] = useState<string | null>(null) // productId
+  const [commentTarget, setCommentTarget] = useState<number | null>(null) // cart index
   const [commentText, setCommentText] = useState('')
+  // Extras sheet: product being configured + current selections per extra
+  const [extrasTarget, setExtrasTarget] = useState<Product | null>(null)
+  const [extrasSelection, setExtrasSelection] = useState<Record<string, string[]>>({}) // extraId → optionIds
   const tableInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -47,17 +50,56 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
 
   const handleAddProduct = (product: Product) => {
     setSuccess(null)
+    if (product.extras?.length) {
+      // Open option sheet first
+      setExtrasSelection({})
+      setExtrasTarget(product)
+      return
+    }
     cart.addItem(product)
   }
 
-  const openCommentEditor = (productId: string) => {
-    const item = cart.items.find((i) => i.product.id === productId)
-    setCommentText(item?.comment ?? '')
-    setCommentTarget(productId)
+  const confirmExtras = () => {
+    if (!extrasTarget) return
+    const selections: SelectedOption[] = []
+    for (const extra of extrasTarget.extras ?? []) {
+      const optionIds = extrasSelection[extra.id] ?? []
+      for (const optionId of optionIds) {
+        const option = extra.options.find((o) => o.id === optionId)
+        if (option) {
+          selections.push({
+            extraId: extra.id,
+            optionId: option.id,
+            extraName: extra.name,
+            optionName: option.name,
+            priceDeltaCents: option.priceDeltaCents,
+          })
+        }
+      }
+    }
+    cart.addItem(extrasTarget, selections.length ? selections : undefined)
+    setExtrasTarget(null)
+    setExtrasSelection({})
+  }
+
+  const toggleOption = (extraId: string, optionId: string, multiSelect: boolean) => {
+    setExtrasSelection((prev) => {
+      const current = prev[extraId] ?? []
+      if (multiSelect) {
+        return { ...prev, [extraId]: current.includes(optionId) ? current.filter((id) => id !== optionId) : [...current, optionId] }
+      }
+      // Radio: replace
+      return { ...prev, [extraId]: current.includes(optionId) && current.length === 1 ? [] : [optionId] }
+    })
+  }
+
+  const openCommentEditor = (index: number) => {
+    setCommentText(cart.items[index]?.comment ?? '')
+    setCommentTarget(index)
   }
 
   const saveComment = () => {
-    if (commentTarget) {
+    if (commentTarget != null) {
       cart.setItemComment(commentTarget, commentText)
     }
     setCommentTarget(null)
@@ -78,6 +120,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
           productId: item.product.id,
           quantity: item.quantity,
           comment: item.comment || undefined,
+          optionSelections: item.options?.map((o) => ({ extraId: o.extraId, optionId: o.optionId })),
         })),
       })
       setSuccess({ tearOffNumber: order.tearOffNumber })
@@ -94,6 +137,16 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
     setSuccess(null)
     tableInputRef.current?.focus()
   }
+
+  const extrasDeltaTotal = extrasTarget
+    ? Object.values(extrasSelection).flat().reduce((sum, optionId) => {
+        for (const extra of extrasTarget.extras ?? []) {
+          const opt = extra.options.find((o) => o.id === optionId)
+          if (opt) return sum + opt.priceDeltaCents
+        }
+        return sum
+      }, 0)
+    : 0
 
   return (
     <div className="min-h-screen bg-gray-50 pb-32">
@@ -149,22 +202,27 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
       {/* Product grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 p-4">
         {activeProducts.filter((p) => p.available).map((product) => {
-          const cartItem = cart.items.find((i) => i.product.id === product.id)
+          const count = cart.items
+            .filter((i) => i.product.id === product.id)
+            .reduce((sum, i) => sum + i.quantity, 0)
           return (
             <button
               key={product.id}
               onClick={() => handleAddProduct(product)}
               className={`relative min-h-[88px] rounded-lg border-2 p-3 text-left transition active:scale-95 ${
-                cartItem
+                count > 0
                   ? 'border-blue-500 bg-blue-50'
                   : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
               <div className="font-medium text-gray-900 text-sm leading-tight">{product.name}</div>
               <div className="text-xs text-gray-500 mt-1">{formatCents(product.priceCents)}</div>
-              {cartItem && (
+              {product.extras?.length ? (
+                <div className="text-[10px] text-blue-600 mt-0.5">⚙ {product.extras.length} {t('order.extrasLabel')}</div>
+              ) : null}
+              {count > 0 && (
                 <span className="absolute top-1 right-1 bg-blue-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
-                  {cartItem.quantity}
+                  {count}
                 </span>
               )}
             </button>
@@ -190,15 +248,22 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
             />
             <div className="flex-1 overflow-x-auto">
               <div className="flex gap-2">
-                {cart.items.map((item) => (
-                  <div key={item.product.id} className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-sm whitespace-nowrap" data-testid={`cart-item-${item.product.id}`}>
+                {cart.items.map((item, idx) => (
+                  <div key={`${item.product.id}-${idx}`} className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-sm whitespace-nowrap" data-testid="cart-item">
                     <span className="font-bold">{item.quantity}×</span>
-                    <button onClick={() => openCommentEditor(item.product.id)} className="hover:text-blue-600" title={t('order.editComment')}>
-                      <span>{item.product.name}</span>
-                      {item.comment && <span className="text-blue-600"> 💬</span>}
+                    <button onClick={() => openCommentEditor(idx)} className="hover:text-blue-600" title={t('order.editComment')}>
+                      <span>
+                        {item.product.name}
+                        {item.options?.length ? (
+                          <span className="text-blue-600">
+                            {' '}({item.options.map((o) => o.optionName).join(', ')})
+                          </span>
+                        ) : null}
+                        {item.comment && <span className="text-blue-600"> 💬</span>}
+                      </span>
                     </button>
                     <button
-                      onClick={() => cart.decrementItem(item.product.id)}
+                      onClick={() => cart.decrementItem(idx)}
                       className="ml-1 text-gray-500 hover:text-red-500"
                     >
                       −
@@ -224,11 +289,11 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
       )}
 
       {/* Comment editor dialog */}
-      {commentTarget && (
+      {commentTarget != null && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-30" onClick={() => setCommentTarget(null)}>
           <div className="bg-white rounded-t-lg sm:rounded-lg p-4 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-medium mb-2">
-              {t('order.commentFor')}: {cart.items.find((i) => i.product.id === commentTarget)?.product.name}
+              {t('order.commentFor')}: {cart.items[commentTarget]?.product.name}
             </h3>
             <input
               type="text"
@@ -240,20 +305,67 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
               autoFocus
             />
             <div className="flex gap-2 mt-3">
-              <button
-                onClick={saveComment}
-                className="flex-1 bg-blue-600 text-white rounded-md py-3 font-medium"
-                data-testid="comment-save"
-              >
+              <button onClick={saveComment} className="flex-1 bg-blue-600 text-white rounded-md py-3 font-medium" data-testid="comment-save">
                 {t('common.save')}
               </button>
               <button
-                onClick={() => { if (commentTarget) { cart.setItemComment(commentTarget, ''); } setCommentTarget(null); }}
+                onClick={() => { if (commentTarget != null) cart.setItemComment(commentTarget, ''); setCommentTarget(null); }}
                 className="px-4 bg-gray-100 rounded-md py-3"
               >
                 {t('common.delete')}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Extras option sheet */}
+      {extrasTarget && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-30" onClick={() => setExtrasTarget(null)}>
+          <div className="bg-white rounded-t-lg sm:rounded-lg p-4 w-full max-w-md max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-bold text-lg mb-1">{extrasTarget.name}</h3>
+            <p className="text-sm text-gray-500 mb-4">{formatCents(extrasTarget.priceCents)}</p>
+
+            {(extrasTarget.extras ?? []).map((extra) => (
+              <div key={extra.id} className="mb-4">
+                <h4 className="font-medium text-sm mb-2">
+                  {extra.name}
+                  <span className="text-gray-400 ml-1">
+                    {extra.multiSelect ? `(${t('order.multiSelect')})` : ''}
+                  </span>
+                </h4>
+                <div className="space-y-1">
+                  {extra.options.map((option) => {
+                    const selected = (extrasSelection[extra.id] ?? []).includes(option.id)
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => toggleOption(extra.id, option.id, extra.multiSelect)}
+                        className={`w-full flex items-center justify-between rounded-md border-2 px-3 py-2.5 text-left ${
+                          selected ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                        }`}
+                        data-testid={`option-${option.name}`}
+                      >
+                        <span>{option.name}</span>
+                        {option.priceDeltaCents !== 0 && (
+                          <span className="text-sm text-gray-600">
+                            {option.priceDeltaCents > 0 ? '+' : ''}{formatCents(option.priceDeltaCents)}
+                          </span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+
+            <button
+              onClick={confirmExtras}
+              className="w-full bg-blue-600 text-white rounded-md py-3 font-medium"
+              data-testid="extras-confirm"
+            >
+              {t('order.add')} · {formatCents(extrasTarget.priceCents + extrasDeltaTotal)}
+            </button>
           </div>
         </div>
       )}

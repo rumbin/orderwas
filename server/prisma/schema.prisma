@@ -86,6 +86,26 @@ model Product {
   orderItems OrderItem[]
   components ProductComponent[] @relation("Composite")
   usedIn     ProductComponent[] @relation("Ingredient")
+  extras     ProductExtra[]
+}
+
+model ProductExtra {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String // e.g. "Senf"
+  multiSelect Boolean @default(false) // false = radio, true = checkbox
+  sortOrder Int     @default(0)
+  options   ProductExtraOption[]
+}
+
+model ProductExtraOption {
+  id              String       @id @default(cuid())
+  extraId         String
+  extra           ProductExtra @relation(fields: [extraId], references: [id], onDelete: Cascade)
+  name            String // e.g. "Ohne", "Mit Ketchup"
+  priceDeltaCents Int          @default(0)
+  sortOrder       Int          @default(0)
 }
 
 model ProductComponent {
@@ -149,6 +169,7 @@ model OrderItem {
   quantity  Int     @default(1)
   status    String  @default("open") // "open" | "prepared" | "delivered" | "cancelled"
   comment   String?
+  options   String? // JSON: [{extraName, optionName, priceDeltaCents}]
 }
 
 model Voucher {

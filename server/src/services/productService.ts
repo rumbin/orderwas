@@ -9,20 +9,24 @@ export async function createProduct(stationId: string, data: any) {
 }
 
 /**
- * Lists products for a station, ordered by sortOrder then name.
+ * Lists products for a station, ordered by sortOrder then name. Includes extras.
  */
 export async function listProductsByStation(stationId: string) {
   return prisma.product.findMany({
     where: { stationId },
     orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+    include: { extras: { include: { options: true }, orderBy: { sortOrder: 'asc' } } },
   })
 }
 
 /**
- * Gets a single product.
+ * Gets a single product (with extras).
  */
 export async function getProduct(id: string) {
-  return prisma.product.findUnique({ where: { id } })
+  return prisma.product.findUnique({
+    where: { id },
+    include: { extras: { include: { options: true }, orderBy: { sortOrder: 'asc' } } },
+  })
 }
 
 /**

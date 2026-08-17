@@ -38,6 +38,23 @@ export interface Station {
   eventId: string
 }
 
+export interface ProductExtraOption {
+  id: string
+  extraId: string
+  name: string
+  priceDeltaCents: number
+  sortOrder: number
+}
+
+export interface ProductExtra {
+  id: string
+  productId: string
+  name: string
+  multiSelect: boolean
+  sortOrder: number
+  options: ProductExtraOption[]
+}
+
 export interface Product {
   id: string
   name: string
@@ -51,6 +68,7 @@ export interface Product {
   stockMode: 'none' | 'tracked' | 'composite'
   stockCount: number
   sortOrder: number
+  extras?: ProductExtra[]
 }
 
 export interface Waiter {

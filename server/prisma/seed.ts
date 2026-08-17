@@ -70,6 +70,37 @@ async function main() {
   for (const p of kuecheProducts) {
     await prisma.product.create({ data: { ...p, stationId: kueche.id } })
   }
+  // Extras for Bratwurst: sauce choice + toppings
+  const bratwurst = await prisma.product.findFirstOrThrow({ where: { name: 'Bratwurst', stationId: kueche.id } })
+  await prisma.productExtra.create({
+    data: {
+      productId: bratwurst.id,
+      name: 'Soße',
+      multiSelect: false,
+      sortOrder: 1,
+      options: {
+        create: [
+          { name: 'Ohne Senf', priceDeltaCents: 0, sortOrder: 1 },
+          { name: 'Mit Senf', priceDeltaCents: 0, sortOrder: 2 },
+          { name: 'Mit Ketchup', priceDeltaCents: 50, sortOrder: 3 },
+        ],
+      },
+    },
+  })
+  await prisma.productExtra.create({
+    data: {
+      productId: bratwurst.id,
+      name: 'Extras',
+      multiSelect: true,
+      sortOrder: 2,
+      options: {
+        create: [
+          { name: 'Curry', priceDeltaCents: 10, sortOrder: 1 },
+          { name: 'Röstzwiebeln', priceDeltaCents: 30, sortOrder: 2 },
+        ],
+      },
+    },
+  })
 
   // Products — Kaffee
   const kaffeeProducts = [

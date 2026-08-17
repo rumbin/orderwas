@@ -21,6 +21,7 @@ interface OrderForPrint {
     status: string
     comment: string | null
     priceCents: number
+    options: string | null
   }>
 }
 
@@ -82,6 +83,7 @@ export async function dispatchOrderPrints(order: OrderForPrint): Promise<void> {
         quantity: item.quantity,
         priceCents: item.priceCents,
         comment: item.comment,
+        options: item.options ? (JSON.parse(item.options) as ReceiptItem['options']) : null,
       }))
 
       const receiptData: ReceiptData = {

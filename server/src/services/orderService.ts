@@ -3,6 +3,11 @@ import type { Prisma } from '@prisma/client'
 import { orderEvents, type OrderEventPayload } from '@/websocket'
 import { dispatchOrderPrints } from '@/printer/dispatch'
 
+export interface OptionSelection {
+  extraId: string
+  optionId: string
+}
+
 export interface CreateOrderInput {
   tableNumber?: string
   pickupCode?: string
@@ -12,6 +17,7 @@ export interface CreateOrderInput {
     productId: string
     quantity: number
     comment?: string
+    optionSelections?: OptionSelection[]
   }>
 }
 
@@ -44,21 +50,65 @@ export async function createOrder(input: CreateOrderInput) {
   const event = await prisma.event.findUnique({ where: { id: eventId }, select: { id: true } })
   if (!event) throw new OrderValidationError('Event does not exist')
 
-  // Fetch product prices and validate all product IDs
+  // Fetch product prices + extras and validate all product IDs
   const productIds = items.map((i) => i.productId)
   const products = await prisma.product.findMany({
     where: { id: { in: productIds } },
-    select: { id: true, priceCents: true, stationId: true, name: true },
+    select: {
+      id: true,
+      priceCents: true,
+      stationId: true,
+      name: true,
+      extras: { include: { options: true }, orderBy: { sortOrder: 'asc' } },
+    },
   })
   if (products.length !== new Set(productIds).size) {
     throw new OrderValidationError('One or more products do not exist')
   }
 
-  const priceMap = new Map(products.map((p) => [p.id, p.priceCents] as const))
-  const totalCents = items.reduce(
-    (sum, item) => sum + (priceMap.get(item.productId) ?? 0) * item.quantity,
-    0,
-  )
+  const productMap = new Map(products.map((p) => [p.id, p] as const))
+
+  // Validate option selections and compute per-item option data
+  interface ResolvedOptions {
+    extraName: string
+    optionName: string
+    priceDeltaCents: number
+  }
+  const optionsByItem = new Map<number, ResolvedOptions[]>()
+  let optionsDeltaTotal = 0
+
+  items.forEach((item, idx) => {
+    if (!item.optionSelections?.length) return
+    const product = productMap.get(item.productId)!
+    const resolved: ResolvedOptions[] = []
+
+    for (const sel of item.optionSelections) {
+      const extra = product.extras.find((e) => e.id === sel.extraId)
+      if (!extra) throw new OrderValidationError(`Extra ${sel.extraId} does not belong to product ${product.name}`)
+      const option = extra.options.find((o) => o.id === sel.optionId)
+      if (!option) throw new OrderValidationError(`Option ${sel.optionId} does not belong to extra ${extra.name}`)
+      resolved.push({
+        extraName: extra.name,
+        optionName: option.name,
+        priceDeltaCents: option.priceDeltaCents,
+      })
+    }
+
+    // Radio extras (multiSelect=false): at most one option per extra
+    for (const extra of product.extras) {
+      const count = item.optionSelections.filter((s) => s.extraId === extra.id).length
+      if (!extra.multiSelect && count > 1) {
+        throw new OrderValidationError(`Extra '${extra.name}' allows only one selection`)
+      }
+    }
+
+    optionsByItem.set(idx, resolved)
+    optionsDeltaTotal += resolved.reduce((sum, r) => sum + r.priceDeltaCents, 0) * item.quantity
+  })
+
+  const totalCents =
+    items.reduce((sum, item) => sum + (productMap.get(item.productId)?.priceCents ?? 0) * item.quantity, 0) +
+    optionsDeltaTotal
 
   // Atomically increment the event's tear-off counter and create the order
   const order = await prisma.$transaction(async (tx) => {
@@ -77,10 +127,11 @@ export async function createOrder(input: CreateOrderInput) {
         totalCents,
         tearOffNumber: updatedEvent.lastTearOffNumber,
         items: {
-          create: items.map((item) => ({
+          create: items.map((item, idx) => ({
             productId: item.productId,
             quantity: item.quantity,
             comment: item.comment,
+            options: optionsByItem.has(idx) ? JSON.stringify(optionsByItem.get(idx)) : null,
           })),
         },
       },
@@ -131,6 +182,7 @@ export async function createOrder(input: CreateOrderInput) {
       status: item.status,
       comment: item.comment,
       priceCents: item.product.priceCents,
+      options: item.options,
     })),
   }).catch((err) => console.error('[printer] dispatch error:', err))
 
