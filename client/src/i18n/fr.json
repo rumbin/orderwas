@@ -21,7 +21,8 @@
     "quantity": "Quantité",
     "add": "Ajouter",
     "remove": "Retirer",
-    "editOptions": "Modifier les options"
+    "editOptions": "Modifier les options",
+    "splitOff": "séparer"
   },
   "station": {
     "title": "Station",

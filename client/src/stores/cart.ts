@@ -23,6 +23,7 @@ interface CartState {
   addItem: (product: Product, options?: SelectedOption[]) => void
   removeItem: (index: number) => void
   decrementItem: (index: number) => void
+  splitItem: (index: number) => number | null
   setItemComment: (index: number, comment: string) => void
   setItemOptions: (index: number, options?: SelectedOption[]) => void
   clear: () => void
@@ -72,6 +73,22 @@ export const useCartStore = create<CartState>((set, get) => ({
         idx === index ? { ...i, options } : i,
       ),
     })),
+  // Peel 1 unit off a multi-quantity item as a new cart line (returns new item's index)
+  splitItem: (index) => {
+    const state = get()
+    const item = state.items[index]
+    if (!item || item.quantity <= 1) return null
+    const newIdx = index + 1
+    set({
+      items: [
+        ...state.items.slice(0, index),
+        { ...item, quantity: item.quantity - 1 },
+        { product: item.product, quantity: 1, options: item.options ? [...item.options] : undefined },
+        ...state.items.slice(index + 1),
+      ],
+    })
+    return newIdx
+  },
   clear: () => set({ items: [], tableNumber: '' }),
   total: () =>
     get().items.reduce(

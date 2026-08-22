@@ -23,7 +23,8 @@
     "remove": "Remove",
     "outOfStock": "Out of stock",
     "inStock": "in stock",
-    "editOptions": "Edit options"
+    "editOptions": "Edit options",
+    "splitOff": "split off"
   },
   "station": {
     "title": "Station",

@@ -475,7 +475,22 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                         </div>
                       )}
                       {item.comment && <div className="text-xs text-gray-500 mt-1">💬 {item.comment}</div>}
-                      <div className="flex gap-2 mt-1">
+                      <div className="flex gap-2 mt-1 flex-wrap">
+                        {item.quantity > 1 && (
+                          <button
+                            onClick={() => {
+                              const newIdx = cart.splitItem(globalIdx)
+                              if (newIdx != null) {
+                                setCommentText('')
+                                setCommentTarget(newIdx)
+                                setDetailProduct(null)
+                              }
+                            }}
+                            className="text-xs text-blue-500 hover:underline"
+                          >
+                            1× {t('order.splitOff') ?? 'abtrennen'}
+                          </button>
+                        )}
                         {item.product.extras?.length ? (
                           <button
                             onClick={() => {
