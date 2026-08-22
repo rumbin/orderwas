@@ -23,7 +23,8 @@
     "remove": "Retirer",
     "editOptions": "Modifier les options",
     "splitOff": "séparer",
-    "newVariantPlaceholder": "Nouvelle variante..."
+    "newVariantPlaceholder": "Nouvelle variante...",
+    "confirmVariants": "Confirmer"
   },
   "station": {
     "title": "Station",

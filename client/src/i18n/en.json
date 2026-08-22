@@ -25,7 +25,8 @@
     "inStock": "in stock",
     "editOptions": "Edit options",
     "splitOff": "split off",
-    "newVariantPlaceholder": "New variant..."
+    "newVariantPlaceholder": "New variant...",
+    "confirmVariants": "Confirm"
   },
   "station": {
     "title": "Station",

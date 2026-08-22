@@ -381,7 +381,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
               onClick={() => setVariantDialogProduct(null)}
               className="w-full mt-3 bg-gray-100 rounded-md py-2.5 text-sm font-medium"
             >
-              {t('common.done') ?? 'Fertig'}
+              {t('order.confirmVariants')}
             </button>
           </div>
         </div>
