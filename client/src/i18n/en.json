@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Orderwas",
+    "title": "OrderWas",
     "tagline": "Ordering system for club festivals"
   },
   "login": {
@@ -22,7 +22,8 @@
     "add": "Add",
     "remove": "Remove",
     "outOfStock": "Out of stock",
-    "inStock": "in stock"
+    "inStock": "in stock",
+    "editOptions": "Edit options"
   },
   "station": {
     "title": "Station",
@@ -39,8 +40,18 @@
     "stations": "Stations",
     "products": "Products",
     "printers": "Printers",
+    "appLayout": "App Layout",
     "settings": "Settings",
-    "confirmDeleteProduct": "Really delete product \"{{name}}\"?"
+    "changePin": "Change Admin PIN",
+    "newPin": "New PIN",
+    "currentPin": "Current PIN",
+    "pinChanged": "PIN changed successfully",
+    "confirmDeleteProduct": "Really delete product \"{{name}}\"?",
+    "price": "Price",
+    "priceUpdated": "Price updated",
+    "login": "Admin Login",
+    "enterPin": "Enter PIN",
+    "wrongPin": "Wrong PIN"
   },
   "common": {
     "save": "Save",
@@ -53,6 +64,7 @@
     "no": "No",
     "loading": "Loading...",
     "error": "Error",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "logout": "Logout"
   }
 }

@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Orderwas",
+    "title": "OrderWas",
     "tagline": "Bestellsystem für Vereinsfeste"
   },
   "landing": {
@@ -33,6 +33,7 @@
     "commentFor": "Anmerkung für",
     "commentPlaceholder": "z.B. ohne Senf, mit Ketchup",
     "extrasLabel": "Auswahl",
+    "editOptions": "Optionen bearbeiten",
     "multiSelect": "Mehrfachauswahl",
     "pay": "Bezahlen",
     "cancelOrder": "Bestellung stornieren",
@@ -50,7 +51,9 @@
     "markDone": "Erledigt",
     "waitTime": "Wartezeit",
     "table": "Tisch",
-    "noOrders": "Keine offenen Bestellungen"
+    "noOrders": "Keine offenen Bestellungen",
+    "done": "Fertig",
+    "noDoneOrders": "Keine fertigen Bestellungen"
   },
   "admin": {
     "title": "Administration",
@@ -61,7 +64,23 @@
     "printers": "Drucker",
     "appLayout": "App Layout",
     "settings": "Einstellungen",
-    "confirmDeleteProduct": "Produkt \u201e{{name}}\u201c wirklich löschen?"
+    "changePin": "Admin-PIN ändern",
+    "newPin": "Neue PIN",
+    "currentPin": "Aktuelle PIN",
+    "pinChanged": "PIN erfolgreich geändert",
+    "confirmDeleteProduct": "Produkt \u201e{{name}}\u201c wirklich löschen?",
+    "price": "Preis",
+    "priceUpdated": "Preis aktualisiert",
+    "login": "Admin-Anmeldung",
+    "enterPin": "PIN eingeben",
+    "wrongPin": "Falsche PIN",
+    "extras": "Extras",
+    "noExtras": "Keine Extras definiert. Free-Text-Kommentare sind immer möglich.",
+    "addExtraHint": "Neues Extra hinzufügen (Optionen mit Komma trennen):",
+    "extraName": "Extra-Name (z.B. \"Belag\")",
+    "multiSelect": "Mehrfach",
+    "optionsHint": "Optionen: Senf, Ketchup, Remoulade",
+    "freeTextHint": "Kellner können jederzeit free-Text-Kommentare hinzufügen (z.B. \"ohne Senf\")."
   },
   "common": {
     "save": "Speichern",
@@ -76,6 +95,7 @@
     "saving": "Speichern...",
     "saved": "Gespeichert!",
     "error": "Fehler",
-    "confirm": "Bestätigen"
+    "confirm": "Bestätigen",
+    "logout": "Abmelden"
   }
 }

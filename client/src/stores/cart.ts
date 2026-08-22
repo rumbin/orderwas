@@ -24,6 +24,7 @@ interface CartState {
   removeItem: (index: number) => void
   decrementItem: (index: number) => void
   setItemComment: (index: number, comment: string) => void
+  setItemOptions: (index: number, options?: SelectedOption[]) => void
   clear: () => void
   total: () => number
 }
@@ -63,6 +64,12 @@ export const useCartStore = create<CartState>((set, get) => ({
     set((state) => ({
       items: state.items.map((i, idx) =>
         idx === index ? { ...i, comment: comment || undefined } : i,
+      ),
+    })),
+  setItemOptions: (index, options) =>
+    set((state) => ({
+      items: state.items.map((i, idx) =>
+        idx === index ? { ...i, options } : i,
       ),
     })),
   clear: () => set({ items: [], tableNumber: '' }),

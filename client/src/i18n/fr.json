@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Orderwas",
+    "title": "OrderWas",
     "tagline": "Système de commande pour fêtes de club"
   },
   "login": {
@@ -20,7 +20,8 @@
     "success": "Commande passée!",
     "quantity": "Quantité",
     "add": "Ajouter",
-    "remove": "Retirer"
+    "remove": "Retirer",
+    "editOptions": "Modifier les options"
   },
   "station": {
     "title": "Station",
@@ -37,7 +38,10 @@
     "stations": "Stations",
     "products": "Produits",
     "printers": "Imprimantes",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "login": "Connexion admin",
+    "enterPin": "Entrer le PIN",
+    "wrongPin": "PIN incorrect"
   },
   "common": {
     "save": "Enregistrer",

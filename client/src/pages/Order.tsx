@@ -11,7 +11,7 @@ function formatCents(cents: number): string {
 
 export default function OrderPage({ navigate }: { navigate: (path: string) => void }) {
   const { t } = useTranslation()
-  const { event, waiter } = useSessionStore()
+  const { event, waiter, clear } = useSessionStore()
   const cart = useCartStore()
   const [stations, setStations] = useState<Station[]>([])
   const [products, setProducts] = useState<Record<string, Product[]>>({})
@@ -25,6 +25,9 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   // Extras sheet: product being configured + current selections per extra
   const [extrasTarget, setExtrasTarget] = useState<Product | null>(null)
   const [extrasSelection, setExtrasSelection] = useState<Record<string, string[]>>({}) // extraId → optionIds
+  const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null) // cart index being edited
+  const [detailProduct, setDetailProduct] = useState<Product | null>(null)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tableInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -77,7 +80,14 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
         }
       }
     }
-    cart.addItem(extrasTarget, selections.length ? selections : undefined)
+    if (editingItemIndex != null) {
+      // Editing existing item — update options in place
+      cart.setItemOptions(editingItemIndex, selections.length ? selections : undefined)
+      setEditingItemIndex(null)
+    } else {
+      // Adding new item
+      cart.addItem(extrasTarget, selections.length ? selections : undefined)
+    }
     setExtrasTarget(null)
     setExtrasSelection({})
   }
@@ -158,6 +168,9 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
           <button onClick={() => navigate('/orders')} className="text-sm text-blue-600">
             {t('order.myOrders')}
           </button>
+          <button onClick={() => { clear(); navigate('/') }} className="text-sm text-gray-400 hover:text-gray-700">
+            {t('common.logout') ?? 'Abmelden'}
+          </button>
         </div>
       </div>
 
@@ -208,35 +221,74 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
           const outOfStock = product.stockMode === 'tracked' && product.stockCount <= 0
           const lowStock = product.stockMode === 'tracked' && product.stockCount > 0 && product.stockCount <= 5
           return (
-            <button
+            <div
               key={product.id}
-              onClick={() => !outOfStock && handleAddProduct(product)}
-              disabled={outOfStock}
               data-testid={`product-${product.name}`}
-              className={`relative min-h-[88px] rounded-lg border-2 p-3 text-left transition active:scale-95 ${
+              className={`relative min-h-[88px] rounded-lg border-2 transition ${
                 outOfStock
-                  ? 'border-gray-200 bg-gray-100 opacity-50 cursor-not-allowed'
+                  ? 'border-gray-200 bg-gray-100 opacity-50'
                   : count > 0
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
-              <div className="font-medium text-gray-900 text-sm leading-tight">{product.name}</div>
-              <div className="text-xs text-gray-500 mt-1">{formatCents(product.priceCents)}</div>
-              {product.extras?.length ? (
-                <div className="text-[10px] text-blue-600 mt-0.5">⚙ {product.extras.length} {t('order.extrasLabel')}</div>
-              ) : null}
-              {product.stockMode === 'tracked' && (
-                <div className={`text-[10px] mt-0.5 ${outOfStock ? 'text-red-600 font-medium' : lowStock ? 'text-amber-600' : 'text-gray-400'}`}>
-                  {outOfStock ? t('order.outOfStock') : `${product.stockCount} ${t('order.inStock')}`}
+              <div className="flex items-stretch h-full">
+                {/* Decrement */}
+                <button
+                  onClick={() => {
+                    const idx = cart.items.findIndex((i) => i.product.id === product.id)
+                    if (idx >= 0) cart.decrementItem(idx)
+                  }}
+                  disabled={count === 0}
+                  className="w-10 flex items-center justify-center text-lg font-bold text-gray-600 hover:text-red-500 disabled:text-gray-300 disabled:cursor-not-allowed rounded-l-lg"
+                  data-testid={`decrement-${product.name}`}
+                >
+                  −
+                </button>
+
+                {/* Product info — long-press opens detail view */}
+                <div
+                  className="flex-1 py-2 px-1 min-w-0 cursor-pointer select-none"
+                  onPointerDown={() => {
+                    if (count > 0) {
+                      longPressTimer.current = setTimeout(() => {
+                        setDetailProduct(product)
+                      }, 500)
+                    }
+                  }}
+                  onPointerUp={() => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null } }}
+                  onPointerLeave={() => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null } }}
+                >
+                  <div className="font-medium text-gray-900 text-sm leading-tight truncate">{product.name}</div>
+                  <div className="text-xs text-gray-500 mt-1">{formatCents(product.priceCents)}</div>
+                  {product.extras?.length ? (
+                    <div className="text-[10px] text-blue-600 mt-0.5">⚙ {product.extras.length} {t('order.extrasLabel')}</div>
+                  ) : null}
+                  {product.stockMode === 'tracked' && (
+                    <div className={`text-[10px] mt-0.5 ${outOfStock ? 'text-red-600 font-medium' : lowStock ? 'text-amber-600' : 'text-gray-400'}`}>
+                      {outOfStock ? t('order.outOfStock') : `${product.stockCount} ${t('order.inStock')}`}
+                    </div>
+                  )}
                 </div>
-              )}
+
+                {/* Increment */}
+                <button
+                  onClick={() => !outOfStock && handleAddProduct(product)}
+                  disabled={outOfStock}
+                  className="w-10 flex items-center justify-center text-lg font-bold text-gray-600 hover:text-blue-600 disabled:text-gray-300 disabled:cursor-not-allowed rounded-r-lg"
+                  data-testid={`increment-${product.name}`}
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Count badge — positioned left of increment button */}
               {count > 0 && (
-                <span className="absolute top-1 right-1 bg-blue-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
+                <span className="absolute top-1 right-11 bg-blue-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
                   {count}
                 </span>
               )}
-            </button>
+            </div>
           )
         })}
       </div>
@@ -301,7 +353,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
 
       {/* Comment editor dialog */}
       {commentTarget != null && (
-        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-30" onClick={() => setCommentTarget(null)}>
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-40" onClick={() => setCommentTarget(null)}>
           <div className="bg-white rounded-t-lg sm:rounded-lg p-4 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-medium mb-2">
               {t('order.commentFor')}: {cart.items[commentTarget]?.product.name}
@@ -332,7 +384,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
 
       {/* Extras option sheet */}
       {extrasTarget && (
-        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-30" onClick={() => setExtrasTarget(null)}>
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-30" onClick={() => { setExtrasTarget(null); setEditingItemIndex(null) }}>
           <div className="bg-white rounded-t-lg sm:rounded-lg p-4 w-full max-w-md max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-bold text-lg mb-1">{extrasTarget.name}</h3>
             <p className="text-sm text-gray-500 mb-4">{formatCents(extrasTarget.priceCents)}</p>
@@ -375,8 +427,88 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
               className="w-full bg-blue-600 text-white rounded-md py-3 font-medium"
               data-testid="extras-confirm"
             >
-              {t('order.add')} · {formatCents(extrasTarget.priceCents + extrasDeltaTotal)}
+              {editingItemIndex != null
+                ? t('common.save')
+                : `${t('order.add')} · ${formatCents(extrasTarget.priceCents + extrasDeltaTotal)}`}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Detail view — long-press shows cart items for a product */}
+      {detailProduct && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-30" onClick={() => setDetailProduct(null)}>
+          <div className="bg-white rounded-t-lg sm:rounded-lg p-4 w-full max-w-md max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-lg">{detailProduct.name}</h3>
+              <button onClick={() => setDetailProduct(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+            </div>
+            {cart.items.filter((i) => i.product.id === detailProduct.id).length === 0 ? (
+              <p className="text-gray-400 text-sm py-4 text-center">{t('order.empty')}</p>
+            ) : (
+              <div className="space-y-2">
+                {cart.items.filter((i) => i.product.id === detailProduct.id).map((item, idx) => {
+                  const globalIdx = cart.items.indexOf(item)
+                  let parsedOptions: { extraName: string; optionName: string; priceDeltaCents: number }[] = []
+                  try { if (item.options) parsedOptions = item.options.map((o) => ({ extraName: o.extraName, optionName: o.optionName, priceDeltaCents: o.priceDeltaCents })) } catch { /* ignore */ }
+                  return (
+                    <div key={`${item.product.id}-${idx}`} className="border rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium">{item.quantity}× {item.product.name}</span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => cart.decrementItem(globalIdx)}
+                            className="w-7 h-7 rounded bg-gray-100 hover:bg-red-100 text-sm font-bold"
+                          >−</button>
+                          <span className="w-6 text-center text-sm font-bold">{item.quantity}</span>
+                          <button
+                            onClick={() => cart.addItem(item.product)}
+                            className="w-7 h-7 rounded bg-gray-100 hover:bg-blue-100 text-sm font-bold"
+                          >+</button>
+                        </div>
+                      </div>
+                      {parsedOptions.length > 0 && (
+                        <div className="text-xs text-blue-600 mt-1">
+                          {parsedOptions.map((o, i) => (
+                            <span key={i}>{o.extraName}: {o.optionName}{i < parsedOptions.length - 1 ? ', ' : ''}</span>
+                          ))}
+                        </div>
+                      )}
+                      {item.comment && <div className="text-xs text-gray-500 mt-1">💬 {item.comment}</div>}
+                      <div className="flex gap-2 mt-1">
+                        {item.product.extras?.length ? (
+                          <button
+                            onClick={() => {
+                              // Pre-populate extras selection from current item options
+                              const preselection: Record<string, string[]> = {}
+                              if (item.options) {
+                                for (const opt of item.options) {
+                                  if (!preselection[opt.extraId]) preselection[opt.extraId] = []
+                                  preselection[opt.extraId].push(opt.optionId)
+                                }
+                              }
+                              setExtrasSelection(preselection)
+                              setExtrasTarget(item.product)
+                              setEditingItemIndex(globalIdx)
+                              setDetailProduct(null)
+                            }}
+                            className="text-xs text-blue-500 hover:underline"
+                          >
+                            ⚙ {t('order.editOptions') ?? 'Optionen'}
+                          </button>
+                        ) : null}
+                        <button
+                          onClick={() => { setCommentText(item.comment ?? ''); setCommentTarget(globalIdx) }}
+                          className="text-xs text-blue-500 hover:underline"
+                        >
+                          {item.comment ? t('common.edit') : '+ ' + (t('order.commentPlaceholder') ?? 'Anmerkung')}
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
