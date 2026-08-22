@@ -74,7 +74,15 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
 
   const adjustVariant = (variant: string, delta: number) => {
     if (!variantDialogProduct) return
-    cart.setVariantQuantity(variantDialogProduct.id, variant, delta)
+    // If no cart item exists yet for this variant, create one first
+    const exists = cart.items.some(
+      (i) => i.product.id === variantDialogProduct.id && (i.variant ?? 'Standard') === variant,
+    )
+    if (!exists && delta > 0) {
+      cart.addItem(variantDialogProduct, undefined, variant === 'Standard' ? undefined : variant)
+    } else {
+      cart.setVariantQuantity(variantDialogProduct.id, variant, delta)
+    }
     setVariantDialogVariants((prev) =>
       prev
         .map((v) => (v.variant === variant ? { ...v, quantity: v.quantity + delta } : v))
@@ -85,11 +93,16 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   const submitNewVariant = () => {
     if (!variantDialogProduct || !newVariantInput.trim()) return
     const v = newVariantInput.trim()
-    cart.addVariant(variantDialogProduct.id, v)
-    cart.setVariantQuantity(variantDialogProduct.id, v, 1)
+    // If no items exist for this product yet, addItem creates the first one
+    const hasItems = cart.items.some((i) => i.product.id === variantDialogProduct.id)
+    if (!hasItems) {
+      cart.addItem(variantDialogProduct, undefined, v)
+    } else {
+      cart.addVariant(variantDialogProduct.id, v)
+      cart.setVariantQuantity(variantDialogProduct.id, v, 1)
+    }
     setVariantDialogVariants((prev) => [...prev, { variant: v, quantity: 1 }])
     setNewVariantInput('')
-    // Re-focus the input for quick consecutive adds
     setTimeout(() => newVariantInputRef.current?.focus(), 0)
   }
 
