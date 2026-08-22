@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/api/client'
 import { useSessionStore } from '@/stores/session'
-import { useCartStore, type SelectedOption } from '@/stores/cart'
+import { useCartStore } from '@/stores/cart'
 import type { Station, Product } from '@/api/types'
 
 function formatCents(cents: number): string {
@@ -20,14 +20,12 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState<{ tearOffNumber: number | null } | null>(null)
   const [error, setError] = useState('')
-  const [commentTarget, setCommentTarget] = useState<number | null>(null) // cart index
-  const [commentText, setCommentText] = useState('')
-  // Extras sheet: product being configured + current selections per extra
-  const [extrasTarget, setExtrasTarget] = useState<Product | null>(null)
-  const [extrasSelection, setExtrasSelection] = useState<Record<string, string[]>>({}) // extraId → optionIds
-  const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null) // cart index being edited
-  const [detailProduct, setDetailProduct] = useState<Product | null>(null)
+  // Variant dialog
+  const [variantDialogProduct, setVariantDialogProduct] = useState<Product | null>(null)
+  const [variantDialogVariants, setVariantDialogVariants] = useState<{ variant: string; quantity: number }[]>([])
+  const [newVariantInput, setNewVariantInput] = useState('')
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const newVariantInputRef = useRef<HTMLInputElement>(null)
   const tableInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -53,67 +51,46 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
 
   const handleAddProduct = (product: Product) => {
     setSuccess(null)
-    if (product.extras?.length) {
-      // Open option sheet first
-      setExtrasSelection({})
-      setExtrasTarget(product)
-      return
-    }
     cart.addItem(product)
   }
 
-  const confirmExtras = () => {
-    if (!extrasTarget) return
-    const selections: SelectedOption[] = []
-    for (const extra of extrasTarget.extras ?? []) {
-      const optionIds = extrasSelection[extra.id] ?? []
-      for (const optionId of optionIds) {
-        const option = extra.options.find((o) => o.id === optionId)
-        if (option) {
-          selections.push({
-            extraId: extra.id,
-            optionId: option.id,
-            extraName: extra.name,
-            optionName: option.name,
-            priceDeltaCents: option.priceDeltaCents,
-          })
-        }
-      }
-    }
-    if (editingItemIndex != null) {
-      // Editing existing item — update options in place
-      cart.setItemOptions(editingItemIndex, selections.length ? selections : undefined)
-      setEditingItemIndex(null)
-    } else {
-      // Adding new item
-      cart.addItem(extrasTarget, selections.length ? selections : undefined)
-    }
-    setExtrasTarget(null)
-    setExtrasSelection({})
-  }
-
-  const toggleOption = (extraId: string, optionId: string, multiSelect: boolean) => {
-    setExtrasSelection((prev) => {
-      const current = prev[extraId] ?? []
-      if (multiSelect) {
-        return { ...prev, [extraId]: current.includes(optionId) ? current.filter((id) => id !== optionId) : [...current, optionId] }
-      }
-      // Radio: replace
-      return { ...prev, [extraId]: current.includes(optionId) && current.length === 1 ? [] : [optionId] }
+  const openVariantDialog = (product: Product) => {
+    const variants = cart.items
+      .filter((i) => i.product.id === product.id)
+      .map((i) => ({ variant: i.variant ?? 'Standard', quantity: i.quantity }))
+    // Ensure "Standard" always appears first if present, then others
+    variants.sort((a, b) => {
+      if (a.variant === 'Standard') return -1
+      if (b.variant === 'Standard') return 1
+      return 0
     })
-  }
-
-  const openCommentEditor = (index: number) => {
-    setCommentText(cart.items[index]?.comment ?? '')
-    setCommentTarget(index)
-  }
-
-  const saveComment = () => {
-    if (commentTarget != null) {
-      cart.setItemComment(commentTarget, commentText)
+    if (variants.length === 0) {
+      variants.push({ variant: 'Standard', quantity: 0 })
     }
-    setCommentTarget(null)
-    setCommentText('')
+    setVariantDialogVariants(variants)
+    setVariantDialogProduct(product)
+    setNewVariantInput('')
+  }
+
+  const adjustVariant = (variant: string, delta: number) => {
+    if (!variantDialogProduct) return
+    cart.setVariantQuantity(variantDialogProduct.id, variant, delta)
+    setVariantDialogVariants((prev) =>
+      prev
+        .map((v) => (v.variant === variant ? { ...v, quantity: v.quantity + delta } : v))
+        .filter((v) => v.quantity > 0 || v.variant === 'Standard'),
+    )
+  }
+
+  const submitNewVariant = () => {
+    if (!variantDialogProduct || !newVariantInput.trim()) return
+    const v = newVariantInput.trim()
+    cart.addVariant(variantDialogProduct.id, v)
+    cart.setVariantQuantity(variantDialogProduct.id, v, 1)
+    setVariantDialogVariants((prev) => [...prev, { variant: v, quantity: 1 }])
+    setNewVariantInput('')
+    // Re-focus the input for quick consecutive adds
+    setTimeout(() => newVariantInputRef.current?.focus(), 0)
   }
 
   const handleSubmit = async () => {
@@ -126,10 +103,10 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
         tableNumber,
         waiterId: waiter.id,
         eventId: event.id,
-        items: cart.items.map((item) => ({
+        items: cart.items.filter((i) => i.quantity > 0).map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
-          comment: item.comment || undefined,
+          comment: item.variant && item.variant !== 'Standard' ? item.variant : undefined,
           optionSelections: item.options?.map((o) => ({ extraId: o.extraId, optionId: o.optionId })),
         })),
       })
@@ -148,15 +125,6 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
     tableInputRef.current?.focus()
   }
 
-  const extrasDeltaTotal = extrasTarget
-    ? Object.values(extrasSelection).flat().reduce((sum, optionId) => {
-        for (const extra of extrasTarget.extras ?? []) {
-          const opt = extra.options.find((o) => o.id === optionId)
-          if (opt) return sum + opt.priceDeltaCents
-        }
-        return sum
-      }, 0)
-    : 0
 
   return (
     <div className="min-h-screen bg-gray-50 pb-32">
@@ -224,14 +192,29 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
             <div
               key={product.id}
               data-testid={`product-${product.name}`}
-              className={`relative min-h-[88px] rounded-lg border-2 transition ${
+              className={`relative min-h-[88px] rounded-lg border-2 transition select-none ${
                 outOfStock
                   ? 'border-gray-200 bg-gray-100 opacity-50'
                   : count > 0
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
+              onPointerDown={(e) => {
+                if (count > 0) {
+                  longPressTimer.current = setTimeout(() => {
+                    openVariantDialog(product)
+                  }, 500)
+                }
+              }}
+              onPointerUp={() => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null } }}
+              onPointerLeave={() => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null } }}
             >
+              {/* Count badge — upper-right corner */}
+              {count > 0 && (
+                <span className="absolute top-1 right-1 bg-blue-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold z-10">
+                  {count}
+                </span>
+              )}
               <div className="flex items-stretch h-full">
                 {/* Decrement */}
                 <button
@@ -246,19 +229,8 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                   −
                 </button>
 
-                {/* Product info — long-press opens detail view */}
-                <div
-                  className="flex-1 py-2 px-1 min-w-0 cursor-pointer select-none"
-                  onPointerDown={() => {
-                    if (count > 0) {
-                      longPressTimer.current = setTimeout(() => {
-                        setDetailProduct(product)
-                      }, 500)
-                    }
-                  }}
-                  onPointerUp={() => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null } }}
-                  onPointerLeave={() => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null } }}
-                >
+                {/* Product info */}
+                <div className="flex-1 py-2 px-1 min-w-0">
                   <div className="font-medium text-gray-900 text-sm leading-tight truncate">{product.name}</div>
                   <div className="text-xs text-gray-500 mt-1">{formatCents(product.priceCents)}</div>
                   {product.extras?.length ? (
@@ -281,20 +253,13 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                   +
                 </button>
               </div>
-
-              {/* Count badge — positioned left of increment button */}
-              {count > 0 && (
-                <span className="absolute top-1 right-11 bg-blue-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
-                  {count}
-                </span>
-              )}
             </div>
           )
         })}
       </div>
 
       {/* Cart bar (fixed bottom) */}
-      {cart.items.length > 0 && (
+      {cart.items.filter((i) => i.quantity > 0).length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 z-20">
           {error && (
             <div className="mb-3 p-2 bg-red-50 text-red-700 text-sm rounded">{error}</div>
@@ -311,28 +276,50 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
             />
             <div className="flex-1 overflow-x-auto">
               <div className="flex gap-2">
-                {cart.items.map((item, idx) => (
-                  <div key={`${item.product.id}-${idx}`} className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-sm whitespace-nowrap" data-testid="cart-item">
-                    <span className="font-bold">{item.quantity}×</span>
-                    <button onClick={() => openCommentEditor(idx)} className="hover:text-blue-600" title={t('order.editComment')}>
-                      <span>
-                        {item.product.name}
-                        {item.options?.length ? (
-                          <span className="text-blue-600">
-                            {' '}({item.options.map((o) => o.optionName).join(', ')})
-                          </span>
-                        ) : null}
-                        {item.comment && <span className="text-blue-600"> 💬</span>}
-                      </span>
-                    </button>
-                    <button
-                      onClick={() => cart.decrementItem(idx)}
-                      className="ml-1 text-gray-500 hover:text-red-500"
-                    >
-                      −
-                    </button>
-                  </div>
-                ))}
+                {(() => {
+                  // Group cart items by product
+                  const grouped = new Map<string, { product: Product; items: { variant: string; quantity: number; idx: number }[] }>()
+                  cart.items.forEach((item, idx) => {
+                    if (item.quantity <= 0) return
+                    const pid = item.product.id
+                    if (!grouped.has(pid)) grouped.set(pid, { product: item.product, items: [] })
+                    grouped.get(pid)!.items.push({ variant: item.variant ?? 'Standard', quantity: item.quantity, idx })
+                  })
+                  return Array.from(grouped.values()).map(({ product, items }) => {
+                    const totalCount = items.reduce((s, i) => s + i.quantity, 0)
+                    const variants = items.map((i) => i.variant)
+                    const display = totalCount === 1
+                      ? (variants[0] === 'Standard' ? product.name : `${product.name} (${variants[0]})`)
+                      : (variants.length === 1 && variants[0] === 'Standard'
+                          ? `${totalCount}× ${product.name}`
+                          : `${totalCount}× ${product.name} (${items.map((i) => `${i.quantity}× ${i.variant}`).join(', ')})`)
+                    return (
+                      <div
+                        key={product.id}
+                        className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-sm whitespace-nowrap"
+                        data-testid="cart-item"
+                      >
+                        <button
+                          onClick={() => openVariantDialog(product)}
+                          className="hover:text-blue-600"
+                          title={t('order.editComment')}
+                        >
+                          <span>{display}</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Decrement the first variant (standard fallback)
+                            const firstIdx = items[0]?.idx
+                            if (firstIdx != null) cart.decrementItem(firstIdx)
+                          }}
+                          className="ml-1 text-gray-500 hover:text-red-500"
+                        >
+                          −
+                        </button>
+                      </div>
+                    )
+                  })
+                })()}
               </div>
             </div>
             <div className="text-right flex-shrink-0">
@@ -341,7 +328,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
             </div>
             <button
               onClick={handleSubmit}
-              disabled={submitting || !tableNumber || cart.items.length === 0}
+              disabled={submitting || !tableNumber || cart.items.filter((i) => i.quantity > 0).length === 0}
               className="bg-blue-600 text-white rounded-md py-2 px-4 font-medium disabled:opacity-50 flex-shrink-0"
               data-testid="submit-order"
             >
@@ -351,179 +338,51 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
         </div>
       )}
 
-      {/* Comment editor dialog */}
-      {commentTarget != null && (
-        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-40" onClick={() => setCommentTarget(null)}>
-          <div className="bg-white rounded-t-lg sm:rounded-lg p-4 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-medium mb-2">
-              {t('order.commentFor')}: {cart.items[commentTarget]?.product.name}
-            </h3>
-            <input
-              type="text"
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder={t('order.commentPlaceholder')}
-              className="w-full rounded-md border border-gray-300 p-3 text-lg"
-              data-testid="comment-input"
-              autoFocus
-            />
-            <div className="flex gap-2 mt-3">
-              <button onClick={saveComment} className="flex-1 bg-blue-600 text-white rounded-md py-3 font-medium" data-testid="comment-save">
-                {t('common.save')}
-              </button>
-              <button
-                onClick={() => { if (commentTarget != null) cart.setItemComment(commentTarget, ''); setCommentTarget(null); }}
-                className="px-4 bg-gray-100 rounded-md py-3"
-              >
-                {t('common.delete')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Extras option sheet */}
-      {extrasTarget && (
-        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-30" onClick={() => { setExtrasTarget(null); setEditingItemIndex(null) }}>
+      {/* Variant dialog — long-press shows per-variant quantities */}
+      {variantDialogProduct && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-40" onClick={() => setVariantDialogProduct(null)}>
           <div className="bg-white rounded-t-lg sm:rounded-lg p-4 w-full max-w-md max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-bold text-lg mb-1">{extrasTarget.name}</h3>
-            <p className="text-sm text-gray-500 mb-4">{formatCents(extrasTarget.priceCents)}</p>
-
-            {(extrasTarget.extras ?? []).map((extra) => (
-              <div key={extra.id} className="mb-4">
-                <h4 className="font-medium text-sm mb-2">
-                  {extra.name}
-                  <span className="text-gray-400 ml-1">
-                    {extra.multiSelect ? `(${t('order.multiSelect')})` : ''}
-                  </span>
-                </h4>
-                <div className="space-y-1">
-                  {extra.options.map((option) => {
-                    const selected = (extrasSelection[extra.id] ?? []).includes(option.id)
-                    return (
-                      <button
-                        key={option.id}
-                        onClick={() => toggleOption(extra.id, option.id, extra.multiSelect)}
-                        className={`w-full flex items-center justify-between rounded-md border-2 px-3 py-2.5 text-left ${
-                          selected ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
-                        }`}
-                        data-testid={`option-${option.name}`}
-                      >
-                        <span>{option.name}</span>
-                        {option.priceDeltaCents !== 0 && (
-                          <span className="text-sm text-gray-600">
-                            {option.priceDeltaCents > 0 ? '+' : ''}{formatCents(option.priceDeltaCents)}
-                          </span>
-                        )}
-                      </button>
-                    )
-                  })}
+            <h3 className="font-bold text-lg mb-3">{variantDialogProduct.name}</h3>
+            {variantDialogVariants.map((v) => (
+              <div key={v.variant} className="flex items-center justify-between py-2 border-b last:border-b-0">
+                <span className="text-sm flex-1 min-w-0 truncate">{v.variant}</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => adjustVariant(v.variant, -1)}
+                    className="w-8 h-8 rounded bg-gray-100 hover:bg-red-100 text-sm font-bold flex items-center justify-center"
+                  >−</button>
+                  <span className="w-6 text-center text-sm font-bold">{v.quantity}</span>
+                  <button
+                    onClick={() => adjustVariant(v.variant, 1)}
+                    className="w-8 h-8 rounded bg-gray-100 hover:bg-blue-100 text-sm font-bold flex items-center justify-center"
+                  >+</button>
                 </div>
               </div>
             ))}
-
-            <button
-              onClick={confirmExtras}
-              className="w-full bg-blue-600 text-white rounded-md py-3 font-medium"
-              data-testid="extras-confirm"
-            >
-              {editingItemIndex != null
-                ? t('common.save')
-                : `${t('order.add')} · ${formatCents(extrasTarget.priceCents + extrasDeltaTotal)}`}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Detail view — long-press shows cart items for a product */}
-      {detailProduct && (
-        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-30" onClick={() => setDetailProduct(null)}>
-          <div className="bg-white rounded-t-lg sm:rounded-lg p-4 w-full max-w-md max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-lg">{detailProduct.name}</h3>
-              <button onClick={() => setDetailProduct(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+            <div className="flex gap-2 mt-4">
+              <input
+                ref={newVariantInputRef}
+                type="text"
+                value={newVariantInput}
+                onChange={(e) => setNewVariantInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') submitNewVariant() }}
+                placeholder={t('order.newVariantPlaceholder') ?? 'Neue Variante...'}
+                className="flex-1 rounded-md border border-gray-300 p-2 text-sm"
+              />
+              <button
+                onClick={submitNewVariant}
+                disabled={!newVariantInput.trim()}
+                className="bg-blue-600 text-white rounded-md px-3 py-2 text-sm font-medium disabled:opacity-50"
+              >
+                +
+              </button>
             </div>
-            {cart.items.filter((i) => i.product.id === detailProduct.id).length === 0 ? (
-              <p className="text-gray-400 text-sm py-4 text-center">{t('order.empty')}</p>
-            ) : (
-              <div className="space-y-2">
-                {cart.items.filter((i) => i.product.id === detailProduct.id).map((item, idx) => {
-                  const globalIdx = cart.items.indexOf(item)
-                  let parsedOptions: { extraName: string; optionName: string; priceDeltaCents: number }[] = []
-                  try { if (item.options) parsedOptions = item.options.map((o) => ({ extraName: o.extraName, optionName: o.optionName, priceDeltaCents: o.priceDeltaCents })) } catch { /* ignore */ }
-                  return (
-                    <div key={`${item.product.id}-${idx}`} className="border rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium">{item.quantity}× {item.product.name}</span>
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => cart.decrementItem(globalIdx)}
-                            className="w-7 h-7 rounded bg-gray-100 hover:bg-red-100 text-sm font-bold"
-                          >−</button>
-                          <span className="w-6 text-center text-sm font-bold">{item.quantity}</span>
-                          <button
-                            onClick={() => cart.addItem(item.product)}
-                            className="w-7 h-7 rounded bg-gray-100 hover:bg-blue-100 text-sm font-bold"
-                          >+</button>
-                        </div>
-                      </div>
-                      {parsedOptions.length > 0 && (
-                        <div className="text-xs text-blue-600 mt-1">
-                          {parsedOptions.map((o, i) => (
-                            <span key={i}>{o.extraName}: {o.optionName}{i < parsedOptions.length - 1 ? ', ' : ''}</span>
-                          ))}
-                        </div>
-                      )}
-                      {item.comment && <div className="text-xs text-gray-500 mt-1">💬 {item.comment}</div>}
-                      <div className="flex gap-2 mt-1 flex-wrap">
-                        {item.quantity > 1 && (
-                          <button
-                            onClick={() => {
-                              const newIdx = cart.splitItem(globalIdx)
-                              if (newIdx != null) {
-                                setCommentText('')
-                                setCommentTarget(newIdx)
-                                setDetailProduct(null)
-                              }
-                            }}
-                            className="text-xs text-blue-500 hover:underline"
-                          >
-                            1× {t('order.splitOff') ?? 'abtrennen'}
-                          </button>
-                        )}
-                        {item.product.extras?.length ? (
-                          <button
-                            onClick={() => {
-                              // Pre-populate extras selection from current item options
-                              const preselection: Record<string, string[]> = {}
-                              if (item.options) {
-                                for (const opt of item.options) {
-                                  if (!preselection[opt.extraId]) preselection[opt.extraId] = []
-                                  preselection[opt.extraId].push(opt.optionId)
-                                }
-                              }
-                              setExtrasSelection(preselection)
-                              setExtrasTarget(item.product)
-                              setEditingItemIndex(globalIdx)
-                              setDetailProduct(null)
-                            }}
-                            className="text-xs text-blue-500 hover:underline"
-                          >
-                            ⚙ {t('order.editOptions') ?? 'Optionen'}
-                          </button>
-                        ) : null}
-                        <button
-                          onClick={() => { setCommentText(item.comment ?? ''); setCommentTarget(globalIdx) }}
-                          className="text-xs text-blue-500 hover:underline"
-                        >
-                          {item.comment ? t('common.edit') : '+ ' + (t('order.commentPlaceholder') ?? 'Anmerkung')}
-                        </button>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+            <button
+              onClick={() => setVariantDialogProduct(null)}
+              className="w-full mt-3 bg-gray-100 rounded-md py-2.5 text-sm font-medium"
+            >
+              {t('common.done') ?? 'Fertig'}
+            </button>
           </div>
         </div>
       )}

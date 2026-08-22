@@ -49,44 +49,99 @@ Orderwas is a **Bestellsystem** (ordering system) and **Boniersystem** (receipt 
 - **Localization:** German (DE), English (EN), French (FR)
 - **License:** GPL-3.0
 
-## Quick Start
+## Architecture
 
-### Prerequisites
-- Docker installed
-- Network thermal printer (ESC/POS compatible)
-- WiFi router
+> **[📄 Architecture Diagram](docs/architecture-diagram.html)** — interactive SVG overview of the full service architecture
 
-### Installation
+### System Overview
 
-```bash
-# Clone the repository
-git clone https://github.com/your-username/orderwas.git
-cd orderwas
+Orderwas runs on a single server on a dedicated festival LAN — **no internet required**. Clients (waiter phones, station displays, admin laptop) connect via HTTP/WebSocket. The server persists to SQLite and dispatches print jobs to ESC/POS network printers.
 
-# Start with Docker
-docker-compose up -d
+### Service Layers
 
-# Access the admin interface
-open http://localhost:8080
-
-# Export configuration
-curl http://localhost:8080/api/export > config.json
-
-# Import configuration
-curl -X POST http://localhost:8080/api/import -d @config.json
-
-# Download the waiter app
-# Visit http://localhost:8080/app on your smartphone
+```
+┌─────────────────────────────── FESTIVAL LAN ───────────────────────────┐
+│                                                                        │
+│  Waiter PWA      Station Display      Admin PWA      Guest QR         │
+│  (React/Vite)    (Kitchen Monitor)    (Config UI)    (Self-service)    │
+│       │                 │                  │               │            │
+│       └─────────────────┴──────────────────┴───────────────┘            │
+│                          HTTP + WebSocket                               │
+│              ┌────────────▼────────────────────┐                       │
+│              │      Fastify 5 (REST API)       │                       │
+│              │   Routes → Services → Prisma     │                       │
+│              └────┬──────────────┬──────────────┘                       │
+│                   │              │                                       │
+│              SQLite (WAL)   TCP 9100 (ESC/POS)                         │
+│              Prisma 5 ORM    ↓                                          │
+│                          Bar / Kitchen / Dummy printers                 │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Configuration
+### Layering Rules (binding)
 
-1. **Create an event** in the admin interface
-2. **Add waiters** with passwords
-3. **Configure stations** (kitchen, bar, coffee)
-4. **Add products** with prices and stock levels
-5. **Set up printers** (IP addresses)
-6. **Customize app layout** (button grid)
+1. **Routes are thin.** Zod parse → one service call → HTTP response. No Prisma in routes.
+2. **Services own business logic.** Order creation, totals, stock, print dispatch, WebSocket — all in `server/src/services/`.
+3. **Side effects fan out from services.** Creating an order: persist → tear-off → stock decrement → print → WebSocket emit.
+4. **Money is integer cents.** `priceCents Int`, `totalCents Int`. API exposes cents; client formats.
+5. **PIN is write-only.** Accepted on create/update, verified by `/api/auth/login`, never returned.
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full binding architecture document.
+
+## Running the Application
+
+### Development Mode
+
+```bash
+cd orderwas
+
+# Install dependencies
+npm install
+
+# Reset & seed the database (first time or after schema changes)
+cd server && npx prisma db push --force-reset && npx prisma generate && npx prisma db seed && cd ..
+
+# Start dev servers (Vite :5173 + Fastify :3000, with HMR)
+npm run dev
+```
+
+- **Frontend:** http://localhost:5173 (Vite dev server, proxies `/api` → :3000)
+- **Backend:** http://localhost:3000 (Fastify with tsx watch, auto-restarts)
+- **Admin UI:** http://localhost:5173/admin
+- **Kitchen Monitor:** http://localhost:5173/kitchen
+- **Station Display:** http://localhost:5173/station
+- **Waiter Order:** http://localhost:5173/order
+
+**Test login:** Waiter Alice → PIN `1234`, Waiter Bob → PIN `5678` (seeded event "Testfest")
+
+### Production Mode (Docker)
+
+```bash
+cd orderwas
+
+# Build and start
+docker compose up -d
+
+# Access
+open http://localhost:8080
+```
+
+- Single container: client built → served via `@fastify/static` → one port (8080)
+- SQLite data persisted on a named Docker volume
+- Same image works on Raspberry Pi (ARM) and x86
+
+### Quick Commands
+
+```bash
+npm run ci              # Full CI: typecheck → unit → build → E2E
+npm run typecheck       # TypeScript check only
+npm test                # Vitest unit + integration tests
+npm run test:e2e        # Playwright E2E (auto-starts both servers)
+npm run build           # Build both client + server
+
+# Database reset (destructive!)
+cd server && npx prisma db push --force-reset && npx prisma generate && npx prisma db seed
+```
 
 ## Hardware Requirements
 

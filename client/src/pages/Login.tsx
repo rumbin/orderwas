@@ -6,9 +6,9 @@ import type { Event, Waiter } from '@/api/types'
 
 export default function Login({ navigate }: { navigate: (path: string) => void }) {
   const { t } = useTranslation()
-  const { setSession, clear } = useSessionStore()
+  const { event: sessionEvent, setSession, clear } = useSessionStore()
   const [events, setEvents] = useState<Event[]>([])
-  const [selectedEventId, setSelectedEventId] = useState('')
+  const [selectedEventId, setSelectedEventId] = useState(sessionEvent?.id ?? '')
   const [waiters, setWaiters] = useState<Waiter[]>([])
   const [selectedWaiterId, setSelectedWaiterId] = useState('')
   const [pin, setPin] = useState('')
@@ -16,18 +16,25 @@ export default function Login({ navigate }: { navigate: (path: string) => void }
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    // If event was pre-selected from Landing, skip event loading
+    if (sessionEvent) {
+      setSelectedWaiterId('')
+      api.getWaiters(sessionEvent.id).then(setWaiters).catch(() => setError('Failed to load waiters'))
+      return
+    }
+    // Otherwise load events for selection
     clear()
     api.getEvents().then(setEvents).catch(() => setError('Failed to load events'))
-  }, [clear])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (!selectedEventId) {
-      setWaiters([])
+    if (!selectedEventId || sessionEvent) {
+      if (!sessionEvent) setWaiters([])
       return
     }
     setSelectedWaiterId('')
     api.getWaiters(selectedEventId).then(setWaiters).catch(() => setError('Failed to load waiters'))
-  }, [selectedEventId])
+  }, [selectedEventId, sessionEvent])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,8 +42,9 @@ export default function Login({ navigate }: { navigate: (path: string) => void }
     setLoading(true)
     setError('')
     try {
+      const effectiveEventId = sessionEvent?.id ?? selectedEventId
       const { token, waiter } = await api.login(selectedWaiterId, pin)
-      const event = events.find((ev) => ev.id === selectedEventId)
+      const event = sessionEvent ?? events.find((ev) => ev.id === effectiveEventId)
       if (event) {
         setSession({ event, waiter, token })
       }
@@ -53,26 +61,40 @@ export default function Login({ navigate }: { navigate: (path: string) => void }
       <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-md">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('app.title')}</h1>
 
-        {/* Event selector */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t('login.selectEvent')}
-          </label>
-          <select
-            value={selectedEventId}
-            onChange={(e) => { setSelectedEventId(e.target.value); setError('') }}
-            className="w-full rounded-md border border-gray-300 p-2 text-lg"
-            data-testid="event-select"
-          >
-            <option value="">—</option>
-            {events.map((ev) => (
-              <option key={ev.id} value={ev.id}>{ev.name}</option>
-            ))}
-          </select>
-        </div>
+        {/* Event selector — only shown if no pre-selected event */}
+        {!sessionEvent && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('login.selectEvent')}
+            </label>
+            <select
+              value={selectedEventId}
+              onChange={(e) => { setSelectedEventId(e.target.value); setError('') }}
+              className="w-full rounded-md border border-gray-300 p-2 text-lg"
+              data-testid="event-select"
+            >
+              <option value="">—</option>
+              {events.map((ev) => (
+                <option key={ev.id} value={ev.id}>{ev.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Show pre-selected event name */}
+        {sessionEvent && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('login.selectEvent')}
+            </label>
+            <div className="w-full rounded-md border border-gray-200 bg-gray-50 p-2 text-lg text-gray-700">
+              {sessionEvent.name}
+            </div>
+          </div>
+        )}
 
         {/* Waiter selector */}
-        {selectedEventId && (
+        {(selectedEventId || sessionEvent) && (
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('login.selectWaiter')}

@@ -9,14 +9,12 @@ export function AdminWaiters({ eventId, waiters, onChanged }: {
   onChanged: () => void
 }) {
   const { t } = useTranslation()
-  const [newData, setNewData] = useState({ name: '', pin: '', pickupCode: '' })
+  const [newData, setNewData] = useState({ name: '', pin: '' })
 
   const handleCreate = async () => {
     if (!newData.name || !newData.pin) return
-    const payload: Record<string, string> = { name: newData.name, pin: newData.pin }
-    if (newData.pickupCode) payload.pickupCode = newData.pickupCode
-    await api.createWaiter(eventId, payload as unknown as Partial<Waiter> & { pin: string })
-    setNewData({ name: '', pin: '', pickupCode: '' })
+    await api.createWaiter(eventId, { name: newData.name, pin: newData.pin } as unknown as Partial<Waiter> & { pin: string })
+    setNewData({ name: '', pin: '' })
     onChanged()
   }
 
@@ -42,9 +40,6 @@ export function AdminWaiters({ eventId, waiters, onChanged }: {
         <input type="password" placeholder="PIN" value={newData.pin}
           onChange={(e) => setNewData({ ...newData, pin: e.target.value })}
           className="w-24 rounded border border-gray-300 px-3 py-1.5" />
-        <input type="text" placeholder="Abholcode" value={newData.pickupCode}
-          onChange={(e) => setNewData({ ...newData, pickupCode: e.target.value })}
-          className="w-28 rounded border border-gray-300 px-3 py-1.5" />
         <button onClick={handleCreate} className="bg-blue-600 text-white rounded px-4 py-1.5">{t('common.create')}</button>
       </div>
 
@@ -53,7 +48,6 @@ export function AdminWaiters({ eventId, waiters, onChanged }: {
         <thead>
           <tr className="text-left border-b">
             <th className="py-2">Name</th>
-            <th>Abholcode</th>
             <th>Aktiv</th>
             <th>Rechte</th>
             <th></th>
@@ -63,7 +57,6 @@ export function AdminWaiters({ eventId, waiters, onChanged }: {
           {waiters.map((w) => (
             <tr key={w.id} className="border-b">
               <td className="py-2">{w.name}</td>
-              <td className="text-gray-500">{w.pickupCode ?? '—'}</td>
               <td>
                 <button onClick={() => handleToggle(w, 'active')}
                   className={`px-2 py-0.5 rounded text-xs ${w.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>

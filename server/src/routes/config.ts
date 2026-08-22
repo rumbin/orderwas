@@ -3,7 +3,9 @@ import { exportEvent, importEvent, type ImportData } from '@/services/configServ
 
 export const configRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
   // GET /events/:eventId/export — export event configuration as JSON
-  server.get('/events/:eventId/export', async (request, reply) => {
+  server.get('/events/:eventId/export', {
+    preHandler: server.requireAdmin,
+  }, async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     const data = await exportEvent(eventId)
     if (!data) return reply.status(404).send({ error: 'Event not found' })
@@ -11,7 +13,9 @@ export const configRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
   })
 
   // POST /events/import — import event from JSON
-  server.post('/events/import', async (request, reply) => {
+  server.post('/events/import', {
+    preHandler: server.requireAdmin,
+  }, async (request, reply) => {
     const body = request.body as ImportData
     if (!body?.event?.name) {
       return reply.status(400).send({ error: 'Missing required field: event.name' })

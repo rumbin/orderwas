@@ -147,4 +147,94 @@ describe('Auth routes', () => {
     expect(body.pin).toBeUndefined()
     expect(body.name).toBe('Alice')
   })
+
+  // --- Admin PIN tests ---
+  it('POST /api/auth/admin/login with default PIN returns 200 with token', async () => {
+    // Default PIN is 'admin' (no DB setting, no ADMIN_PIN env)
+    await prisma.systemSetting.deleteMany({ where: { key: 'admin_pin' } })
+    const res = await server.inject({
+      method: 'POST',
+      url: '/api/auth/admin/login',
+      payload: { pin: 'admin' },
+    })
+    expect(res.statusCode).toBe(200)
+    const body = res.json()
+    expect(body.token).toBeDefined()
+    expect(typeof body.token).toBe('string')
+  })
+
+  it('POST /api/auth/admin/login with wrong PIN returns 401', async () => {
+    await prisma.systemSetting.deleteMany({ where: { key: 'admin_pin' } })
+    const res = await server.inject({
+      method: 'POST',
+      url: '/api/auth/admin/login',
+      payload: { pin: 'wrong' },
+    })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('PUT /api/auth/admin/pin changes the admin PIN', async () => {
+    await prisma.systemSetting.deleteMany({ where: { key: 'admin_pin' } })
+    // Login with default PIN
+    const loginRes = await server.inject({
+      method: 'POST',
+      url: '/api/auth/admin/login',
+      payload: { pin: 'admin' },
+    })
+    const adminToken = loginRes.json().token
+
+    // Change PIN
+    const changeRes = await server.inject({
+      method: 'PUT',
+      url: '/api/auth/admin/pin',
+      headers: { authorization: `Bearer ${adminToken}` },
+      payload: { newPin: 'secret123' },
+    })
+    expect(changeRes.statusCode).toBe(200)
+    expect(changeRes.json().ok).toBe(true)
+
+    // Old PIN no longer works
+    const oldRes = await server.inject({
+      method: 'POST',
+      url: '/api/auth/admin/login',
+      payload: { pin: 'admin' },
+    })
+    expect(oldRes.statusCode).toBe(401)
+
+    // New PIN works
+    const newRes = await server.inject({
+      method: 'POST',
+      url: '/api/auth/admin/login',
+      payload: { pin: 'secret123' },
+    })
+    expect(newRes.statusCode).toBe(200)
+    expect(newRes.json().token).toBeDefined()
+  })
+
+  it('PUT /api/auth/admin/pin rejects short PIN', async () => {
+    await prisma.systemSetting.deleteMany({ where: { key: 'admin_pin' } })
+    const loginRes = await server.inject({
+      method: 'POST',
+      url: '/api/auth/admin/login',
+      payload: { pin: 'admin' },
+    })
+    const adminToken = loginRes.json().token
+
+    const res = await server.inject({
+      method: 'PUT',
+      url: '/api/auth/admin/pin',
+      headers: { authorization: `Bearer ${adminToken}` },
+      payload: { newPin: 'ab' },
+    })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('PUT /api/auth/admin/pin without admin token returns 401', async () => {
+    const res = await server.inject({
+      method: 'PUT',
+      url: '/api/auth/admin/pin',
+      payload: { newPin: 'secret123' },
+    })
+    expect(res.statusCode).toBe(401)
+  })
 })

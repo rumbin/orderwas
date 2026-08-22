@@ -2,6 +2,7 @@ import type {
   Event,
   Station,
   Product,
+  ProductExtra,
   Waiter,
   Order,
   Printer,
@@ -27,6 +28,20 @@ function authHeaders(): Record<string, string> {
   return {}
 }
 
+function adminAuthHeaders(): Record<string, string> {
+  const stored = localStorage.getItem('orderwas-session')
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored)
+      const adminToken = parsed?.state?.adminToken
+      if (adminToken) return { Authorization: `Bearer ${adminToken}` }
+    } catch {
+      // ignore
+    }
+  }
+  return {}
+}
+
 async function request<T>(
   path: string,
   options?: RequestInit,
@@ -36,6 +51,7 @@ async function request<T>(
     headers: {
       'Content-Type': 'application/json',
       ...authHeaders(),
+      ...adminAuthHeaders(),
       ...options?.headers,
     },
   })
@@ -59,6 +75,16 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ waiterId, pin }),
     }),
+
+  // Admin Auth
+  adminLogin: (pin: string) =>
+    request<{ token: string }>('/auth/admin/login', {
+      method: 'POST',
+      body: JSON.stringify({ pin }),
+    }),
+
+  changeAdminPin: (newPin: string) =>
+    request<{ ok: boolean }>('/auth/admin/pin', { method: 'PUT', body: JSON.stringify({ newPin }) }),
 
   // Events
   getEvents: () => request<Event[]>('/events'),
@@ -91,6 +117,17 @@ export const api = {
     request<void>(`/products/${id}`, { method: 'DELETE' }),
   adjustStock: (id: string, delta: number) =>
     request<{ id: string; name: string; stockCount: number; stockMode: string }>(`/products/${id}/stock`, { method: 'PATCH', body: JSON.stringify({ delta }) }),
+  reorderProducts: (stationId: string, productIds: string[]) =>
+    request<{ ok: boolean }>('/products/reorder', {
+      method: 'PATCH',
+      body: JSON.stringify({ stationId, productIds }),
+    }),
+
+  // Extras (predefined customizations)
+  createExtra: (productId: string, data: { name: string; multiSelect?: boolean; options: { name: string; priceDeltaCents?: number }[] }) =>
+    request<ProductExtra>(`/products/${productId}/extras`, { method: 'POST', body: JSON.stringify(data) }),
+  deleteExtra: (extraId: string) =>
+    request<void>(`/extras/${extraId}`, { method: 'DELETE' }),
 
   // Waiters
   getWaiters: (eventId: string) => request<Waiter[]>(`/events/${eventId}/waiters`),

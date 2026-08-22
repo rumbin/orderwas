@@ -15,7 +15,10 @@ export async function listProductsByStation(stationId: string) {
   return prisma.product.findMany({
     where: { stationId },
     orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-    include: { extras: { include: { options: true }, orderBy: { sortOrder: 'asc' } } },
+    include: {
+      extras: { include: { options: true }, orderBy: { sortOrder: 'asc' } },
+      _count: { select: { orderItems: true } },
+    },
   })
 }
 

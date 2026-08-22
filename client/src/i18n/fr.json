@@ -22,7 +22,8 @@
     "add": "Ajouter",
     "remove": "Retirer",
     "editOptions": "Modifier les options",
-    "splitOff": "séparer"
+    "splitOff": "séparer",
+    "newVariantPlaceholder": "Nouvelle variante..."
   },
   "station": {
     "title": "Station",
@@ -47,6 +48,7 @@
   "common": {
     "save": "Enregistrer",
     "cancel": "Annuler",
+    "done": "Terminé",
     "delete": "Supprimer",
     "edit": "Modifier",
     "create": "Créer",

@@ -4,10 +4,12 @@ import { prisma } from '@/db/client'
 
 describe('Event CRUD routes', () => {
   let server: AppServer
+  let adminToken: string
 
   beforeAll(async () => {
     server = buildServer()
     await server.listen({ port: 0, host: '127.0.0.1' })
+    adminToken = server.jwt.sign({ admin: true }, { expiresIn: '8h' })
   })
 
   afterAll(async () => {
@@ -34,6 +36,7 @@ describe('Event CRUD routes', () => {
       method: 'POST',
       url: '/api/events',
       payload: { name: 'Test Event', status: 'live' },
+      headers: { authorization: `Bearer ${adminToken}` },
     })
     expect(response.statusCode).toBe(201)
     const body = response.json()
@@ -49,6 +52,7 @@ describe('Event CRUD routes', () => {
       method: 'POST',
       url: '/api/events',
       payload: { status: 'live' },
+      headers: { authorization: `Bearer ${adminToken}` },
     })
     expect(response.statusCode).toBe(400)
   })
@@ -95,6 +99,7 @@ describe('Event CRUD routes', () => {
       method: 'PUT',
       url: `/api/events/${created.id}`,
       payload: { name: 'Updated', status: 'live', hidePrices: true, tseEnabled: true },
+      headers: { authorization: `Bearer ${adminToken}` },
     })
     expect(response.statusCode).toBe(200)
     const body = response.json()
@@ -109,6 +114,7 @@ describe('Event CRUD routes', () => {
       method: 'PUT',
       url: '/api/events/nonexistent',
       payload: { name: 'Nope' },
+      headers: { authorization: `Bearer ${adminToken}` },
     })
     expect(response.statusCode).toBe(404)
   })
@@ -119,6 +125,7 @@ describe('Event CRUD routes', () => {
     const response = await server.inject({
       method: 'DELETE',
       url: `/api/events/${created.id}`,
+      headers: { authorization: `Bearer ${adminToken}` },
     })
     expect(response.statusCode).toBe(204)
 
@@ -130,6 +137,7 @@ describe('Event CRUD routes', () => {
     const response = await server.inject({
       method: 'DELETE',
       url: '/api/events/nonexistent',
+      headers: { authorization: `Bearer ${adminToken}` },
     })
     expect(response.statusCode).toBe(404)
   })

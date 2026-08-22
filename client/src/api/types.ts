@@ -98,6 +98,7 @@ export interface OrderItem {
   quantity: number
   status: 'open' | 'prepared' | 'delivered' | 'cancelled'
   comment: string | null
+  options: string | null // JSON: [{extraName, optionName, priceDeltaCents}]
 }
 
 export interface Order {

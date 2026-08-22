@@ -6,7 +6,7 @@
     "client"
   ],
   "scripts": {
-    "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
+    "dev": "cd server && rm -f prisma/orderwas.db && npx prisma db push 2>&1 | tail -3 && npx prisma db seed 2>&1 | tail -3 && cd .. && concurrently \"npm:dev:server\" \"npm:dev:client\"",
     "dev:server": "npm -w server run dev",
     "dev:client": "npm -w client run dev",
     "test": "npm -w server run test && npm -w client run test",

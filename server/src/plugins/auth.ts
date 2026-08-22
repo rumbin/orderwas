@@ -15,6 +15,10 @@ export interface JwtPayload {
   }
 }
 
+export interface AdminJwtPayload {
+  admin: true
+}
+
 /**
  * Registers the JWT plugin and decorates the server with `authenticate`
  * and `requirePermission`.
@@ -30,6 +34,18 @@ async function authPlugin(server: FastifyInstance): Promise<void> {
   server.decorate('authenticate', async (request: any, reply: any) => {
     try {
       await request.jwtVerify()
+    } catch {
+      return reply.status(401).send({ error: 'Unauthorized' })
+    }
+  })
+
+  // Admin gate: requires JWT with { admin: true }
+  server.decorate('requireAdmin', async (request: any, reply: any) => {
+    try {
+      const payload = (await request.jwtVerify()) as AdminJwtPayload
+      if (!payload.admin) {
+        return reply.status(403).send({ error: 'Forbidden: admin access required' })
+      }
     } catch {
       return reply.status(401).send({ error: 'Unauthorized' })
     }
@@ -57,6 +73,7 @@ export default fp(authPlugin, { name: 'auth' })
 declare module 'fastify' {
   interface FastifyInstance {
     authenticate: (request: any, reply: any) => Promise<void>
+    requireAdmin: (request: any, reply: any) => Promise<void>
     requirePermission: (permission: keyof JwtPayload['permissions']) => (request: any, reply: any) => Promise<void>
   }
 }

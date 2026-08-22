@@ -54,6 +54,24 @@ const updateExtraSchema = z.object({
 })
 
 export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
+  // PATCH /products/reorder — bulk update sortOrder for products in a station
+  const reorderSchema = z.object({
+    stationId: z.string(),
+    productIds: z.array(z.string()).nonempty(),
+  })
+
+  server.patch('/products/reorder', async (request, reply) => {
+    const parsed = reorderSchema.safeParse(request.body)
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
+    const { stationId, productIds } = parsed.data
+    await prisma.$transaction(
+      productIds.map((id, index) =>
+        prisma.product.update({ where: { id }, data: { sortOrder: index } })
+      )
+    )
+    return { ok: true }
+  })
+
   // POST /stations/:stationId/products — create product under a station
   server.post('/stations/:stationId/products', async (request, reply) => {
     const { stationId } = request.params as { stationId: string }

@@ -5,6 +5,7 @@ import { exportEvent, importEvent } from '@/services/configService'
 
 describe('Configuration export/import', () => {
   let server: AppServer
+  let adminToken: string
   let eventId: string
 
   afterAll(async () => {
@@ -34,11 +35,13 @@ describe('Configuration export/import', () => {
     // Create a full event via API
     server = buildServer()
     await server.ready()
+    adminToken = server.jwt.sign({ admin: true }, { expiresIn: '8h' })
 
     const evRes = await server.inject({
       method: 'POST',
       url: '/api/events',
       payload: { name: 'Export Test Event' },
+      headers: { authorization: `Bearer ${adminToken}` },
     })
     eventId = evRes.json().id
 
@@ -79,7 +82,11 @@ describe('Configuration export/import', () => {
   })
 
   it('GET /events/:id/export returns event configuration', async () => {
-    const res = await server.inject({ method: 'GET', url: `/api/events/${eventId}/export` })
+    const res = await server.inject({
+      method: 'GET',
+      url: `/api/events/${eventId}/export`,
+      headers: { authorization: `Bearer ${adminToken}` },
+    })
     expect(res.statusCode).toBe(200)
     const data = res.json()
     expect(data.event.name).toBe('Export Test Event')
@@ -96,7 +103,11 @@ describe('Configuration export/import', () => {
 
   it('POST /events/import creates a new event from JSON', async () => {
     // Export
-    const exportRes = await server.inject({ method: 'GET', url: `/api/events/${eventId}/export` })
+    const exportRes = await server.inject({
+      method: 'GET',
+      url: `/api/events/${eventId}/export`,
+      headers: { authorization: `Bearer ${adminToken}` },
+    })
     const exported = exportRes.json()
 
     // Import
@@ -104,6 +115,7 @@ describe('Configuration export/import', () => {
       method: 'POST',
       url: '/api/events/import',
       payload: exported,
+      headers: { authorization: `Bearer ${adminToken}` },
     })
     expect(importRes.statusCode).toBe(201)
     const imported = importRes.json()
@@ -112,7 +124,7 @@ describe('Configuration export/import', () => {
   })
 
   it('round-trip: export→import→export is idempotent', async () => {
-    // First export
+    // First export (service-level, no HTTP auth needed)
     const export1 = await exportEvent(eventId)
     expect(export1).not.toBeNull()
 
@@ -154,6 +166,7 @@ describe('Configuration export/import', () => {
       method: 'POST',
       url: '/api/events/import',
       payload: { stations: [] },
+      headers: { authorization: `Bearer ${adminToken}` },
     })
     expect(res.statusCode).toBe(400)
   })

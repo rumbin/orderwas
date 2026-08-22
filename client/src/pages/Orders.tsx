@@ -18,7 +18,7 @@ function formatCents(cents: number): string {
 
 export default function OrdersPage({ navigate }: { navigate: (path: string) => void }) {
   const { t } = useTranslation()
-  const { event, waiter, token } = useSessionStore()
+  const { event, waiter, token, clear } = useSessionStore()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [confirming, setConfirming] = useState<{ type: 'pay' | 'cancel' | 'reopen'; orderId: string } | null>(null)
@@ -140,6 +140,9 @@ export default function OrdersPage({ navigate }: { navigate: (path: string) => v
             + {t('order.newOrder')}
           </button>
           <button onClick={loadOrders} className="text-sm text-blue-600">↻</button>
+          <button onClick={() => { clear(); navigate('/') }} className="text-sm text-gray-400 hover:text-gray-700">
+            {t('common.logout') ?? 'Abmelden'}
+          </button>
         </div>
       </div>
 
@@ -173,7 +176,8 @@ export default function OrdersPage({ navigate }: { navigate: (path: string) => v
             </p>
             <div className="flex gap-2">
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation()
                   if (confirming.type === 'pay') handlePay(confirming.orderId)
                   else if (confirming.type === 'cancel') handleCancel(confirming.orderId)
                   else handleReopen(confirming.orderId)

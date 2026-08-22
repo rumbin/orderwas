@@ -24,7 +24,8 @@
     "outOfStock": "Out of stock",
     "inStock": "in stock",
     "editOptions": "Edit options",
-    "splitOff": "split off"
+    "splitOff": "split off",
+    "newVariantPlaceholder": "New variant..."
   },
   "station": {
     "title": "Station",
@@ -57,6 +58,7 @@
   "common": {
     "save": "Save",
     "cancel": "Cancel",
+    "done": "Done",
     "delete": "Delete",
     "edit": "Edit",
     "create": "Create",

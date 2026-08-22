@@ -7,7 +7,42 @@ const loginSchema = z.object({
   pin: z.string().min(1),
 })
 
+const adminLoginSchema = z.object({
+  pin: z.string().min(1),
+})
+
 export const authRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
+  // POST /api/auth/admin/login — verify admin PIN, return admin JWT
+  server.post('/auth/admin/login', async (request, reply) => {
+    const parsed = adminLoginSchema.safeParse(request.body)
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
+
+    const { pin } = parsed.data
+    // Check DB setting first, fallback to env, fallback to 'admin'
+    const dbSetting = await prisma.systemSetting.findUnique({ where: { key: 'admin_pin' } })
+    const validPin = dbSetting?.value ?? process.env.ADMIN_PIN ?? 'admin'
+    if (pin !== validPin) {
+      return reply.status(401).send({ error: 'Wrong PIN' })
+    }
+
+    const token = server.jwt.sign({ admin: true }, { expiresIn: '8h' })
+    return reply.status(200).send({ token })
+  })
+
+  // PUT /api/auth/admin/pin — change admin PIN (requires admin auth)
+  server.put('/auth/admin/pin', { preHandler: server.requireAdmin }, async (request, reply) => {
+    const { newPin } = request.body as { newPin: string }
+    if (!newPin || newPin.length < 3) {
+      return reply.status(400).send({ error: 'PIN must be at least 3 characters' })
+    }
+    await prisma.systemSetting.upsert({
+      where: { key: 'admin_pin' },
+      update: { value: newPin },
+      create: { key: 'admin_pin', value: newPin },
+    })
+    return reply.status(200).send({ ok: true })
+  })
+
   // POST /api/auth/login — verify waiter PIN, return JWT
   server.post('/auth/login', async (request, reply) => {
     const parsed = loginSchema.safeParse(request.body)

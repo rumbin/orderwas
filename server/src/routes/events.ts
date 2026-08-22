@@ -12,11 +12,14 @@ const updateEventSchema = z.object({
   status: z.enum(['test', 'live']).optional(),
   hidePrices: z.boolean().optional(),
   tseEnabled: z.boolean().optional(),
+  lastTearOffNumber: z.number().int().min(0).optional(),
 })
 
 export default async function eventRoutes(server: FastifyInstance): Promise<void> {
   // Create event
-  server.post('/events', async (request, reply) => {
+  server.post('/events', {
+    preHandler: server.requireAdmin,
+  }, async (request, reply) => {
     const parsed = createEventSchema.safeParse(request.body)
     if (!parsed.success) {
       return reply.code(400).send({ error: parsed.error.flatten() })
@@ -41,7 +44,9 @@ export default async function eventRoutes(server: FastifyInstance): Promise<void
   })
 
   // Update event
-  server.put('/events/:id', async (request, reply) => {
+  server.put('/events/:id', {
+    preHandler: server.requireAdmin,
+  }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = updateEventSchema.safeParse(request.body)
     if (!parsed.success) {
@@ -55,7 +60,9 @@ export default async function eventRoutes(server: FastifyInstance): Promise<void
   })
 
   // Delete event
-  server.delete('/events/:id', async (request, reply) => {
+  server.delete('/events/:id', {
+    preHandler: server.requireAdmin,
+  }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const deleted = await eventService.deleteEvent(id)
     if (!deleted) {

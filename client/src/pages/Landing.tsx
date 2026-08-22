@@ -6,13 +6,15 @@ import type { Event, Station } from '@/api/types'
 
 export default function Landing({ navigate }: { navigate: (path: string) => void }) {
   const { t } = useTranslation()
-  const { isLoggedIn } = useSessionStore()
+  const { isLoggedIn, clear, setEvent } = useSessionStore()
   const [events, setEvents] = useState<Event[]>([])
   const [selectedEventId, setSelectedEventId] = useState('')
   const [stations, setStations] = useState<Station[]>([])
   const [showStations, setShowStations] = useState(false)
 
   useEffect(() => {
+    // Clear stale waiter session on landing page (preserve adminToken)
+    clear()
     api.getEvents().then((evs) => {
       setEvents(evs)
       if (evs.length > 0) setSelectedEventId(evs[0].id)
@@ -47,7 +49,12 @@ export default function Landing({ navigate }: { navigate: (path: string) => void
       {/* Role tiles */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-md">
         <button
-          onClick={() => navigate(isLoggedIn() ? '/order' : '/login')}
+          onClick={() => {
+            // Store selected event in session so Login can skip event selection
+            const ev = events.find((e) => e.id === selectedEventId)
+            if (ev) setEvent(ev)
+            navigate(isLoggedIn() ? '/order' : '/login')
+          }}
           className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-6 text-center min-h-[120px] flex flex-col items-center justify-center"
           data-testid="tile-waiter"
         >
