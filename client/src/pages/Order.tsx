@@ -199,12 +199,10 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
-              onPointerDown={(e) => {
-                if (count > 0) {
-                  longPressTimer.current = setTimeout(() => {
-                    openVariantDialog(product)
-                  }, 500)
-                }
+              onPointerDown={() => {
+                longPressTimer.current = setTimeout(() => {
+                  openVariantDialog(product)
+                }, 500)
               }}
               onPointerUp={() => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null } }}
               onPointerLeave={() => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null } }}
