@@ -1,6 +1,6 @@
 import { useRouter, matchRoute } from '@/router'
 import { useSessionStore } from '@/stores/session'
-import { useThemeStore } from '@/stores/theme'
+import { ThemeProvider, useThemeStore } from '@/stores/theme'
 import Landing from '@/pages/Landing'
 import Login from '@/pages/Login'
 import OrderPage from '@/pages/Order'
@@ -10,10 +10,10 @@ import StationDisplay from '@/pages/StationDisplay'
 import KitchenMonitor from '@/pages/KitchenMonitor'
 import GuestOrder from '@/pages/GuestOrder'
 
-export default function App() {
+function AppInner() {
   const route = useRouter()
   const isLoggedIn = useSessionStore((s) => s.isLoggedIn())
-  const dark = useThemeStore((s) => s.dark)
+  useThemeStore() // subscribe to theme context
 
   // Landing page — role navigation hub
   if (route.path === '/') {
@@ -61,5 +61,13 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
       <p className="text-gray-500 dark:text-gray-400">404 — Page not found</p>
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
+    </ThemeProvider>
   )
 }
