@@ -61,6 +61,13 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
     return () => window.removeEventListener('beforeunload', handler)
   }, [])
 
+  // Auto-dismiss success after 7 seconds
+  useEffect(() => {
+    if (!success) return
+    const timer = setTimeout(() => setSuccess(null), 7000)
+    return () => clearTimeout(timer)
+  }, [success])
+
   // Load orders when switching to open/done tabs
   useEffect(() => {
     if (tab === 'new' || !event) return
@@ -81,7 +88,6 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   const total = cart.total()
 
   const handleAddProduct = (product: Product) => {
-    setSuccess(null)
     cart.addItem(product)
   }
 
@@ -183,7 +189,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
         {(['new', 'open', 'done'] as const).map((t2) => (
           <button
             key={t2}
-            onClick={() => setTab(t2)}
+            onClick={() => { setTab(t2); setSuccess(null) }}
             className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap ${
               tab === t2
                 ? 'bg-blue-600 text-white'
