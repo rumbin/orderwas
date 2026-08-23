@@ -330,7 +330,7 @@ describe('OrderPage', () => {
       fireEvent.click(screen.getByText('order.tabDone'))
 
       await waitFor(() => {
-        expect(screen.getByText('fertig')).toBeDefined()
+        expect(screen.getByText('order.statusDone')).toBeDefined()
       })
     })
 

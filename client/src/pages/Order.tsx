@@ -10,6 +10,20 @@ function formatCents(cents: number): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(cents / 100)
 }
 
+const STATUS_I18N: Record<string, string> = {
+  open: 'order.statusOpen',
+  preparing: 'order.statusPreparing',
+  partial: 'order.statusPartial',
+  done: 'order.statusDone',
+  paid: 'order.statusPaid',
+  cancelled: 'order.statusCancelled',
+  fertig: 'order.statusDone',
+}
+
+function statusText(status: string, t: (key: string) => string): string {
+  return t(STATUS_I18N[status] ?? status)
+}
+
 export default function OrderPage({ navigate }: { navigate: (path: string) => void }) {
   const { t } = useTranslation()
   const { event, waiter, token, clear } = useSessionStore()
@@ -422,7 +436,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                       {order.tearOffNumber && <span className="text-xs text-gray-500">#{order.tearOffNumber}</span>}
                     </div>
                     <span className="text-xs font-medium px-2 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200">
-                      {order.status}
+                      {statusText(order.status, t)}
                     </span>
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-300">
@@ -488,7 +502,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                       displayStatus === 'cancelled' ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200'
                         : 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200'
                     }`}>
-                      {displayStatus}
+                      {statusText(displayStatus, t)}
                     </span>
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-300">
