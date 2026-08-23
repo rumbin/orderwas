@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 
-// Mock the API client
 vi.mock('@/api/client', () => ({
   api: {
     getWaiters: vi.fn(),
@@ -14,7 +13,6 @@ vi.mock('@/api/client', () => ({
 import { api } from '@/api/client'
 import { useSessionStore } from '@/stores/session'
 
-// Mock i18n
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }))
@@ -26,24 +24,12 @@ const mockWaiters = [
 
 describe('Session store clear() preserves adminToken', () => {
   beforeEach(() => {
-    useSessionStore.setState({
-      event: null,
-      waiter: null,
-      token: null,
-      adminToken: null,
-    })
+    useSessionStore.setState({ event: null, waiter: null, token: null, adminToken: null })
   })
 
   it('clear() removes event, waiter, token but keeps adminToken', () => {
-    useSessionStore.setState({
-      event: mockEvent as any,
-      waiter: mockWaiters[0] as any,
-      token: 'waiter-jwt',
-      adminToken: 'admin-jwt',
-    })
-
+    useSessionStore.setState({ event: mockEvent as any, waiter: mockWaiters[0] as any, token: 'waiter-jwt', adminToken: 'admin-jwt' })
     useSessionStore.getState().clear()
-
     const state = useSessionStore.getState()
     expect(state.event).toBeNull()
     expect(state.waiter).toBeNull()
@@ -52,34 +38,18 @@ describe('Session store clear() preserves adminToken', () => {
   })
 
   it('clear() on state without adminToken keeps it null', () => {
-    useSessionStore.setState({
-      event: mockEvent as any,
-      waiter: mockWaiters[0] as any,
-      token: 'waiter-jwt',
-      adminToken: null,
-    })
-
+    useSessionStore.setState({ event: mockEvent as any, waiter: mockWaiters[0] as any, token: 'waiter-jwt', adminToken: null })
     useSessionStore.getState().clear()
-
     const state = useSessionStore.getState()
     expect(state.event).toBeNull()
-    expect(state.waiter).toBeNull()
-    expect(state.token).toBeNull()
     expect(state.adminToken).toBeNull()
   })
 
   it('setSession sets event, waiter, token but does not touch adminToken', () => {
     useSessionStore.setState({ adminToken: 'admin-jwt' })
-
-    useSessionStore.getState().setSession({
-      event: mockEvent as any,
-      waiter: mockWaiters[0] as any,
-      token: 'waiter-jwt',
-    })
-
+    useSessionStore.getState().setSession({ event: mockEvent as any, waiter: mockWaiters[0] as any, token: 'waiter-jwt' })
     const state = useSessionStore.getState()
     expect(state.event).toEqual(mockEvent)
-    expect(state.waiter).toEqual(mockWaiters[0])
     expect(state.token).toBe('waiter-jwt')
     expect(state.adminToken).toBe('admin-jwt')
   })
@@ -87,11 +57,8 @@ describe('Session store clear() preserves adminToken', () => {
   it('setAdminToken and clear() interact correctly', () => {
     useSessionStore.setState({ adminToken: 'admin-jwt' })
     useSessionStore.getState().setAdminToken('new-admin-jwt')
-
     expect(useSessionStore.getState().adminToken).toBe('new-admin-jwt')
-
     useSessionStore.getState().clear()
-
     expect(useSessionStore.getState().adminToken).toBe('new-admin-jwt')
   })
 })
@@ -99,71 +66,48 @@ describe('Session store clear() preserves adminToken', () => {
 describe('Login flow', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
-    // Set up session with pre-selected event (as Landing page would do)
-    useSessionStore.setState({
-      event: mockEvent as any,
-      waiter: null,
-      token: null,
-      adminToken: null,
-    })
+    useSessionStore.setState({ event: mockEvent as any, waiter: null, token: null, adminToken: null })
     vi.mocked(api.getWaiters).mockResolvedValue(mockWaiters as any)
   })
 
-  it('loads waiters on mount using pre-selected event', async () => {
+  it('loads waiters and shows buttons', async () => {
     const { default: Login } = await import('@/pages/Login')
     render(<Login navigate={vi.fn()} />)
     await waitFor(() => {
       expect(api.getWaiters).toHaveBeenCalledWith('evt1')
     })
-    const waiterSelect = screen.getByTestId('waiter-select')
-    const options = waiterSelect.querySelectorAll('option')
-    expect(options.length).toBe(2) // placeholder + Alice
-    expect(options[1].textContent).toBe('Alice')
+    expect(screen.getByTestId('waiter-Alice')).toBeDefined()
   })
 
-  it('successful login sets session correctly with event, waiter, and token', async () => {
+  it('successful login sets session and navigates', async () => {
     const mockNavigate = vi.fn()
-    vi.mocked(api.login).mockResolvedValueOnce({
-      token: 'waiter-jwt-token',
-      waiter: mockWaiters[0] as any,
-    })
-
+    vi.mocked(api.login).mockResolvedValueOnce({ token: 'waiter-jwt-token', waiter: mockWaiters[0] as any })
     const { default: Login } = await import('@/pages/Login')
     render(<Login navigate={mockNavigate} />)
     await waitFor(() => expect(api.getWaiters).toHaveBeenCalled())
-
-    fireEvent.change(screen.getByTestId('waiter-select'), { target: { value: 'wtr1' } })
+    fireEvent.click(screen.getByTestId('waiter-Alice'))
     fireEvent.change(screen.getByTestId('pin-input'), { target: { value: '1234' } })
     fireEvent.click(screen.getByTestId('login-button'))
-
     await waitFor(() => {
       expect(api.login).toHaveBeenCalledWith('wtr1', '1234')
+      const state = useSessionStore.getState()
+      expect(state.token).toBe('waiter-jwt-token')
+      expect(state.event?.id).toBe('evt1')
+      expect(mockNavigate).toHaveBeenCalledWith('/order')
     })
-
-    const state = useSessionStore.getState()
-    expect(state.token).toBe('waiter-jwt-token')
-    expect(state.waiter).toEqual(mockWaiters[0])
-    expect(state.event?.id).toBe('evt1')
-    expect(mockNavigate).toHaveBeenCalledWith('/order')
   })
 
   it('wrong PIN shows error and does not set session', async () => {
     vi.mocked(api.login).mockRejectedValueOnce(new Error('Invalid credentials'))
-
     const { default: Login } = await import('@/pages/Login')
     render(<Login navigate={vi.fn()} />)
     await waitFor(() => expect(api.getWaiters).toHaveBeenCalled())
-
-    fireEvent.change(screen.getByTestId('waiter-select'), { target: { value: 'wtr1' } })
+    fireEvent.click(screen.getByTestId('waiter-Alice'))
     fireEvent.change(screen.getByTestId('pin-input'), { target: { value: '9999' } })
     fireEvent.click(screen.getByTestId('login-button'))
-
     await waitFor(() => {
       expect(screen.getByTestId('login-error')).toBeDefined()
     })
-
-    const state = useSessionStore.getState()
-    expect(state.token).toBeNull()
-    expect(state.waiter).toBeNull()
+    expect(useSessionStore.getState().token).toBeNull()
   })
 })

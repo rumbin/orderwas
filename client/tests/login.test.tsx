@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import Login from '@/pages/Login'
 
-// Mock the API client
 vi.mock('@/api/client', () => ({
   api: {
     getWaiters: vi.fn(),
@@ -12,7 +11,6 @@ vi.mock('@/api/client', () => ({
 
 import { api } from '@/api/client'
 
-// Mock zustand session store — event is always pre-selected from Landing
 const mockEvent = { id: 'evt1', name: 'Testfest', status: 'test', hidePrices: false, tseEnabled: false, lastTearOffNumber: 0, createdAt: '', updatedAt: '' }
 vi.mock('@/stores/session', () => ({
   useSessionStore: () => ({
@@ -21,12 +19,10 @@ vi.mock('@/stores/session', () => ({
   }),
 }))
 
-// Mock i18n
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }))
 
-// Mock zustand to avoid persist middleware
 vi.mock('zustand', () => ({
   create: (fn: any) => {
     const state = fn((set: any) => ({}), () => ({}))
@@ -36,6 +32,7 @@ vi.mock('zustand', () => ({
 
 const mockWaiters = [
   { id: 'wtr1', name: 'Alice', logo: null, eventId: 'evt1', printerId: null, pickupCode: null, printsImmediately: true, canCancel: false, canCashOut: false, canStatistics: false, canCreateWaiters: false, canTransfer: false, isStationWaiter: false, hidden: false, autoSammelbon: false, active: true },
+  { id: 'wtr2', name: 'Bob', logo: null, eventId: 'evt1', printerId: null, pickupCode: null, printsImmediately: true, canCancel: false, canCashOut: false, canStatistics: false, canCreateWaiters: false, canTransfer: false, isStationWaiter: false, hidden: false, autoSammelbon: false, active: true },
 ]
 
 describe('Login page', () => {
@@ -44,21 +41,30 @@ describe('Login page', () => {
     vi.mocked(api.getWaiters).mockResolvedValue(mockWaiters as any)
   })
 
-  it('loads waiters on mount using pre-selected event', async () => {
+  it('renders waiter buttons sorted alphabetically', async () => {
     render(<Login navigate={vi.fn()} />)
-    await waitFor(() => {
-      expect(api.getWaiters).toHaveBeenCalledWith('evt1')
-    })
-    const waiterSelect = screen.getByTestId('waiter-select')
-    const options = waiterSelect.querySelectorAll('option')
-    expect(options.length).toBeGreaterThanOrEqual(2) // placeholder + waiters
+    await waitFor(() => expect(api.getWaiters).toHaveBeenCalled())
+    const aliceBtn = screen.getByTestId('waiter-Alice')
+    const bobBtn = screen.getByTestId('waiter-Bob')
+    expect(aliceBtn).toBeDefined()
+    expect(bobBtn).toBeDefined()
+    // Alice before Bob in DOM (alphabetical)
+    expect(aliceBtn.compareDocumentPosition(bobBtn) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('clicking waiter opens PIN overlay', async () => {
+    render(<Login navigate={vi.fn()} />)
+    await waitFor(() => expect(api.getWaiters).toHaveBeenCalled())
+    fireEvent.click(screen.getByTestId('waiter-Alice'))
+    expect(screen.getByTestId('pin-input')).toBeDefined()
+    expect(screen.getByTestId('login-button')).toBeDefined()
   })
 
   it('shows wrong PIN error on login failure', async () => {
     vi.mocked(api.login).mockRejectedValueOnce(new Error('Invalid credentials'))
     render(<Login navigate={vi.fn()} />)
     await waitFor(() => expect(api.getWaiters).toHaveBeenCalled())
-    fireEvent.change(screen.getByTestId('waiter-select'), { target: { value: 'wtr1' } })
+    fireEvent.click(screen.getByTestId('waiter-Alice'))
     fireEvent.change(screen.getByTestId('pin-input'), { target: { value: '9999' } })
     fireEvent.click(screen.getByTestId('login-button'))
     await waitFor(() => {
@@ -74,7 +80,7 @@ describe('Login page', () => {
     })
     render(<Login navigate={mockNavigate} />)
     await waitFor(() => expect(api.getWaiters).toHaveBeenCalled())
-    fireEvent.change(screen.getByTestId('waiter-select'), { target: { value: 'wtr1' } })
+    fireEvent.click(screen.getByTestId('waiter-Alice'))
     fireEvent.change(screen.getByTestId('pin-input'), { target: { value: '1234' } })
     fireEvent.click(screen.getByTestId('login-button'))
     await waitFor(() => {

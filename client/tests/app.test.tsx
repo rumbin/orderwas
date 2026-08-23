@@ -24,9 +24,12 @@ vi.mock('@/stores/session', () => ({
 vi.mock('@/api/client', () => ({
   api: {
     getEvents: vi.fn().mockResolvedValue([]),
-    getWaiters: vi.fn().mockResolvedValue([]),
+    getWaiters: vi.fn().mockResolvedValue([
+      { id: 'wtr1', name: 'Alice', logo: null, eventId: 'evt1', printerId: null, pickupCode: null, printsImmediately: true, canCancel: false, canCashOut: false, canStatistics: false, canCreateWaiters: false, canTransfer: false, isStationWaiter: false, hidden: false, autoSammelbon: false, active: true },
+    ]),
     login: vi.fn(),
     getStations: vi.fn().mockResolvedValue([]),
+    getProducts: vi.fn().mockResolvedValue([]),
   },
 }))
 
@@ -50,7 +53,7 @@ describe('App', () => {
     window.location.hash = '#/login'
     render(<App />)
     await waitFor(() => {
-      expect(screen.getByTestId('waiter-select')).toBeDefined()
+      expect(screen.getByTestId('waiter-Alice')).toBeDefined()
     })
   })
 })
