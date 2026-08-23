@@ -21,7 +21,7 @@ export default function OrdersPage({ navigate }: { navigate: (path: string) => v
   const { event, waiter, token, clear } = useSessionStore()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
-  const [confirming, setConfirming] = useState<{ type: 'pay' | 'cancel' | 'reopen'; orderId: string } | null>(null)
+  const [confirming, setConfirming] = useState<{ type: 'cancel' | 'reopen'; orderId: string } | null>(null)
 
   const loadOrders = useCallback(async () => {
     if (!event) return
@@ -40,12 +40,6 @@ export default function OrdersPage({ navigate }: { navigate: (path: string) => v
   }, [event])
 
   if (!event || !waiter) return null
-
-  const handlePay = async (orderId: string) => {
-    await api.payOrder(orderId, token!)
-    setConfirming(null)
-    loadOrders()
-  }
 
   const handleCancel = async (orderId: string) => {
     await api.cancelOrder(orderId, token!)
@@ -94,17 +88,6 @@ export default function OrdersPage({ navigate }: { navigate: (path: string) => v
           <span>{t('order.total')}</span>
           <span>{formatCents(order.totalCents)}</span>
         </div>
-        {openAction && waiter.canCashOut && (
-          <div className="mt-2 flex gap-2">
-            <button
-              onClick={() => setConfirming({ type: 'pay', orderId: order.id })}
-              className="bg-green-600 text-white text-sm rounded px-3 py-1.5"
-              data-testid={`pay-${order.id}`}
-            >
-              {t('order.pay')}
-            </button>
-          </div>
-        )}
         {openAction && waiter.canCancel && (
           <div className="mt-2">
             <button
@@ -167,23 +150,20 @@ export default function OrdersPage({ navigate }: { navigate: (path: string) => v
 
       {/* Confirm dialog */}
       {confirming && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-30" onClick={() => setConfirming(null)}>
-          <div className="bg-white rounded-lg p-4 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-30">
+          <div className="bg-white rounded-lg p-4 max-w-sm w-full mx-4">
             <p className="mb-4">
-              {confirming.type === 'pay' && t('order.confirmPay')}
               {confirming.type === 'cancel' && t('order.confirmCancel')}
               {confirming.type === 'reopen' && t('order.confirmReopen')}
             </p>
             <div className="flex gap-2">
               <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  if (confirming.type === 'pay') handlePay(confirming.orderId)
-                  else if (confirming.type === 'cancel') handleCancel(confirming.orderId)
+                onClick={() => {
+                  if (confirming.type === 'cancel') handleCancel(confirming.orderId)
                   else handleReopen(confirming.orderId)
                 }}
                 className={`flex-1 text-white rounded py-2 font-medium ${
-                  confirming.type === 'cancel' ? 'bg-red-600' : confirming.type === 'pay' ? 'bg-green-600' : 'bg-blue-600'
+                  confirming.type === 'cancel' ? 'bg-red-600' : 'bg-blue-600'
                 }`}
               >
                 {t('common.yes')}
