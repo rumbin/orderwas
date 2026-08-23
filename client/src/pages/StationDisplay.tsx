@@ -20,7 +20,8 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
   const [, setTick] = useState(0) // force re-render for wait time
   const [connected, setConnected] = useState(false)
 
-  // Load station and its open orders
+  // Load station and its open orders — show orders that still have work to do
+  // OR orders that are status 'open' but all items happen to be prepared (waiting for "mark done")
   const loadOrders = useCallback(async () => {
     if (!stationId) return
     try {
@@ -29,7 +30,7 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
       const allOrders = await api.getOrders(st.eventId)
       const stationOrders = allOrders.filter(
         (o) => ['open', 'preparing', 'partial'].includes(o.status) &&
-          o.items.some((i) => i.product.stationId === stationId && !['prepared', 'delivered', 'cancelled'].includes(i.status))
+          o.items.some((i) => i.product.stationId === stationId),
       )
       setOrders(stationOrders)
     } finally {
@@ -74,15 +75,17 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
 
   // Mark entire order as done: prepare all open items for this station + set order status to 'done'
   const handleMarkOrderDone = async (order: Order) => {
-    // Optimistic: mark all station items as prepared, remove from view
+    // Optimistic: remove from view
     setOrders((prev) => prev.filter((o) => o.id !== order.id))
     try {
-      const stationItems = order.items.filter(
+      const openItems = order.items.filter(
         (i) => i.product.stationId === stationId && i.status === 'open',
       )
-      await Promise.all(
-        stationItems.map((i) => api.updateOrderItem(i.id, { status: 'prepared' })),
-      )
+      if (openItems.length > 0) {
+        await Promise.all(
+          openItems.map((i) => api.updateOrderItem(i.id, { status: 'prepared' })),
+        )
+      }
       await api.updateOrderStatus(order.id, 'done')
     } catch {
       loadOrders() // revert on failure
@@ -113,7 +116,13 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
     if (!station || !stationId) return
     try {
       const allOrders = await api.getOrders(station.eventId)
-      const done = allOrders.filter((o) => o.status === 'done')
+      const done = allOrders.filter((o) => {
+        // Explicitly marked done
+        if (o.status === 'done') return true
+        // Or all items for this station are prepared/delivered/cancelled
+        const stationItems = o.items.filter((i) => i.product.stationId === stationId)
+        return stationItems.length > 0 && stationItems.every((i) => ['prepared', 'delivered', 'cancelled'].includes(i.status))
+      })
       setDoneOrders(done)
     } catch {
       // ignore
@@ -135,33 +144,33 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
-      <div className="bg-gray-800 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center gap-4">
+      <div className="bg-gray-800 px-4 py-3 sticky top-0 z-10">
+        <div className="flex items-center gap-3 mb-2">
           <button onClick={() => navigate('/')} className="text-gray-400 text-sm">←</button>
-          <h1 className="text-2xl font-bold">{station.name}</h1>
-          <span className="text-sm text-gray-400">{t('station.openOrders')}: {orders.length}</span>
-          <span className={`w-2.5 h-2.5 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`} title={connected ? 'Live' : 'Offline'} />
+          <h1 className="text-xl font-bold truncate">{station.name}</h1>
+          <span className="text-xs text-gray-400 whitespace-nowrap">{t('station.openOrders')}: {orders.length}</span>
+          <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${connected ? 'bg-green-500' : 'bg-red-500'}`} title={connected ? 'Live' : 'Offline'} />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => setView('orders')}
-            className={`px-3 py-1.5 rounded text-sm font-medium ${view === 'orders' ? 'bg-blue-600' : 'bg-gray-700'}`}
+            className={`px-2.5 py-1 rounded text-xs font-medium ${view === 'orders' ? 'bg-blue-600' : 'bg-gray-700'}`}
           >
             {t('station.title')}
           </button>
           <button
             onClick={() => setView('products')}
-            className={`px-3 py-1.5 rounded text-sm font-medium ${view === 'products' ? 'bg-blue-600' : 'bg-gray-700'}`}
+            className={`px-2.5 py-1 rounded text-xs font-medium ${view === 'products' ? 'bg-blue-600' : 'bg-gray-700'}`}
           >
             {t('order.products')}
           </button>
           <button
             onClick={() => setView('done')}
-            className={`px-3 py-1.5 rounded text-sm font-medium ${view === 'done' ? 'bg-green-600' : 'bg-gray-700'}`}
+            className={`px-2.5 py-1 rounded text-xs font-medium ${view === 'done' ? 'bg-green-600' : 'bg-gray-700'}`}
           >
             {t('station.done') ?? 'Fertig'}
           </button>
-          <button onClick={loadOrders} className="px-3 py-1.5 rounded text-sm bg-gray-700">↻</button>
+          <button onClick={loadOrders} className="px-2.5 py-1 rounded text-xs bg-gray-700">↻</button>
         </div>
       </div>
 
@@ -174,7 +183,7 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
             orders.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()).map((order) => {
               const waitSeconds = Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 1000)
               const stationItems = order.items.filter(
-                (i) => i.product.stationId === stationId && !['prepared', 'delivered', 'cancelled'].includes(i.status)
+                (i) => i.product.stationId === stationId && i.status !== 'cancelled',
               )
               return (
                 <div
