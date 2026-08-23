@@ -5,14 +5,30 @@ interface ThemeState {
   toggle: () => void
 }
 
-const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('theme-dark') : null
+function getInitialDark(): boolean {
+  try {
+    return localStorage.getItem('theme-dark') === 'true'
+  } catch {
+    return false
+  }
+}
+
+function applyDark(dark: boolean) {
+  document.documentElement.classList.toggle('dark', dark)
+}
 
 export const useThemeStore = create<ThemeState>((set) => ({
-  dark: stored === 'true',
+  dark: getInitialDark(),
   toggle: () =>
     set((state) => {
       const next = !state.dark
-      localStorage.setItem('theme-dark', String(next))
+      try {
+        localStorage.setItem('theme-dark', String(next))
+      } catch { /* ignore */ }
+      applyDark(next)
       return { dark: next }
     }),
 }))
+
+// Apply on initial load (module execution time)
+applyDark(getInitialDark())

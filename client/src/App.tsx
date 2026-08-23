@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useRouter, matchRoute } from '@/router'
 import { useSessionStore } from '@/stores/session'
 import { useThemeStore } from '@/stores/theme'
@@ -15,11 +14,6 @@ export default function App() {
   const route = useRouter()
   const isLoggedIn = useSessionStore((s) => s.isLoggedIn())
   const dark = useThemeStore((s) => s.dark)
-
-  // Sync dark class on <html>
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark)
-  }, [dark])
 
   // Landing page — role navigation hub
   if (route.path === '/') {
