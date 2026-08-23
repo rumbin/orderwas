@@ -388,6 +388,31 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                 +
               </button>
             </div>
+            {/* Predefined extras as quick-add buttons */}
+            {variantDialogProduct.extras && variantDialogProduct.extras.length > 0 && (
+              <div className="mt-3 space-y-2">
+                {variantDialogProduct.extras.map((extra) => (
+                  <div key={extra.id}>
+                    <div className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">{extra.name}</div>
+                    <div className="flex flex-wrap gap-1">
+                      {extra.options.map((option) => (
+                        <button
+                          key={option.id}
+                          onClick={() => {
+                            const sep = newVariantInput.trim() ? ' ' : ''
+                            setNewVariantInput((prev) => prev.trim() + sep + option.name)
+                            newVariantInputRef.current?.focus()
+                          }}
+                          className="bg-gray-100 hover:bg-blue-100 text-xs px-2 py-1 rounded border border-gray-200"
+                        >
+                          {option.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             <button
               onClick={() => setVariantDialogProduct(null)}
               className="w-full mt-3 bg-gray-100 rounded-md py-2.5 text-sm font-medium"
