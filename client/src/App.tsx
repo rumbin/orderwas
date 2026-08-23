@@ -31,8 +31,9 @@ function AppInner() {
   }
 
   if (route.path === '/orders') {
+    // Redirect to /order — tabs are now unified
     if (!isLoggedIn) return <Login navigate={route.navigate} />
-    return <OrdersPage navigate={route.navigate} />
+    return <OrderPage navigate={route.navigate} />
   }
 
   if (route.path === '/admin') {

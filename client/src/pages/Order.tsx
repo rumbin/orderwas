@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/api/client'
 import { useSessionStore } from '@/stores/session'
 import { useCartStore } from '@/stores/cart'
-import ThemeSwitcher from '@/components/ThemeSwitcher'
-import type { Station, Product } from '@/api/types'
+import UserMenu from '@/components/UserMenu'
+import type { Station, Product, Order } from '@/api/types'
 
 function formatCents(cents: number): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(cents / 100)
@@ -12,7 +12,7 @@ function formatCents(cents: number): string {
 
 export default function OrderPage({ navigate }: { navigate: (path: string) => void }) {
   const { t } = useTranslation()
-  const { event, waiter, clear } = useSessionStore()
+  const { event, waiter, token, clear } = useSessionStore()
   const cart = useCartStore()
   const [stations, setStations] = useState<Station[]>([])
   const [products, setProducts] = useState<Record<string, Product[]>>({})
@@ -28,6 +28,11 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const newVariantInputRef = useRef<HTMLInputElement>(null)
   const tableInputRef = useRef<HTMLInputElement>(null)
+  // Tab state
+  const [tab, setTab] = useState<'new' | 'open' | 'done'>('new')
+  const [onlyMyOrders, setOnlyMyOrders] = useState(true)
+  const [myOrders, setMyOrders] = useState<Order[]>([])
+  const [myOrdersLoading, setMyOrdersLoading] = useState(false)
 
   useEffect(() => {
     if (!event) return
@@ -55,6 +60,20 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
     window.addEventListener('beforeunload', handler)
     return () => window.removeEventListener('beforeunload', handler)
   }, [])
+
+  // Load orders when switching to open/done tabs
+  useEffect(() => {
+    if (tab === 'new' || !event) return
+    setMyOrdersLoading(true)
+    api.getOrders(event.id).then((all) => {
+      setMyOrders(all.filter((o) => o.waiterId === waiter?.id))
+    }).finally(() => setMyOrdersLoading(false))
+  }, [tab, event, waiter])
+
+  const handleCancelOrder = async (orderId: string) => {
+    await api.cancelOrder(orderId, token!)
+    setMyOrders((prev) => prev.filter((o) => o.id !== orderId))
+  }
 
   if (!event || !waiter) return null
 
@@ -156,17 +175,29 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10 px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-bold text-gray-900 dark:text-white">{event.name}</h1>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600 dark:text-gray-400">{waiter.name}</span>
-          <button onClick={() => navigate('/orders')} className="text-sm text-blue-600">
-            {t('order.myOrders')}
-          </button>
-          <button onClick={() => { clear(); navigate('/') }} className="text-sm text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300">
-            {t('common.logout') ?? 'Abmelden'}
-          </button>
-        </div>
+        <UserMenu />
       </div>
 
+      {/* Tab bar */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex gap-2 sticky top-[57px] z-10">
+        {(['new', 'open', 'done'] as const).map((t2) => (
+          <button
+            key={t2}
+            onClick={() => setTab(t2)}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap ${
+              tab === t2
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+            }`}
+          >
+            {t(`order.tab${t2.charAt(0).toUpperCase() + t2.slice(1)}`)}
+          </button>
+        ))}
+      </div>
+
+      {/* === NEW ORDER TAB === */}
+      {tab === 'new' && (
+        <>
       {/* Success banner with tear-off + next-order button */}
       {success && !error && (
         <div className="sticky top-[57px] z-10 bg-green-50 dark:bg-green-900/30 border-b border-green-200 dark:border-green-800 px-4 py-3 flex items-center justify-between">
@@ -360,11 +391,110 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
           </div>
         </div>
       )}
+        </>
+      )}
 
-      {/* ThemeSwitcher — fixed bottom-left, above cart bar when present */}
-      <div className="fixed bottom-4 left-4 z-30">
-        <ThemeSwitcher />
-      </div>
+      {/* === OPEN ORDERS TAB === */}
+      {tab === 'open' && (
+        <div className="p-4 space-y-3">
+          <div className="flex items-center gap-2 mb-3">
+            <input type="checkbox" id="only-my-open" checked={onlyMyOrders}
+              onChange={(e) => setOnlyMyOrders(e.target.checked)}
+              className="w-4 h-4 rounded" />
+            <label htmlFor="only-my-open" className="text-sm text-gray-700 dark:text-gray-300">
+              {t('order.onlyMyOrders')}
+            </label>
+          </div>
+          {myOrdersLoading ? (
+            <p className="text-gray-500 dark:text-gray-400 text-center py-8">{t('common.loading')}</p>
+          ) : (
+            (() => {
+              const open = myOrders
+                .filter((o) => ['open', 'preparing', 'partial'].includes(o.status))
+                .sort((a, b) => (a.tearOffNumber ?? 0) - (b.tearOffNumber ?? 0))
+              if (open.length === 0) return <p className="text-gray-500 dark:text-gray-400 text-center py-8">{t('order.empty')}</p>
+              return open.map((order) => (
+                <div key={order.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {t('station.table')} {order.tableNumber ?? order.pickupCode}
+                      </span>
+                      {order.tearOffNumber && <span className="text-xs text-gray-500">#{order.tearOffNumber}</span>}
+                    </div>
+                    <span className="text-xs font-medium px-2 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200">
+                      {order.status}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">
+                    {order.items.map((item) => (
+                      <div key={item.id} className={`flex justify-between ${item.status === 'cancelled' ? 'line-through text-gray-400' : ''}`}>
+                        <span>{item.quantity}× {item.product.name}{item.comment && <span className="text-blue-600 dark:text-blue-400 text-xs ml-1">({item.comment})</span>}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {order.waiterId === waiter?.id && (
+                    <button onClick={() => handleCancelOrder(order.id)}
+                      className="mt-2 text-red-600 dark:text-red-400 text-sm underline">
+                      {t('order.cancelOrder')}
+                    </button>
+                  )}
+                </div>
+              ))
+            })()
+          )}
+        </div>
+      )}
+
+      {/* === DONE ORDERS TAB === */}
+      {tab === 'done' && (
+        <div className="p-4 space-y-3">
+          <div className="flex items-center gap-2 mb-3">
+            <input type="checkbox" id="only-my-done" checked={onlyMyOrders}
+              onChange={(e) => setOnlyMyOrders(e.target.checked)}
+              className="w-4 h-4 rounded" />
+            <label htmlFor="only-my-done" className="text-sm text-gray-700 dark:text-gray-300">
+              {t('order.onlyMyOrders')}
+            </label>
+          </div>
+          {myOrdersLoading ? (
+            <p className="text-gray-500 dark:text-gray-400 text-center py-8">{t('common.loading')}</p>
+          ) : (
+            (() => {
+              const done = myOrders
+                .filter((o) => ['paid', 'cancelled', 'done'].includes(o.status))
+                .sort((a, b) => (b.tearOffNumber ?? 0) - (a.tearOffNumber ?? 0))
+              if (done.length === 0) return <p className="text-gray-500 dark:text-gray-400 text-center py-8">{t('order.empty')}</p>
+              return done.map((order) => (
+                <div key={order.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 opacity-70">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {t('station.table')} {order.tableNumber ?? order.pickupCode}
+                      </span>
+                      {order.tearOffNumber && <span className="text-xs text-gray-500">#{order.tearOffNumber}</span>}
+                    </div>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                      order.status === 'cancelled' ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200'
+                        : 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200'
+                    }`}>
+                      {order.status}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">
+                    {order.items.map((item) => (
+                      <div key={item.id} className={`flex justify-between ${item.status === 'cancelled' ? 'line-through text-gray-400' : ''}`}>
+                        <span>{item.quantity}× {item.product.name}</span>
+                        <span>{item.status === 'prepared' || item.status === 'delivered' ? '✓' : ''}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            })()
+          )}
+        </div>
+      )}
 
       {/* Variant dialog — long-press shows per-variant quantities */}
       {variantDialogProduct && (

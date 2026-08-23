@@ -97,12 +97,12 @@ describe('OrderPage', () => {
     })
   })
 
-  it('renders waiter name in header', async () => {
+  it('renders user menu button with first letter of waiter name', async () => {
     render(<OrderPage navigate={navigate} />)
-
     await waitFor(() => {
-      expect(screen.getByText('Alice')).toBeDefined()
+      expect(screen.getByTestId('user-menu-button')).toBeDefined()
     })
+    expect(screen.getByTestId('user-menu-button').textContent).toBe('A')
   })
 
   it('station tabs switch active tab', async () => {

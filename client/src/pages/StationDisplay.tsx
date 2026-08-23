@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/api/client'
 import { useWebSocket, type OrderEventPayload } from '@/hooks/useWebSocket'
+import UserMenu from '@/components/UserMenu'
 import type { Order, Station } from '@/api/types'
 
 function formatTime(seconds: number): string {
@@ -149,6 +150,7 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
           <h1 className="text-xl font-bold truncate">{station.name}</h1>
           <span className="text-xs text-gray-400 whitespace-nowrap">{t('station.openOrders')}: {orders.length}</span>
           <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${connected ? 'bg-green-500' : 'bg-red-500'}`} title={connected ? 'Live' : 'Offline'} />
+          <div className="ml-auto"><UserMenu /></div>
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
