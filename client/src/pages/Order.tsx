@@ -170,11 +170,6 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
     }
   }
 
-  const startNextOrder = () => {
-    setSuccess(null)
-    tableInputRef.current?.focus()
-  }
-
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
@@ -204,22 +199,15 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
       {/* === NEW ORDER TAB === */}
       {tab === 'new' && (
         <>
-      {/* Success message — inline */}
+      {/* Success toast — slides in from bottom */}
       {success && !error && (
-        <div className="mx-4 mt-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg px-4 py-3 flex items-center justify-between">
-          <div className="text-green-800 dark:text-green-300">
+        <div className="fixed bottom-20 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 bg-green-600 text-white rounded-lg shadow-xl px-4 py-3 flex items-center justify-between z-30 animate-slide-up">
+          <div>
             <span className="font-medium">{t('order.success')}</span>
             {success.tearOffNumber != null && (
               <span className="ml-2 font-bold">#{success.tearOffNumber}</span>
             )}
           </div>
-          <button
-            onClick={startNextOrder}
-            className="bg-green-600 text-white rounded-md px-4 py-2 font-medium"
-            data-testid="next-order"
-          >
-            {t('order.newOrder')}
-          </button>
         </div>
       )}
 
