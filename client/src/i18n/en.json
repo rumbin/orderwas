@@ -71,5 +71,9 @@
     "error": "Error",
     "confirm": "Confirm",
     "logout": "Logout"
+  },
+  "theme": {
+    "dark": "Dark",
+    "light": "Light"
   }
 }

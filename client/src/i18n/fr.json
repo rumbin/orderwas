@@ -60,5 +60,9 @@
     "loading": "Chargement...",
     "error": "Erreur",
     "confirm": "Confirmer"
+  },
+  "theme": {
+    "dark": "Sombre",
+    "light": "Clair"
   }
 }

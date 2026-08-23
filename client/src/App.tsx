@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { useRouter, matchRoute } from '@/router'
 import { useSessionStore } from '@/stores/session'
+import { useThemeStore } from '@/stores/theme'
 import Landing from '@/pages/Landing'
 import Login from '@/pages/Login'
 import OrderPage from '@/pages/Order'
@@ -12,6 +14,12 @@ import GuestOrder from '@/pages/GuestOrder'
 export default function App() {
   const route = useRouter()
   const isLoggedIn = useSessionStore((s) => s.isLoggedIn())
+  const dark = useThemeStore((s) => s.dark)
+
+  // Sync dark class on <html>
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark)
+  }, [dark])
 
   // Landing page — role navigation hub
   if (route.path === '/') {
@@ -56,8 +64,8 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <p className="text-gray-500">404 — Page not found</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <p className="text-gray-500 dark:text-gray-400">404 — Page not found</p>
     </div>
   )
 }

@@ -101,5 +101,9 @@
     "error": "Fehler",
     "confirm": "Bestätigen",
     "logout": "Abmelden"
+  },
+  "theme": {
+    "dark": "Dunkel",
+    "light": "Hell"
   }
 }

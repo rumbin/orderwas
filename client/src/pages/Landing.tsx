@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/api/client'
 import { useSessionStore } from '@/stores/session'
 import type { Event, Station } from '@/api/types'
+import ThemeSwitcher from '@/components/ThemeSwitcher'
 
 export default function Landing({ navigate }: { navigate: (path: string) => void }) {
   const { t } = useTranslation()
@@ -29,17 +30,17 @@ export default function Landing({ navigate }: { navigate: (path: string) => void
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-      <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('app.title')}</h1>
-      <p className="text-gray-500 mb-8">{t('app.tagline')}</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-6">
+      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{t('app.title')}</h1>
+      <p className="text-gray-500 dark:text-gray-400 mb-8">{t('app.tagline')}</p>
 
       {/* Event selector (needed for station picker) */}
       <div className="mb-6 w-full max-w-md">
-        <label className="block text-sm font-medium text-gray-700 mb-1">{t('login.selectEvent')}</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('login.selectEvent')}</label>
         <select
           value={selectedEventId}
           onChange={(e) => { setSelectedEventId(e.target.value); setShowStations(false) }}
-          className="w-full rounded-md border border-gray-300 p-2 text-lg"
+          className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white p-2 text-lg"
           data-testid="landing-event-select"
         >
           {events.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
@@ -82,24 +83,29 @@ export default function Landing({ navigate }: { navigate: (path: string) => void
       {/* Station picker overlay */}
       {showStations && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-30" onClick={() => setShowStations(false)}>
-          <div className="bg-white rounded-lg p-4 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-medium mb-3">{t('landing.selectStation')}</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-medium mb-3 dark:text-white">{t('landing.selectStation')}</h3>
             <div className="space-y-2">
               {stations.map((s) => (
                 <button
                   key={s.id}
                   onClick={() => navigate(`/station/${s.id}`)}
-                  className="w-full text-left bg-gray-100 hover:bg-blue-100 rounded-md px-4 py-3 font-medium"
+                  className="w-full text-left bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900 rounded-md px-4 py-3 font-medium dark:text-white"
                   data-testid={`station-option-${s.name}`}
                 >
                   {s.name}
-                  {s.kitchenMonitor && <span className="text-xs text-blue-600 ml-2">Küchenmonitor</span>}
+                  {s.kitchenMonitor && <span className="text-xs text-blue-600 dark:text-blue-400 ml-2">Küchenmonitor</span>}
                 </button>
               ))}
             </div>
           </div>
         </div>
       )}
+
+      {/* Theme switcher */}
+      <div className="fixed bottom-4 right-4 z-40">
+        <ThemeSwitcher />
+      </div>
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/api/client'
 import { useSessionStore } from '@/stores/session'
 import { useCartStore } from '@/stores/cart'
+import ThemeSwitcher from '@/components/ThemeSwitcher'
 import type { Station, Product } from '@/api/types'
 
 function formatCents(cents: number): string {
@@ -151,16 +152,16 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
 
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
       {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-10 px-4 py-3 flex items-center justify-between">
-        <h1 className="text-lg font-bold text-gray-900">{event.name}</h1>
+      <div className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10 px-4 py-3 flex items-center justify-between">
+        <h1 className="text-lg font-bold text-gray-900 dark:text-white">{event.name}</h1>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600">{waiter.name}</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">{waiter.name}</span>
           <button onClick={() => navigate('/orders')} className="text-sm text-blue-600">
             {t('order.myOrders')}
           </button>
-          <button onClick={() => { clear(); navigate('/') }} className="text-sm text-gray-400 hover:text-gray-700">
+          <button onClick={() => { clear(); navigate('/') }} className="text-sm text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300">
             {t('common.logout') ?? 'Abmelden'}
           </button>
         </div>
@@ -168,8 +169,8 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
 
       {/* Success banner with tear-off + next-order button */}
       {success && !error && (
-        <div className="sticky top-[57px] z-10 bg-green-50 border-b border-green-200 px-4 py-3 flex items-center justify-between">
-          <div className="text-green-800">
+        <div className="sticky top-[57px] z-10 bg-green-50 dark:bg-green-900/30 border-b border-green-200 dark:border-green-800 px-4 py-3 flex items-center justify-between">
+          <div className="text-green-800 dark:text-green-300">
             <span className="font-medium">{t('order.success')}</span>
             {success.tearOffNumber != null && (
               <span className="ml-2 font-bold">#{success.tearOffNumber}</span>
@@ -187,7 +188,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
 
       {/* Station tabs */}
       {stations.length > 1 && (
-        <div className="flex gap-1 px-4 py-2 bg-white border-b overflow-x-auto">
+        <div className="flex gap-1 px-4 py-2 bg-white dark:bg-gray-800 border-b dark:border-gray-700 overflow-x-auto">
           {stations.map((st) => (
             <button
               key={st.id}
@@ -195,7 +196,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
               className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap ${
                 activeStation === st.id
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
               }`}
             >
               {st.name}
@@ -218,10 +219,10 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
               data-testid={`product-${product.name}`}
               className={`relative min-h-[88px] rounded-lg border-2 transition select-none ${
                 outOfStock
-                  ? 'border-gray-200 bg-gray-100 opacity-50'
+                  ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-50'
                   : count > 0
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
               onPointerDown={() => {
                 longPressTimer.current = setTimeout(() => {
@@ -245,7 +246,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                     if (idx >= 0) cart.decrementItem(idx)
                   }}
                   disabled={count === 0}
-                  className="w-10 flex items-center justify-center text-lg font-bold text-gray-600 hover:text-red-500 disabled:text-gray-300 disabled:cursor-not-allowed rounded-l-lg"
+                  className="w-10 flex items-center justify-center text-lg font-bold text-gray-600 dark:text-gray-400 hover:text-red-500 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed rounded-l-lg"
                   data-testid={`decrement-${product.name}`}
                 >
                   −
@@ -253,13 +254,13 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
 
                 {/* Product info */}
                 <div className="flex-1 py-2 px-1 min-w-0">
-                  <div className="font-medium text-gray-900 text-sm leading-tight truncate">{product.name}</div>
-                  <div className="text-xs text-gray-500 mt-1">{formatCents(product.priceCents)}</div>
+                  <div className="font-medium text-gray-900 dark:text-white text-sm leading-tight truncate">{product.name}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{formatCents(product.priceCents)}</div>
                   {product.extras?.length ? (
                     <div className="text-[10px] text-blue-600 mt-0.5">⚙ {product.extras.length} {t('order.extrasLabel')}</div>
                   ) : null}
                   {product.stockMode === 'tracked' && (
-                    <div className={`text-[10px] mt-0.5 ${outOfStock ? 'text-red-600 font-medium' : lowStock ? 'text-amber-600' : 'text-gray-400'}`}>
+                    <div className={`text-[10px] mt-0.5 ${outOfStock ? 'text-red-600 font-medium' : lowStock ? 'text-amber-600' : 'text-gray-400 dark:text-gray-500'}`}>
                       {outOfStock ? t('order.outOfStock') : `${product.stockCount} ${t('order.inStock')}`}
                     </div>
                   )}
@@ -269,7 +270,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                 <button
                   onClick={() => !outOfStock && handleAddProduct(product)}
                   disabled={outOfStock}
-                  className="w-10 flex items-center justify-center text-lg font-bold text-gray-600 hover:text-blue-600 disabled:text-gray-300 disabled:cursor-not-allowed rounded-r-lg"
+                  className="w-10 flex items-center justify-center text-lg font-bold text-gray-600 dark:text-gray-400 hover:text-blue-600 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed rounded-r-lg"
                   data-testid={`increment-${product.name}`}
                 >
                   +
@@ -282,9 +283,9 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
 
       {/* Cart bar (fixed bottom) */}
       {cart.items.filter((i) => i.quantity > 0).length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 z-20">
+        <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t dark:border-gray-700 shadow-lg p-4 z-20">
           {error && (
-            <div className="mb-3 p-2 bg-red-50 text-red-700 text-sm rounded">{error}</div>
+            <div className="mb-3 p-2 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded">{error}</div>
           )}
           <div className="flex items-center gap-3 max-w-2xl mx-auto">
             <input
@@ -293,7 +294,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
               value={tableNumber}
               onChange={(e) => setTableNumber(e.target.value)}
               placeholder={t('order.tableNumber')}
-              className="flex-shrink-0 w-32 rounded-md border border-gray-300 p-2 text-lg"
+              className="flex-shrink-0 w-32 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white p-2 text-lg"
               data-testid="table-number-input"
             />
             <div className="flex-1 overflow-x-auto">
@@ -318,7 +319,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                     return (
                       <div
                         key={product.id}
-                        className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-sm whitespace-nowrap"
+                        className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded px-2 py-1 text-sm whitespace-nowrap"
                         data-testid="cart-item"
                       >
                         <button
@@ -334,7 +335,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                             const firstIdx = items[0]?.idx
                             if (firstIdx != null) cart.decrementItem(firstIdx)
                           }}
-                          className="ml-1 text-gray-500 hover:text-red-500"
+                          className="ml-1 text-gray-500 dark:text-gray-400 hover:text-red-500"
                         >
                           −
                         </button>
@@ -345,8 +346,8 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
               </div>
             </div>
             <div className="text-right flex-shrink-0">
-              <div className="text-xs text-gray-500">{t('order.total')}</div>
-              <div className="font-bold text-lg text-gray-900">{formatCents(total)}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{t('order.total')}</div>
+              <div className="font-bold text-lg text-gray-900 dark:text-white">{formatCents(total)}</div>
             </div>
             <button
               onClick={handleSubmit}
@@ -360,23 +361,28 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
         </div>
       )}
 
+      {/* ThemeSwitcher — fixed bottom-left, above cart bar when present */}
+      <div className="fixed bottom-4 left-4 z-30">
+        <ThemeSwitcher />
+      </div>
+
       {/* Variant dialog — long-press shows per-variant quantities */}
       {variantDialogProduct && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-40" onClick={() => setVariantDialogProduct(null)}>
-          <div className="bg-white rounded-t-lg sm:rounded-lg p-4 w-full max-w-md max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-bold text-lg mb-3">{variantDialogProduct.name}</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-t-lg sm:rounded-lg p-4 w-full max-w-md max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-bold text-lg mb-3 text-gray-900 dark:text-white">{variantDialogProduct.name}</h3>
             {variantDialogVariants.map((v) => (
-              <div key={v.variant} className="flex items-center justify-between py-2 border-b last:border-b-0">
-                <span className="text-sm flex-1 min-w-0 truncate">{v.variant}</span>
+              <div key={v.variant} className="flex items-center justify-between py-2 border-b dark:border-gray-700 last:border-b-0">
+                <span className="text-sm flex-1 min-w-0 truncate text-gray-900 dark:text-gray-300">{v.variant}</span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => adjustVariant(v.variant, -1)}
-                    className="w-8 h-8 rounded bg-gray-100 hover:bg-red-100 text-sm font-bold flex items-center justify-center"
+                    className="w-8 h-8 rounded bg-gray-100 dark:bg-gray-700 hover:bg-red-100 dark:hover:bg-red-900/40 text-sm font-bold flex items-center justify-center"
                   >−</button>
-                  <span className="w-6 text-center text-sm font-bold">{v.quantity}</span>
+                  <span className="w-6 text-center text-sm font-bold text-gray-900 dark:text-white">{v.quantity}</span>
                   <button
                     onClick={() => adjustVariant(v.variant, 1)}
-                    className="w-8 h-8 rounded bg-gray-100 hover:bg-blue-100 text-sm font-bold flex items-center justify-center"
+                    className="w-8 h-8 rounded bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-sm font-bold flex items-center justify-center"
                   >+</button>
                 </div>
               </div>
@@ -389,7 +395,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                 onChange={(e) => setNewVariantInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') submitNewVariant() }}
                 placeholder={t('order.newVariantPlaceholder') ?? 'Neue Variante...'}
-                className="flex-1 rounded-md border border-gray-300 p-2 text-sm"
+                className="flex-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white p-2 text-sm"
               />
               <button
                 onClick={submitNewVariant}
@@ -404,7 +410,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
               <div className="mt-3 space-y-2">
                 {variantDialogProduct.extras.map((extra) => (
                   <div key={extra.id}>
-                    <div className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">{extra.name}</div>
+                    <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">{extra.name}</div>
                     <div className="flex flex-wrap gap-1">
                       {extra.options.map((option) => (
                         <button
@@ -414,7 +420,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                             setNewVariantInput((prev) => prev.trim() + sep + option.name)
                             newVariantInputRef.current?.focus()
                           }}
-                          className="bg-gray-100 hover:bg-blue-100 text-xs px-2 py-1 rounded border border-gray-200"
+                          className="bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-xs px-2 py-1 rounded border border-gray-200 dark:border-gray-600"
                         >
                           {option.name}
                         </button>
@@ -426,7 +432,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
             )}
             <button
               onClick={() => setVariantDialogProduct(null)}
-              className="w-full mt-3 bg-gray-100 rounded-md py-2.5 text-sm font-medium"
+              className="w-full mt-3 bg-gray-100 dark:bg-gray-700 rounded-md py-2.5 text-sm font-medium text-gray-900 dark:text-white"
             >
               {t('order.confirmVariants')}
             </button>
