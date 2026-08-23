@@ -89,12 +89,15 @@ describe('OrderPage', () => {
     })
   })
 
-  it('renders event name in header', async () => {
+  it('renders tab buttons and user menu in header', async () => {
     render(<OrderPage navigate={navigate} />)
-
     await waitFor(() => {
-      expect(screen.getByText('Testfest')).toBeDefined()
+      expect(screen.getByTestId('user-menu-button')).toBeDefined()
     })
+    // Tab buttons should be present
+    expect(screen.getByText('order.tabNew')).toBeDefined()
+    expect(screen.getByText('order.tabOpen')).toBeDefined()
+    expect(screen.getByText('order.tabDone')).toBeDefined()
   })
 
   it('renders user menu button with first letter of waiter name', async () => {

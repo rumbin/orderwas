@@ -173,14 +173,8 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10 px-4 py-3 flex items-center justify-between">
-        <h1 className="text-lg font-bold text-gray-900 dark:text-white">{event.name}</h1>
-        <UserMenu />
-      </div>
-
-      {/* Tab bar */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex gap-2 sticky top-[57px] z-10">
+      {/* Header with tabs + avatar */}
+      <div className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10 px-4 py-2 flex items-center gap-2">
         {(['new', 'open', 'done'] as const).map((t2) => (
           <button
             key={t2}
@@ -194,6 +188,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
             {t(`order.tab${t2.charAt(0).toUpperCase() + t2.slice(1)}`)}
           </button>
         ))}
+        <div className="ml-auto"><UserMenu /></div>
       </div>
 
       {/* === NEW ORDER TAB === */}
