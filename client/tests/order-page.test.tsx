@@ -32,12 +32,16 @@ vi.mock('@/stores/session', () => ({
 const mockGetStations = vi.hoisted(() => vi.fn())
 const mockGetProducts = vi.hoisted(() => vi.fn())
 const mockCreateOrder = vi.hoisted(() => vi.fn())
+const mockGetOrders = vi.hoisted(() => vi.fn())
+const mockCancelOrder = vi.hoisted(() => vi.fn())
 
 vi.mock('@/api/client', () => ({
   api: {
     getStations: mockGetStations,
     getProducts: mockGetProducts,
     createOrder: mockCreateOrder,
+    getOrders: mockGetOrders,
+    cancelOrder: mockCancelOrder,
     getEvents: vi.fn().mockResolvedValue([]),
     getWaiters: vi.fn().mockResolvedValue([]),
     login: vi.fn(),
@@ -75,6 +79,8 @@ beforeEach(async () => {
     return Promise.resolve([])
   })
   mockCreateOrder.mockResolvedValue({ tearOffNumber: 1 })
+  mockGetOrders.mockResolvedValue([])
+  mockCancelOrder.mockResolvedValue({})
 })
 
 describe('OrderPage', () => {
@@ -247,5 +253,105 @@ describe('OrderPage', () => {
     expect(screen.getByTestId('table-number-input')).toBeDefined()
     const submitBtn = screen.getByTestId('submit-order')
     expect(submitBtn).toBeDisabled() // no table number yet
+  })
+
+  describe('Order filtering', () => {
+    const mockOrders = [
+      { id: 'o-1', waiterId: 'w-1', tableNumber: '5', pickupCode: null, tearOffNumber: 1, status: 'open', totalCents: 300, comment: null, createdAt: '2026-01-01', updatedAt: '2026-01-01', eventId: 'evt-1',
+        items: [{ id: 'oi-1', orderId: 'o-1', productId: 'p-1', quantity: 1, status: 'open', comment: null, options: null, product: { id: 'p-1', name: 'Bier', stationId: 'st-1' } }] },
+      { id: 'o-2', waiterId: 'w-2', tableNumber: '3', pickupCode: null, tearOffNumber: 2, status: 'open', totalCents: 250, comment: null, createdAt: '2026-01-02', updatedAt: '2026-01-02', eventId: 'evt-1',
+        items: [{ id: 'oi-2', orderId: 'o-2', productId: 'p-2', quantity: 1, status: 'open', comment: null, options: null, product: { id: 'p-2', name: 'Cola', stationId: 'st-1' } }] },
+      { id: 'o-3', waiterId: 'w-1', tableNumber: '7', pickupCode: null, tearOffNumber: 3, status: 'cancelled', totalCents: 400, comment: null, createdAt: '2026-01-03', updatedAt: '2026-01-03', eventId: 'evt-1',
+        items: [{ id: 'oi-3', orderId: 'o-3', productId: 'p-3', quantity: 1, status: 'cancelled', comment: null, options: null, product: { id: 'p-3', name: 'Schnitzel', stationId: 'st-2' } }] },
+    ]
+
+    it('fetches all orders when switching to open tab', async () => {
+      mockGetOrders.mockResolvedValue(mockOrders)
+      render(<OrderPage navigate={navigate} />)
+
+      await waitFor(() => expect(screen.getByTestId('product-Bier')).toBeDefined())
+
+      // Switch to open tab
+      fireEvent.click(screen.getByText('order.tabOpen'))
+
+      await waitFor(() => {
+        expect(mockGetOrders).toHaveBeenCalledWith('evt-1')
+      })
+    })
+
+    it('checkbox checked shows only own orders', async () => {
+      mockGetOrders.mockResolvedValue(mockOrders)
+      render(<OrderPage navigate={navigate} />)
+
+      await waitFor(() => expect(screen.getByTestId('product-Bier')).toBeDefined())
+      fireEvent.click(screen.getByText('order.tabOpen'))
+
+      await waitFor(() => {
+        // Alice (w-1) should see her own orders (o-1) but not Bob's (o-2)
+        // i18n mock returns keys, so 'station.table' + '5'
+        expect(screen.getByText(/5/)).toBeDefined()
+        // Bob's order (table 3) should not appear
+        const allText = document.body.textContent || ''
+        expect(allText).not.toMatch(/3.*Cola/)
+      })
+    })
+
+    it('checkbox unchecked shows all orders', async () => {
+      mockGetOrders.mockResolvedValue(mockOrders)
+      render(<OrderPage navigate={navigate} />)
+
+      await waitFor(() => expect(screen.getByTestId('product-Bier')).toBeDefined())
+      fireEvent.click(screen.getByText('order.tabOpen'))
+
+      await waitFor(() => {
+        expect(screen.getByText(/5/)).toBeDefined()
+      })
+
+      // Uncheck the filter
+      const checkbox = screen.getByLabelText('order.onlyMyOrders')
+      fireEvent.click(checkbox)
+
+      await waitFor(() => {
+        // Now should see Bob's order too (table 3 with Cola)
+        const allText = document.body.textContent || ''
+        expect(allText).toContain('Cola')
+      })
+    })
+
+    it('done tab shows orders with all items prepared', async () => {
+      const doneOrders = [{
+        ...mockOrders[0],
+        items: [{ ...mockOrders[0].items[0], status: 'prepared' }],
+      }]
+      mockGetOrders.mockResolvedValue(doneOrders)
+      render(<OrderPage navigate={navigate} />)
+
+      await waitFor(() => expect(screen.getByTestId('product-Bier')).toBeDefined())
+      fireEvent.click(screen.getByText('order.tabDone'))
+
+      await waitFor(() => {
+        expect(screen.getByText('fertig')).toBeDefined()
+      })
+    })
+
+    it('cancel button calls API and removes order', async () => {
+      mockGetOrders.mockResolvedValue([mockOrders[0]])
+      render(<OrderPage navigate={navigate} />)
+
+      await waitFor(() => expect(screen.getByTestId('product-Bier')).toBeDefined())
+      fireEvent.click(screen.getByText('order.tabOpen'))
+
+      await waitFor(() => {
+        expect(screen.getByText(/5/)).toBeDefined()
+      })
+
+      // Find and click cancel button
+      const cancelBtn = screen.getByText('order.cancelOrder')
+      fireEvent.click(cancelBtn)
+
+      await waitFor(() => {
+        expect(mockCancelOrder).toHaveBeenCalledWith('o-1', 'fake-token')
+      })
+    })
   })
 })
