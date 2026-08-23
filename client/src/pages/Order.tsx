@@ -463,7 +463,13 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                 })
                 .sort((a, b) => (b.tearOffNumber ?? 0) - (a.tearOffNumber ?? 0))
               if (done.length === 0) return <p className="text-gray-500 dark:text-gray-400 text-center py-8">{t('order.empty')}</p>
-              return done.map((order) => (
+              return done.map((order) => {
+                const allItemsDone = order.items.length > 0 && order.items.every((i) => ['prepared', 'delivered', 'cancelled'].includes(i.status))
+                const displayStatus = order.status === 'cancelled' ? 'cancelled'
+                  : order.status === 'paid' ? 'paid'
+                  : order.status === 'done' ? 'done'
+                  : allItemsDone ? 'fertig' : order.status
+                return (
                 <div key={order.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 opacity-70">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -473,10 +479,10 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                       {order.tearOffNumber && <span className="text-xs text-gray-500">#{order.tearOffNumber}</span>}
                     </div>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                      order.status === 'cancelled' ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200'
+                      displayStatus === 'cancelled' ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200'
                         : 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200'
                     }`}>
-                      {order.status}
+                      {displayStatus}
                     </span>
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-300">
@@ -488,7 +494,8 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                     ))}
                   </div>
                 </div>
-              ))
+              )
+              })
             })()
           )}
         </div>
