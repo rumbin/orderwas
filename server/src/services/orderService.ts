@@ -244,7 +244,7 @@ export async function getOrder(id: string) {
   })
 }
 
-const VALID_STATUSES = ['open', 'preparing', 'partial', 'paid', 'cancelled'] as const
+const VALID_STATUSES = ['open', 'preparing', 'partial', 'done', 'paid', 'cancelled'] as const
 type OrderStatus = (typeof VALID_STATUSES)[number]
 
 /**

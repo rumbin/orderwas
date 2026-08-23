@@ -150,7 +150,7 @@ model Order {
   waiter        Waiter      @relation(fields: [waiterId], references: [id])
   eventId       String
   event         Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  status        String      @default("open") // "open" | "preparing" | "partial" | "paid" | "cancelled"
+  status        String      @default("open") // "open" | "preparing" | "partial" | "done" | "paid" | "cancelled"
   totalCents    Int         @default(0)
   comment       String?
   tearOffNumber Int?

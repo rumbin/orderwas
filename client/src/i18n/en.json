@@ -32,6 +32,7 @@
     "title": "Station",
     "openOrders": "Open orders",
     "markDone": "Done",
+    "markOrderDone": "Complete order",
     "waitTime": "Wait time",
     "table": "Table",
     "noOrders": "No open orders"

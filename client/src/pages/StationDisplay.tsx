@@ -72,6 +72,23 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
     }
   }
 
+  // Mark entire order as done: prepare all open items for this station + set order status to 'done'
+  const handleMarkOrderDone = async (order: Order) => {
+    // Optimistic: mark all station items as prepared, remove from view
+    setOrders((prev) => prev.filter((o) => o.id !== order.id))
+    try {
+      const stationItems = order.items.filter(
+        (i) => i.product.stationId === stationId && i.status === 'open',
+      )
+      await Promise.all(
+        stationItems.map((i) => api.updateOrderItem(i.id, { status: 'prepared' })),
+      )
+      await api.updateOrderStatus(order.id, 'done')
+    } catch {
+      loadOrders() // revert on failure
+    }
+  }
+
   // Product aggregation view
   const productAggregation = useCallback(() => {
     const map = new Map<string, { name: string; totalQty: number; tables: string[] }>()
@@ -96,10 +113,7 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
     if (!station || !stationId) return
     try {
       const allOrders = await api.getOrders(station.eventId)
-      const done = allOrders.filter((o) => {
-        const stationItems = o.items.filter((i) => i.product.stationId === stationId)
-        return stationItems.length > 0 && stationItems.every((i) => ['prepared', 'delivered', 'cancelled'].includes(i.status))
-      })
+      const done = allOrders.filter((o) => o.status === 'done')
       setDoneOrders(done)
     } catch {
       // ignore
@@ -214,6 +228,14 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
                       )
                     })}
                   </div>
+                  {/* Mark entire order done */}
+                  <button
+                    onClick={() => handleMarkOrderDone(order)}
+                    className="w-full mt-3 bg-green-700 hover:bg-green-800 text-sm py-2 rounded font-medium"
+                    data-testid={`order-done-${order.id}`}
+                  >
+                    {t('station.markOrderDone') ?? 'Ganze Bestellung fertig'}
+                  </button>
                 </div>
               )
             })

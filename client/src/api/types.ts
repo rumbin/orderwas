@@ -107,7 +107,7 @@ export interface Order {
   waiterId: string
   waiter?: Waiter
   eventId: string
-  status: 'open' | 'preparing' | 'partial' | 'paid' | 'cancelled'
+  status: 'open' | 'preparing' | 'partial' | 'done' | 'paid' | 'cancelled'
   totalCents: number
   comment: string | null
   tearOffNumber: number | null

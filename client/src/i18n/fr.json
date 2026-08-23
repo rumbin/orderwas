@@ -30,6 +30,7 @@
     "title": "Station",
     "openOrders": "Commandes ouvertes",
     "markDone": "Terminé",
+    "markOrderDone": "Commande terminée",
     "waitTime": "Temps d'attente",
     "table": "Table",
     "noOrders": "Aucune commande ouverte"

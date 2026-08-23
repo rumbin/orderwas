@@ -52,6 +52,7 @@
     "title": "Station",
     "openOrders": "Offene Bestellungen",
     "markDone": "Erledigt",
+    "markOrderDone": "Ganze Bestellung fertig",
     "waitTime": "Wartezeit",
     "table": "Tisch",
     "noOrders": "Keine offenen Bestellungen",

@@ -6,7 +6,7 @@ import App from '@/App'
 vi.mock('@/stores/session', () => ({
   useSessionStore: (selector?: any) => {
     const state = {
-      event: null,
+      event: { id: 'evt1', name: 'Testfest', status: 'test', hidePrices: false, tseEnabled: false, lastTearOffNumber: 0, createdAt: '', updatedAt: '' },
       waiter: null,
       token: null,
       setEvent: vi.fn(),
@@ -50,7 +50,7 @@ describe('App', () => {
     window.location.hash = '#/login'
     render(<App />)
     await waitFor(() => {
-      expect(screen.getByTestId('event-select')).toBeDefined()
+      expect(screen.getByTestId('waiter-select')).toBeDefined()
     })
   })
 })
