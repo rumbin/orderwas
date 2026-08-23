@@ -78,8 +78,12 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   }, [tab, event, waiter])
 
   const handleCancelOrder = async (orderId: string) => {
-    await api.cancelOrder(orderId, token!)
-    setMyOrders((prev) => prev.filter((o) => o.id !== orderId))
+    try {
+      await api.cancelOrder(orderId, token!)
+      setMyOrders((prev) => prev.filter((o) => o.id !== orderId))
+    } catch (err) {
+      console.error('Cancel failed:', err)
+    }
   }
 
   if (!event || !waiter) return null
