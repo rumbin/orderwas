@@ -44,6 +44,17 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
     })
   }, [activeStation, products])
 
+  // Warn before leaving with items in cart
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (useCartStore.getState().items.some((i) => i.quantity > 0)) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [])
+
   if (!event || !waiter) return null
 
   const activeProducts = products[activeStation] ?? []
