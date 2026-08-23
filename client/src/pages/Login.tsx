@@ -109,7 +109,7 @@ export default function Login({ navigate }: { navigate: (path: string) => void }
       )}
 
       {/* Theme Switcher */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
+      <div className="fixed bottom-4 left-4 z-30">
         <ThemeSwitcher />
       </div>
     </div>

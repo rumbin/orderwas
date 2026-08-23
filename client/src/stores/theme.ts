@@ -13,22 +13,15 @@ function getInitialDark(): boolean {
   }
 }
 
-function applyDark(dark: boolean) {
-  document.documentElement.classList.toggle('dark', dark)
-}
-
-export const useThemeStore = create<ThemeState>((set) => ({
+export const useThemeStore = create<ThemeState>((set, get) => ({
   dark: getInitialDark(),
-  toggle: () =>
-    set((state) => {
-      const next = !state.dark
-      try {
-        localStorage.setItem('theme-dark', String(next))
-      } catch { /* ignore */ }
-      applyDark(next)
-      return { dark: next }
-    }),
+  toggle: () => {
+    const next = !get().dark
+    try { localStorage.setItem('theme-dark', String(next)) } catch {}
+    document.documentElement.classList.toggle('dark', next)
+    set({ dark: next })
+  },
 }))
 
-// Apply on initial load (module execution time)
-applyDark(getInitialDark())
+// Apply on load
+document.documentElement.classList.toggle('dark', getInitialDark())

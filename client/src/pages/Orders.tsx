@@ -178,7 +178,7 @@ export default function OrdersPage({ navigate }: { navigate: (path: string) => v
       )}
 
       {/* Theme switcher */}
-      <div className="fixed bottom-4 left-4 z-20">
+      <div className="fixed bottom-4 left-4 z-30">
         <ThemeSwitcher />
       </div>
     </div>
