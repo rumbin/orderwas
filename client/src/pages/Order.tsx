@@ -399,7 +399,12 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
           ) : (
             (() => {
               const open = myOrders
-                .filter((o) => ['open', 'preparing', 'partial'].includes(o.status))
+                .filter((o) => {
+                  if (['paid', 'cancelled', 'done'].includes(o.status)) return false
+                  // Done if ALL items are prepared/delivered/cancelled
+                  const allDone = o.items.length > 0 && o.items.every((i) => ['prepared', 'delivered', 'cancelled'].includes(i.status))
+                  return !allDone
+                })
                 .sort((a, b) => (a.tearOffNumber ?? 0) - (b.tearOffNumber ?? 0))
               if (open.length === 0) return <p className="text-gray-500 dark:text-gray-400 text-center py-8">{t('order.empty')}</p>
               return open.map((order) => (
@@ -451,7 +456,11 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
           ) : (
             (() => {
               const done = myOrders
-                .filter((o) => ['paid', 'cancelled', 'done'].includes(o.status))
+                .filter((o) => {
+                  if (['paid', 'cancelled', 'done'].includes(o.status)) return true
+                  // Also done if ALL items are prepared/delivered/cancelled
+                  return o.items.length > 0 && o.items.every((i) => ['prepared', 'delivered', 'cancelled'].includes(i.status))
+                })
                 .sort((a, b) => (b.tearOffNumber ?? 0) - (a.tearOffNumber ?? 0))
               if (done.length === 0) return <p className="text-gray-500 dark:text-gray-400 text-center py-8">{t('order.empty')}</p>
               return done.map((order) => (
