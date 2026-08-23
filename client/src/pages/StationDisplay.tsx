@@ -20,18 +20,18 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
   const [, setTick] = useState(0) // force re-render for wait time
   const [connected, setConnected] = useState(false)
 
-  // Load station and its open orders — show orders that still have work to do
-  // OR orders that are status 'open' but all items happen to be prepared (waiting for "mark done")
+  // Load station and its open orders — only orders where this station still has open items
   const loadOrders = useCallback(async () => {
     if (!stationId) return
     try {
       const st = await api.getStation(stationId)
       setStation(st)
       const allOrders = await api.getOrders(st.eventId)
-      const stationOrders = allOrders.filter(
-        (o) => ['open', 'preparing', 'partial'].includes(o.status) &&
-          o.items.some((i) => i.product.stationId === stationId),
-      )
+      const stationOrders = allOrders.filter((o) => {
+        if (o.status === 'done') return false // order-level done → not open for anyone
+        const stationItems = o.items.filter((i) => i.product.stationId === stationId)
+        return stationItems.length > 0 && stationItems.some((i) => i.status === 'open')
+      })
       setOrders(stationOrders)
     } finally {
       setLoading(false)
@@ -73,7 +73,7 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
     }
   }
 
-  // Mark entire order as done: prepare all open items for this station + set order status to 'done'
+  // Mark entire order done for this station: prepare all open items (does NOT set order.status)
   const handleMarkOrderDone = async (order: Order) => {
     // Optimistic: remove from view
     setOrders((prev) => prev.filter((o) => o.id !== order.id))
@@ -86,7 +86,6 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
           openItems.map((i) => api.updateOrderItem(i.id, { status: 'prepared' })),
         )
       }
-      await api.updateOrderStatus(order.id, 'done')
     } catch {
       loadOrders() // revert on failure
     }
@@ -281,7 +280,7 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
           {doneOrders.length === 0 ? (
             <p className="text-gray-500 col-span-full text-center py-8">{t('station.noDoneOrders') ?? 'Keine fertigen Bestellungen'}</p>
           ) : (
-            doneOrders.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).map((order) => {
+            doneOrders.sort((a, b) => (b.tearOffNumber ?? 0) - (a.tearOffNumber ?? 0)).map((order) => {
               const stationItems = order.items.filter((i) => i.product.stationId === stationId)
               const doneAt = Math.floor((Date.now() - new Date(order.updatedAt).getTime()) / 1000)
               return (
