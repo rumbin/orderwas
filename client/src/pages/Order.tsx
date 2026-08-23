@@ -198,9 +198,9 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
       {/* === NEW ORDER TAB === */}
       {tab === 'new' && (
         <>
-      {/* Success banner with tear-off + next-order button */}
+      {/* Success message — inline */}
       {success && !error && (
-        <div className="sticky top-[57px] z-10 bg-green-50 dark:bg-green-900/30 border-b border-green-200 dark:border-green-800 px-4 py-3 flex items-center justify-between">
+        <div className="mx-4 mt-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg px-4 py-3 flex items-center justify-between">
           <div className="text-green-800 dark:text-green-300">
             <span className="font-medium">{t('order.success')}</span>
             {success.tearOffNumber != null && (

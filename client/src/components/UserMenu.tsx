@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useSessionStore } from '@/stores/session'
 import { useThemeStore } from '@/stores/theme'
@@ -8,31 +9,44 @@ export default function UserMenu() {
   const { waiter, clear } = useSessionStore()
   const { dark, toggle } = useThemeStore()
   const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const [menuPos, setMenuPos] = useState({ top: 0, right: 0 })
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      if (btnRef.current && !btnRef.current.contains(e.target as Node)) setOpen(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
+
+  // Position dropdown below button
+  useEffect(() => {
+    if (open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right })
+    }
+  }, [open])
 
   if (!waiter) return null
 
   const initial = waiter.name.charAt(0).toUpperCase()
 
   return (
-    <div ref={ref} className="relative">
+    <>
       <button
+        ref={btnRef}
         onClick={() => setOpen(!open)}
         className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm"
         data-testid="user-menu-button"
       >
         {initial}
       </button>
-      {open && (
-        <div className="absolute right-0 top-11 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 w-56 z-50">
+      {open && createPortal(
+        <div
+          className="fixed bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 py-2 w-56"
+          style={{ top: menuPos.top, right: menuPos.right, zIndex: 99999 }}
+        >
           <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
             <div className="text-sm font-medium text-gray-900 dark:text-white">{waiter.name}</div>
           </div>
@@ -50,8 +64,9 @@ export default function UserMenu() {
           >
             {t('common.logout') ?? 'Abmelden'}
           </button>
-        </div>
+        </div>,
+        document.body,
       )}
-    </div>
+    </>
   )
 }
