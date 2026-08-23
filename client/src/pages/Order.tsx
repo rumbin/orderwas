@@ -73,9 +73,9 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
     if (tab === 'new' || !event) return
     setMyOrdersLoading(true)
     api.getOrders(event.id).then((all) => {
-      setMyOrders(all.filter((o) => o.waiterId === waiter?.id))
+      setMyOrders(all)
     }).finally(() => setMyOrdersLoading(false))
-  }, [tab, event, waiter])
+  }, [tab, event])
 
   const handleCancelOrder = async (orderId: string) => {
     try {
@@ -404,6 +404,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
             (() => {
               const open = myOrders
                 .filter((o) => {
+                  if (onlyMyOrders && o.waiterId !== waiter?.id) return false
                   if (['paid', 'cancelled', 'done'].includes(o.status)) return false
                   // Done if ALL items are prepared/delivered/cancelled
                   const allDone = o.items.length > 0 && o.items.every((i) => ['prepared', 'delivered', 'cancelled'].includes(i.status))
@@ -461,6 +462,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
             (() => {
               const done = myOrders
                 .filter((o) => {
+                  if (onlyMyOrders && o.waiterId !== waiter?.id) return false
                   if (['paid', 'cancelled', 'done'].includes(o.status)) return true
                   // Also done if ALL items are prepared/delivered/cancelled
                   return o.items.length > 0 && o.items.every((i) => ['prepared', 'delivered', 'cancelled'].includes(i.status))
