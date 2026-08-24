@@ -79,6 +79,26 @@ cd server && npx prisma generate                # regenerate Prisma client after
 
 German-first. Translation files: `client/src/i18n/de.json` (primary), `en.json`, `fr.json`. All UI strings through `t()` — no hardcoded strings.
 
+### ⚠️ Mandatory: All 3 languages must have identical key sets
+
+Every key added to `de.json` MUST also be added to `en.json` and `fr.json` in the same commit. Before committing any i18n change, verify parity:
+
+```bash
+node -e "
+const de = require('./client/src/i18n/de.json');
+const en = require('./client/src/i18n/en.json');
+const fr = require('./client/src/i18n/fr.json');
+function flat(o,p=''){const r={};for(const[k,v]of Object.entries(o)){const k2=p?p+'.'+k:k;if(typeof v==='object'&&v!==null)Object.assign(r,flat(v,k2));else r[k2]=v;}return r;}
+const d=flat(de),e=flat(en),f=flat(fr);
+const me=Object.keys(d).filter(k=>!(k in e));
+const mf=Object.keys(d).filter(k=>!(k in f));
+if(me.length||mf.length){console.error('MISSING in en:',me);console.error('MISSING in fr:',mf);process.exit(1);}
+console.log('✅ All',Object.keys(d).length,'keys present in DE, EN, FR');
+"
+```
+
+This must pass before any commit touching i18n files.
+
 ## What NOT to Do
 
 - Don't return `pin` in any API response (use `waiterSelect`).
