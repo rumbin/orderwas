@@ -377,7 +377,14 @@ function AdminProducts({ stations, products, onLoadProducts, setProducts }: {
                     onDragEnd={() => setDragIndex(null)}
                     style={{ opacity: dragIndex === index ? 0.5 : 1 }}
                   >
-                    <td className="py-2">{p.name}</td>
+                    <td className="py-2">
+                      <div className="flex items-center gap-2">
+                        {p.color && PRODUCT_COLORS[p.color] && (
+                          <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: PRODUCT_COLORS[p.color] }} />
+                        )}
+                        {p.name}
+                      </div>
+                    </td>
                     <td>
                       {(p as any)._count?.orderItems > 0 && (
                         <span className="inline-block px-1.5 py-0.5 text-[10px] rounded bg-gray-200 text-gray-600 leading-none">Bestellt</span>

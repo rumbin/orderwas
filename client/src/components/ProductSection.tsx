@@ -1,6 +1,6 @@
 import type { Product } from '@/api/types'
 import { useCartStore } from '@/stores/cart'
-import { PRODUCT_COLORS } from '@/lib/productColors'
+import { PRODUCT_COLORS, PRODUCT_BG_CLASSES } from '@/lib/productColors'
 import { useRef } from 'react'
 
 function formatCents(cents: number): string {
@@ -41,7 +41,9 @@ export default function ProductSection({ station, products, t, onAdd, onLongPres
                   ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-50'
                   : count > 0
                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
+                    : product.color && PRODUCT_BG_CLASSES[product.color]
+                      ? `border-gray-200 dark:border-gray-700 ${PRODUCT_BG_CLASSES[product.color]}`
+                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
               style={product.color && PRODUCT_COLORS[product.color]
                 ? { borderLeftColor: PRODUCT_COLORS[product.color], borderLeftWidth: '4px' }

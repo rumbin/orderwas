@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/api/client'
 import { useWebSocket, type OrderEventPayload } from '@/hooks/useWebSocket'
 import UserMenu from '@/components/UserMenu'
+import { PRODUCT_COLORS } from '@/lib/productColors'
 import type { Order, Station } from '@/api/types'
 
 function formatTime(seconds: number): string {
@@ -214,6 +215,9 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-lg">{item.quantity}×</span>
                               <span>{item.product.name}</span>
+                              {item.product.color && PRODUCT_COLORS[item.product.color] && (
+                                <span className="w-2 h-2 rounded-full inline-block ml-1" style={{ backgroundColor: PRODUCT_COLORS[item.product.color] }} />
+                              )}
                               {item.status === 'prepared' && <span className="text-green-500">✓</span>}
                             </div>
                             {parsedOptions.length > 0 && (

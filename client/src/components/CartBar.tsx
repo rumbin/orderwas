@@ -1,4 +1,5 @@
 import { useCartStore } from '@/stores/cart'
+import { PRODUCT_COLORS } from '@/lib/productColors'
 import type { Product } from '@/api/types'
 
 function formatCents(cents: number): string {
@@ -54,7 +55,15 @@ export default function CartBar({ tableNumber, onTableChange, error, submitting,
                 return (
                   <div
                     key={product.id}
-                    className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded px-2 py-1 text-sm whitespace-nowrap"
+                    className={`flex items-center gap-1 rounded px-2 py-1 text-sm whitespace-nowrap ${
+                      product.color && PRODUCT_COLORS[product.color]
+                        ? `border-l-3`
+                        : 'bg-gray-100 dark:bg-gray-700'
+                    }`}
+                    style={product.color && PRODUCT_COLORS[product.color]
+                      ? { borderLeftColor: PRODUCT_COLORS[product.color], borderLeftWidth: '3px', backgroundColor: PRODUCT_COLORS[product.color] + '20' }
+                      : undefined
+                    }
                     data-testid="cart-item"
                   >
                     <button onClick={() => onOpenVariant(product)} className="hover:text-blue-600" title={t('order.editComment')}>
