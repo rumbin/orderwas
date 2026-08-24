@@ -4,6 +4,7 @@ import { api } from '@/api/client'
 import { useSessionStore } from '@/stores/session'
 import type { Waiter } from '@/api/types'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
+import LanguagePicker from '@/components/LanguagePicker'
 
 export default function Login({ navigate }: { navigate: (path: string) => void }) {
   const { t } = useTranslation()
@@ -108,8 +109,9 @@ export default function Login({ navigate }: { navigate: (path: string) => void }
         </div>
       )}
 
-      {/* Theme Switcher */}
-      <div className="fixed bottom-4 left-4 z-30">
+      {/* Theme Switcher + Language Picker */}
+      <div className="fixed bottom-4 left-4 z-30 flex items-center gap-2">
+        <LanguagePicker />
         <ThemeSwitcher />
       </div>
     </div>

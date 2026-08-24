@@ -4,13 +4,17 @@ import de from './de.json'
 import en from './en.json'
 import fr from './fr.json'
 
+// Restore saved language
+let savedLang = 'de'
+try { savedLang = localStorage.getItem('language') ?? 'de' } catch {}
+
 i18n.use(initReactI18next).init({
   resources: {
     de: { translation: de },
     en: { translation: en },
     fr: { translation: fr },
   },
-  lng: 'de',
+  lng: savedLang,
   fallbackLng: 'de',
   interpolation: {
     escapeValue: false,

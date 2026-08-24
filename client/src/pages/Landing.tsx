@@ -4,6 +4,7 @@ import { api } from '@/api/client'
 import { useSessionStore } from '@/stores/session'
 import type { Event, Station } from '@/api/types'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
+import LanguagePicker from '@/components/LanguagePicker'
 
 export default function Landing({ navigate }: { navigate: (path: string) => void }) {
   const { t } = useTranslation()
@@ -102,8 +103,9 @@ export default function Landing({ navigate }: { navigate: (path: string) => void
         </div>
       )}
 
-      {/* Theme switcher */}
-      <div className="fixed bottom-4 left-4 z-30">
+      {/* Theme switcher + language picker */}
+      <div className="fixed bottom-4 left-4 z-30 flex items-center gap-2">
+        <LanguagePicker />
         <ThemeSwitcher />
       </div>
     </div>

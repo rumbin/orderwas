@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useSessionStore } from '@/stores/session'
 import { useThemeStore } from '@/stores/theme'
+import LanguagePicker from '@/components/LanguagePicker'
 
 export default function UserMenu() {
   const { t } = useTranslation()
@@ -52,7 +53,8 @@ export default function UserMenu() {
           style={{ top: menuPos.top, right: menuPos.right, zIndex: 99999 }}
         >
           <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-            <div className="text-sm font-medium text-gray-900 dark:text-white">{waiter.name}</div>
+            <div className="text-sm font-medium text-gray-900 dark:text-white mb-2">{waiter.name}</div>
+            <LanguagePicker onSelect={() => setOpen(false)} />
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); toggle(); setOpen(false) }}
