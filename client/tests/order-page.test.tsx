@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import OrderPage from '@/pages/Order'
+import { useCartStore } from '@/stores/cart'
 
 // Mock i18n
 vi.mock('react-i18next', () => ({
@@ -67,11 +68,14 @@ const mockOutOfStockProduct = {
 }
 
 // Reset cart store between tests
-beforeEach(async () => {
-  const { useCartStore } = await import('@/stores/cart')
+beforeEach(() => {
   useCartStore.getState().clear()
-  vi.clearAllMocks()
-  // Re-setup mock implementations after clearAllMocks
+  // Re-setup mock implementations (clearAllMocks resets them)
+  mockGetStations.mockReset()
+  mockGetProducts.mockReset()
+  mockCreateOrder.mockReset()
+  mockGetOrders.mockReset()
+  mockCancelOrder.mockReset()
   mockGetStations.mockResolvedValue(mockStations)
   mockGetProducts.mockImplementation((stationId: string) => {
     if (stationId === 'st-1') return Promise.resolve([...mockBarProducts, mockOutOfStockProduct])
