@@ -21,6 +21,7 @@ const createProductSchema = z.object({
   stockMode: z.enum(['none', 'tracked', 'composite']).optional(),
   stockCount: z.number().optional(),
   sortOrder: z.number().int().optional(),
+  color: z.string().nullable().optional(),
 })
 
 const updateProductSchema = z.object({
@@ -34,6 +35,7 @@ const updateProductSchema = z.object({
   stockMode: z.enum(['none', 'tracked', 'composite']).optional(),
   stockCount: z.number().optional(),
   sortOrder: z.number().int().optional(),
+  color: z.string().nullable().optional(),
 })
 
 const createExtraSchema = z.object({

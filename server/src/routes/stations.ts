@@ -19,6 +19,25 @@ const updateStationSchema = z.object({
 })
 
 export default async function stationRoutes(server: FastifyInstance): Promise<void> {
+  // POST /stations/reorder — bulk update sortOrder for stations
+  const reorderSchema = z.array(z.object({
+    id: z.string(),
+    sortOrder: z.number().int(),
+  })).min(1)
+
+  server.post('/stations/reorder', async (request, reply) => {
+    const parsed = reorderSchema.safeParse(request.body)
+    if (!parsed.success) {
+      return reply.code(400).send({ error: parsed.error.flatten() })
+    }
+    await prisma.$transaction(
+      parsed.data.map(({ id, sortOrder }) =>
+        prisma.station.update({ where: { id }, data: { sortOrder } })
+      )
+    )
+    return { ok: true }
+  })
+
   // Create station under an event
   server.post('/events/:eventId/stations', async (request, reply) => {
     const { eventId } = request.params as { eventId: string }

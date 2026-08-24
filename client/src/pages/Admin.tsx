@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/api/client'
 import { useSessionStore } from '@/stores/session'
 import type { Event, Station, Product, ProductExtra, Waiter, Printer } from '@/api/types'
+import { PRODUCT_COLORS } from '@/lib/productColors'
+export { PRODUCT_COLORS }
 import { AdminEvents } from '@/pages/admin/Events'
 import { AdminStations } from '@/pages/admin/Stations'
 import { AdminWaiters } from '@/pages/admin/Waiters'
@@ -533,6 +535,7 @@ function ProductEditModal({ product, onClose, onSaved }: {
   const [newExtraMultiSelect, setNewExtraMultiSelect] = useState(false)
   const [newOptionTexts, setNewOptionTexts] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
+  const [selectedColor, setSelectedColor] = useState<string | null>(product.color ?? null)
 
   const handleAddExtra = async () => {
     if (!newExtraName.trim()) return
@@ -568,12 +571,50 @@ function ProductEditModal({ product, onClose, onSaved }: {
     setExtras((prev) => prev.filter((e) => e.id !== extraId))
   }
 
+  const handleColorChange = async (color: string | null) => {
+    setSelectedColor(color)
+    await api.updateProduct(product.id, { color })
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
       <div className="bg-white rounded-lg p-4 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-lg">{product.name} — {t('admin.extras') ?? 'Extras'}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+        </div>
+
+        {/* Color picker */}
+        <div className="mb-4">
+          <p className="text-xs text-gray-500 mb-2">{t('admin.productColor') ?? 'Button-Farbe'}</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => handleColorChange(null)}
+              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition ${
+                selectedColor === null
+                  ? 'border-blue-500 bg-gray-100'
+                  : 'border-gray-300 bg-white hover:border-gray-400'
+              }`}
+              title={t('admin.noColor') ?? 'Keine Farbe'}
+              aria-label={t('admin.noColor') ?? 'Keine Farbe'}
+            >
+              <span className="text-[10px] text-gray-400">×</span>
+            </button>
+            {Object.entries(PRODUCT_COLORS).map(([name, hex]) => (
+              <button
+                key={name}
+                onClick={() => handleColorChange(name)}
+                className={`w-6 h-6 rounded-full border-2 transition ${
+                  selectedColor === name
+                    ? 'border-blue-500 ring-2 ring-blue-200 scale-110'
+                    : 'border-transparent hover:scale-110'
+                }`}
+                style={{ backgroundColor: hex }}
+                title={name}
+                aria-label={name}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Existing extras */}

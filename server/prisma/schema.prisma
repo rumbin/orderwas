@@ -82,6 +82,7 @@ model Product {
   stockMode  String   @default("none") // "none" | "tracked" | "composite"
   stockCount Float    @default(0)
   sortOrder  Int      @default(0)
+  color      String?  // Tailwind color name e.g. "red-500", "blue-500"
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   orderItems OrderItem[]

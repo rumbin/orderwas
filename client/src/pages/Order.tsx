@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/api/client'
 import { useSessionStore } from '@/stores/session'
 import { useCartStore } from '@/stores/cart'
 import UserMenu from '@/components/UserMenu'
+import { PRODUCT_COLORS } from '@/lib/productColors'
 import type { Station, Product, Order } from '@/api/types'
 
 function formatCents(cents: number): string {
@@ -29,8 +30,9 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   const { event, waiter, token, clear } = useSessionStore()
   const cart = useCartStore()
   const [stations, setStations] = useState<Station[]>([])
+  const [sortedStations, setSortedStations] = useState<Station[]>([])
   const [products, setProducts] = useState<Record<string, Product[]>>({})
-  const [activeStation, setActiveStation] = useState<string>('')
+  const [activeStationId, setActiveStationId] = useState<string>('')
   const [tableNumber, setTableNumber] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState<{ tearOffNumber: number | null } | null>(null)
@@ -42,27 +44,75 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const newVariantInputRef = useRef<HTMLInputElement>(null)
   const tableInputRef = useRef<HTMLInputElement>(null)
+  // Station nav & section refs
+  const navRef = useRef<HTMLDivElement>(null)
+  const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   // Tab state
   const [tab, setTab] = useState<'new' | 'open' | 'done'>('new')
   const [onlyMyOrders, setOnlyMyOrders] = useState(true)
   const [myOrders, setMyOrders] = useState<Order[]>([])
   const [myOrdersLoading, setMyOrdersLoading] = useState(false)
 
+  // Load all stations and all products on mount
   useEffect(() => {
     if (!event) return
+    let cancelled = false
     api.getStations(event.id).then((sts) => {
+      if (cancelled) return
       setStations(sts)
-      if (sts.length > 0) setActiveStation(sts[0].id)
+      const sorted = [...sts].sort((a, b) => a.sortOrder - b.sortOrder)
+      setSortedStations(sorted)
+      // Load products for all stations in parallel
+      return Promise.all(sorted.map((st) => api.getProducts(st.id))).then((results) => {
+        if (cancelled) return
+        const productMap: Record<string, Product[]> = {}
+        results.forEach((prods, i) => {
+          productMap[sorted[i].id] = prods
+        })
+        setProducts(productMap)
+        if (sorted.length > 0) setActiveStationId(sorted[0].id)
+      })
     })
+    return () => { cancelled = true }
   }, [event])
 
+  // IntersectionObserver to track which station section is visible
   useEffect(() => {
-    if (!activeStation) return
-    if (products[activeStation]) return
-    api.getProducts(activeStation).then((prods) => {
-      setProducts((prev) => ({ ...prev, [activeStation]: prods }))
-    })
-  }, [activeStation, products])
+    if (sortedStations.length === 0 || typeof IntersectionObserver === 'undefined') return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('data-station-id')
+            if (id) setActiveStationId(id)
+          }
+        }
+      },
+      { rootMargin: '-20% 0px -70% 0px' },
+    )
+    for (const st of sortedStations) {
+      const el = sectionRefs.current.get(st.id)
+      if (el) observer.observe(el)
+    }
+    return () => observer.disconnect()
+  }, [sortedStations])
+
+  // Register section ref callback (stable per station id)
+  const sectionRefCallbacks = useRef<Map<string, (el: HTMLDivElement | null) => void>>(new Map())
+  const getSectionRef = useCallback((id: string) => {
+    if (!sectionRefCallbacks.current.has(id)) {
+      sectionRefCallbacks.current.set(id, (el: HTMLDivElement | null) => {
+        if (el) sectionRefs.current.set(id, el)
+        else sectionRefs.current.delete(id)
+      })
+    }
+    return sectionRefCallbacks.current.get(id)!
+  }, [])
+
+  // Scroll to station section
+  const scrollToStation = useCallback((id: string) => {
+    sectionRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [])
 
   // Warn before leaving with items in cart
   useEffect(() => {
@@ -102,8 +152,13 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
 
   if (!event || !waiter) return null
 
-  const activeProducts = products[activeStation] ?? []
   const total = cart.total()
+
+  // All products from all stations, sorted by station sortOrder
+  const allStationProducts = sortedStations.map((st) => ({
+    station: st,
+    products: (products[st.id] ?? []).filter((p) => p.available),
+  }))
 
   const handleAddProduct = (product: Product) => {
     cart.addItem(product)
@@ -224,15 +279,15 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
         </div>
       )}
 
-      {/* Station tabs */}
-      {stations.length > 1 && (
-        <div className="flex gap-1 px-4 py-2 bg-white dark:bg-gray-800 border-b dark:border-gray-700 overflow-x-auto">
-          {stations.map((st) => (
+      {/* Station nav — sticky below tabs */}
+      {sortedStations.length > 1 && (
+        <div ref={navRef} className="sticky top-12 z-10 flex gap-1 px-4 py-2 bg-white dark:bg-gray-800 border-b dark:border-gray-700 overflow-x-auto">
+          {sortedStations.map((st) => (
             <button
               key={st.id}
-              onClick={() => setActiveStation(st.id)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap ${
-                activeStation === st.id
+              onClick={() => scrollToStation(st.id)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition ${
+                activeStationId === st.id
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
               }`}
@@ -243,81 +298,94 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
         </div>
       )}
 
-      {/* Product grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 p-4">
-        {activeProducts.filter((p) => p.available).map((product) => {
-          const count = cart.items
-            .filter((i) => i.product.id === product.id)
-            .reduce((sum, i) => sum + i.quantity, 0)
-          const outOfStock = product.stockMode === 'tracked' && product.stockCount <= 0
-          const lowStock = product.stockMode === 'tracked' && product.stockCount > 0 && product.stockCount <= 5
-          return (
-            <div
-              key={product.id}
-              data-testid={`product-${product.name}`}
-              className={`relative min-h-[88px] rounded-lg border-2 transition select-none ${
-                outOfStock
-                  ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-50'
-                  : count > 0
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-              onPointerDown={() => {
-                longPressTimer.current = setTimeout(() => {
-                  openVariantDialog(product)
-                }, 500)
-              }}
-              onPointerUp={() => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null } }}
-              onPointerLeave={() => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null } }}
-            >
-              {/* Count badge — upper-right corner */}
-              {count > 0 && (
-                <span className="absolute top-1 right-1 bg-blue-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold z-10">
-                  {count}
-                </span>
-              )}
-              <div className="flex items-stretch h-full">
-                {/* Decrement */}
-                <button
-                  onClick={() => {
-                    const idx = cart.items.findIndex((i) => i.product.id === product.id)
-                    if (idx >= 0) cart.decrementItem(idx)
+      {/* Station sections — all products on one scrollable page */}
+      {allStationProducts.map(({ station, products: stationProducts }, idx) => (
+        <div
+          key={station.id}
+          ref={getSectionRef(station.id)}
+          data-station-id={station.id}
+          className={idx > 0 ? 'border-t border-gray-200 dark:border-gray-700' : ''}
+        >
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 p-4">
+            {stationProducts.map((product) => {
+              const count = cart.items
+                .filter((i) => i.product.id === product.id)
+                .reduce((sum, i) => sum + i.quantity, 0)
+              const outOfStock = product.stockMode === 'tracked' && product.stockCount <= 0
+              const lowStock = product.stockMode === 'tracked' && product.stockCount > 0 && product.stockCount <= 5
+              return (
+                <div
+                  key={product.id}
+                  data-testid={`product-${product.name}`}
+                  className={`relative min-h-[88px] rounded-lg border-2 transition select-none ${
+                    outOfStock
+                      ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-50'
+                      : count > 0
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                  style={product.color && PRODUCT_COLORS[product.color]
+                    ? { borderLeftColor: PRODUCT_COLORS[product.color], borderLeftWidth: '4px' }
+                    : undefined
+                  }
+                  onPointerDown={() => {
+                    longPressTimer.current = setTimeout(() => {
+                      openVariantDialog(product)
+                    }, 500)
                   }}
-                  disabled={count === 0}
-                  className="w-10 flex items-center justify-center text-lg font-bold text-gray-600 dark:text-gray-400 hover:text-red-500 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed rounded-l-lg"
-                  data-testid={`decrement-${product.name}`}
+                  onPointerUp={() => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null } }}
+                  onPointerLeave={() => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null } }}
                 >
-                  −
-                </button>
-
-                {/* Product info */}
-                <div className="flex-1 py-2 px-1 min-w-0">
-                  <div className="font-medium text-gray-900 dark:text-white text-sm leading-tight truncate">{product.name}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{formatCents(product.priceCents)}</div>
-                  {product.extras?.length ? (
-                    <div className="text-[10px] text-blue-600 mt-0.5">⚙ {product.extras.length} {t('order.extrasLabel')}</div>
-                  ) : null}
-                  {product.stockMode === 'tracked' && (
-                    <div className={`text-[10px] mt-0.5 ${outOfStock ? 'text-red-600 font-medium' : lowStock ? 'text-amber-600' : 'text-gray-400 dark:text-gray-500'}`}>
-                      {outOfStock ? t('order.outOfStock') : `${product.stockCount} ${t('order.inStock')}`}
-                    </div>
+                  {/* Count badge — upper-right corner */}
+                  {count > 0 && (
+                    <span className="absolute top-1 right-1 bg-blue-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold z-10">
+                      {count}
+                    </span>
                   )}
-                </div>
+                  <div className="flex items-stretch h-full">
+                    {/* Decrement */}
+                    <button
+                      onClick={() => {
+                        const idx = cart.items.findIndex((i) => i.product.id === product.id)
+                        if (idx >= 0) cart.decrementItem(idx)
+                      }}
+                      disabled={count === 0}
+                      className="w-10 flex items-center justify-center text-lg font-bold text-gray-600 dark:text-gray-400 hover:text-red-500 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed rounded-l-lg"
+                      data-testid={`decrement-${product.name}`}
+                    >
+                      −
+                    </button>
 
-                {/* Increment */}
-                <button
-                  onClick={() => !outOfStock && handleAddProduct(product)}
-                  disabled={outOfStock}
-                  className="w-10 flex items-center justify-center text-lg font-bold text-gray-600 dark:text-gray-400 hover:text-blue-600 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed rounded-r-lg"
-                  data-testid={`increment-${product.name}`}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+                    {/* Product info */}
+                    <div className="flex-1 py-2 px-1 min-w-0">
+                      <div className="font-medium text-gray-900 dark:text-white text-sm leading-tight truncate">{product.name}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{formatCents(product.priceCents)}</div>
+                      {product.extras?.length ? (
+                        <div className="text-[10px] text-blue-600 mt-0.5">⚙ {product.extras.length} {t('order.extrasLabel')}</div>
+                      ) : null}
+                      {product.stockMode === 'tracked' && (
+                        <div className={`text-[10px] mt-0.5 ${outOfStock ? 'text-red-600 font-medium' : lowStock ? 'text-amber-600' : 'text-gray-400 dark:text-gray-500'}`}>
+                          {outOfStock ? t('order.outOfStock') : `${product.stockCount} ${t('order.inStock')}`}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Increment */}
+                    <button
+                      onClick={() => !outOfStock && handleAddProduct(product)}
+                      disabled={outOfStock}
+                      className="w-10 flex items-center justify-center text-lg font-bold text-gray-600 dark:text-gray-400 hover:text-blue-600 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed rounded-r-lg"
+                      data-testid={`increment-${product.name}`}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ))}
 
       {/* Cart bar (fixed bottom) */}
       {cart.items.filter((i) => i.quantity > 0).length > 0 && (

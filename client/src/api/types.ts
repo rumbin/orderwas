@@ -68,6 +68,7 @@ export interface Product {
   stockMode: 'none' | 'tracked' | 'composite'
   stockCount: number
   sortOrder: number
+  color: string | null
   extras?: ProductExtra[]
 }
 

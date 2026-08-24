@@ -54,16 +54,16 @@ const mockStations = [
 ]
 
 const mockBarProducts = [
-  { id: 'p-1', name: 'Bier', shortName: null, priceCents: 300, taxRateBps: 2000, stationId: 'st-1', available: true, isVoucher: false, addable: true, stockMode: 'none', stockCount: 0, sortOrder: 0 },
-  { id: 'p-2', name: 'Cola', shortName: null, priceCents: 250, taxRateBps: 2000, stationId: 'st-1', available: true, isVoucher: false, addable: true, stockMode: 'none', stockCount: 0, sortOrder: 1 },
+  { id: 'p-1', name: 'Bier', shortName: null, priceCents: 300, taxRateBps: 2000, stationId: 'st-1', available: true, isVoucher: false, addable: true, stockMode: 'none', stockCount: 0, sortOrder: 0, color: null },
+  { id: 'p-2', name: 'Cola', shortName: null, priceCents: 250, taxRateBps: 2000, stationId: 'st-1', available: true, isVoucher: false, addable: true, stockMode: 'none', stockCount: 0, sortOrder: 1, color: null },
 ]
 
 const mockKitchenProducts = [
-  { id: 'p-3', name: 'Schnitzel', shortName: null, priceCents: 800, taxRateBps: 2000, stationId: 'st-2', available: true, isVoucher: false, addable: true, stockMode: 'none', stockCount: 0, sortOrder: 0 },
+  { id: 'p-3', name: 'Schnitzel', shortName: null, priceCents: 800, taxRateBps: 2000, stationId: 'st-2', available: true, isVoucher: false, addable: true, stockMode: 'none', stockCount: 0, sortOrder: 0, color: null },
 ]
 
 const mockOutOfStockProduct = {
-  id: 'p-4', name: 'Fanta', shortName: null, priceCents: 250, taxRateBps: 2000, stationId: 'st-1', available: true, isVoucher: false, addable: true, stockMode: 'tracked', stockCount: 0, sortOrder: 2,
+  id: 'p-4', name: 'Fanta', shortName: null, priceCents: 250, taxRateBps: 2000, stationId: 'st-1', available: true, isVoucher: false, addable: true, stockMode: 'tracked', stockCount: 0, sortOrder: 2, color: null,
 }
 
 // Reset cart store between tests
@@ -86,12 +86,14 @@ beforeEach(async () => {
 describe('OrderPage', () => {
   const navigate = vi.fn()
 
-  it('renders product grid when session has event', async () => {
+  it('renders all products from all stations when session has event', async () => {
     render(<OrderPage navigate={navigate} />)
 
     await waitFor(() => {
+      // All products from both stations should be visible at once
       expect(screen.getByTestId('product-Bier')).toBeDefined()
       expect(screen.getByTestId('product-Cola')).toBeDefined()
+      expect(screen.getByTestId('product-Schnitzel')).toBeDefined()
     })
   })
 
@@ -114,7 +116,7 @@ describe('OrderPage', () => {
     expect(screen.getByTestId('user-menu-button').textContent).toBe('A')
   })
 
-  it('station tabs switch active tab', async () => {
+  it('station nav buttons exist and first is active', async () => {
     render(<OrderPage navigate={navigate} />)
 
     await waitFor(() => {
@@ -124,33 +126,21 @@ describe('OrderPage', () => {
     const barBtn = screen.getByText('Bar')
     const kitchenBtn = screen.getByText('Kitchen')
 
-    // Initially Bar is active (blue), Kitchen is inactive (gray)
+    // First station (Bar, sortOrder: 0) is active initially via IntersectionObserver
     expect(barBtn.className).toContain('bg-blue-600')
     expect(kitchenBtn.className).toContain('bg-gray-100')
-
-    // Click Kitchen tab — fireEvent triggers the onClick synchronously
-    fireEvent.click(kitchenBtn)
-
-    // Kitchen should now be active (blue), Bar inactive (gray)
-    expect(kitchenBtn.className).toContain('bg-blue-600')
-    expect(barBtn.className).toContain('bg-gray-100')
   })
 
-  it('station tabs fetch products for clicked station', async () => {
+  it('loads products for all stations on mount', async () => {
     render(<OrderPage navigate={navigate} />)
 
     await waitFor(() => {
       expect(screen.getByTestId('product-Bier')).toBeDefined()
     })
 
-    // Click Kitchen tab
-    fireEvent.click(screen.getByText('Kitchen'))
-
-    // API should have been called for both stations
-    await waitFor(() => {
-      expect(mockGetProducts).toHaveBeenCalledWith('st-1')
-      expect(mockGetProducts).toHaveBeenCalledWith('st-2')
-    })
+    // API should have been called for both stations on mount
+    expect(mockGetProducts).toHaveBeenCalledWith('st-1')
+    expect(mockGetProducts).toHaveBeenCalledWith('st-2')
   })
 
   it('clicking + increments cart count', async () => {

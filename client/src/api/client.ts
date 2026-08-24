@@ -105,6 +105,11 @@ export const api = {
     request<Station>(`/stations/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteStation: (id: string) =>
     request<void>(`/stations/${id}`, { method: 'DELETE' }),
+  reorderStations: (items: { id: string; sortOrder: number }[]) =>
+    request<{ ok: boolean }>('/stations/reorder', {
+      method: 'POST',
+      body: JSON.stringify(items),
+    }),
 
   // Products
   getProducts: (stationId: string) => request<Product[]>(`/stations/${stationId}/products`),
