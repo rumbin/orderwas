@@ -36,7 +36,7 @@ export async function updateItem(
       ...(data.comment !== undefined ? { comment: data.comment } : {}),
       ...(data.status !== undefined ? { status: data.status as ItemStatus } : {}),
     },
-    include: { product: { select: { id: true, name: true, stationId: true } } },
+    include: { product: { select: { id: true, name: true, stationId: true, color: true } } },
   })
 
   // Emit WS event when status changed

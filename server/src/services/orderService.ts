@@ -150,7 +150,7 @@ export async function createOrder(input: CreateOrderInput) {
         },
       },
       include: {
-        items: { include: { product: { select: { id: true, name: true, priceCents: true, stationId: true } } } },
+        items: { include: { product: { select: { id: true, name: true, priceCents: true, stationId: true, color: true } } } },
       },
     })
   })
@@ -226,7 +226,7 @@ export async function listOrdersByEvent(eventId: string) {
   return prisma.order.findMany({
     where: { eventId },
     include: {
-      items: { include: { product: { select: { id: true, name: true, priceCents: true, stationId: true } } } },
+      items: { include: { product: { select: { id: true, name: true, priceCents: true, stationId: true, color: true } } } },
     },
     orderBy: { createdAt: 'asc' },
   })
@@ -239,7 +239,7 @@ export async function getOrder(id: string) {
   return prisma.order.findUnique({
     where: { id },
     include: {
-      items: { include: { product: { select: { id: true, name: true, priceCents: true, stationId: true } } } },
+      items: { include: { product: { select: { id: true, name: true, priceCents: true, stationId: true, color: true } } } },
     },
   })
 }
