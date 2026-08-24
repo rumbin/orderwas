@@ -93,18 +93,26 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
     }
   }
 
-  // Product aggregation view
+  // Product aggregation view — groups by product, then by variant (comment)
   const productAggregation = useCallback(() => {
-    const map = new Map<string, { name: string; totalQty: number; tables: string[] }>()
+    // Map: productId → { name, color, variants: Map<variant, { totalQty, tables }> }
+    const map = new Map<string, { name: string; color: string | null; totalQty: number; variants: Map<string, { totalQty: number; tables: string[] }> }>()
     for (const order of orders) {
       for (const item of order.items) {
         if (item.product.stationId !== stationId) continue
         if (item.status === 'prepared' || item.status === 'cancelled') continue
-        const key = item.productId
-        const existing = map.get(key) ?? { name: item.product.name, totalQty: 0, tables: [] }
+        const variant = item.comment || null
+        let productEntry = map.get(item.productId)
+        if (!productEntry) {
+          productEntry = { name: item.product.name, color: item.product.color, totalQty: 0, variants: new Map() }
+          map.set(item.productId, productEntry)
+        }
+        productEntry.totalQty += item.quantity
+        const vKey = variant ?? '__standard__'
+        const existing = productEntry.variants.get(vKey) ?? { totalQty: 0, tables: [] }
         existing.totalQty += item.quantity
         existing.tables.push(order.tableNumber ?? order.pickupCode ?? '?')
-        map.set(key, existing)
+        productEntry.variants.set(vKey, existing)
       }
     }
     return Array.from(map.values()).sort((a, b) => b.totalQty - a.totalQty)
@@ -265,14 +273,30 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
           ) : (
             <div className="space-y-2">
               {productAggregation().map((p) => (
-                <div key={p.name} className="bg-gray-800 rounded-lg p-4 flex items-center justify-between">
-                  <div>
-                    <span className="text-xl font-bold">{p.totalQty}×</span>
-                    <span className="ml-2 text-lg">{p.name}</span>
+                <div key={p.name} className="bg-gray-800 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl font-bold">{p.totalQty}×</span>
+                      <span className="text-lg">{p.name}</span>
+                      {p.color && PRODUCT_COLORS[p.color] && (
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: PRODUCT_COLORS[p.color] }} />
+                      )}
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-400">
-                    {t('station.table')}: {p.tables.join(', ')}
-                  </div>
+                  {p.variants.size > 1 || !p.variants.has('__standard__') ? (
+                    <div className="mt-2 ml-6 space-y-1">
+                      {Array.from(p.variants.entries()).map(([variant, v]) => (
+                        <div key={variant} className="flex items-center justify-between text-sm text-gray-300">
+                          <span>{variant === '__standard__' ? '— Standard' : `— ${variant}`}</span>
+                          <span className="font-medium">{v.totalQty}× · {v.tables.join(', ')}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mt-1 ml-6 text-sm text-gray-400">
+                      {t('station.table')}: {Array.from(p.variants.values())[0].tables.join(', ')}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
