@@ -48,12 +48,12 @@ async function main() {
 
   // Products — Bar (prices in cents!)
   const barProducts = [
-    { name: 'Bier (Helles)', shortName: 'Bier', priceCents: 300, taxRateBps: 2000, sortOrder: 1 },
-    { name: 'Bier (Radler)', shortName: 'Radler', priceCents: 350, taxRateBps: 2000, sortOrder: 2 },
-    { name: 'Weißwein', shortName: 'Weiß', priceCents: 400, taxRateBps: 2000, sortOrder: 3 },
-    { name: 'Rotwein', shortName: 'Rot', priceCents: 400, taxRateBps: 2000, sortOrder: 4 },
-    { name: 'Cola', shortName: null, priceCents: 250, taxRateBps: 2000, sortOrder: 5 },
-    { name: 'Wasser', shortName: null, priceCents: 200, taxRateBps: 2000, sortOrder: 6 },
+    { name: 'Bier (Helles)', shortName: 'Bier', priceCents: 300, taxRateBps: 2000, sortOrder: 1, color: 'amber-500' },
+    { name: 'Bier (Radler)', shortName: 'Radler', priceCents: 350, taxRateBps: 2000, sortOrder: 2, color: 'amber-500' },
+    { name: 'Weißwein', shortName: 'Weiß', priceCents: 400, taxRateBps: 2000, sortOrder: 3, color: 'violet-500' },
+    { name: 'Rotwein', shortName: 'Rot', priceCents: 400, taxRateBps: 2000, sortOrder: 4, color: 'red-500' },
+    { name: 'Cola', shortName: null, priceCents: 250, taxRateBps: 2000, sortOrder: 5, color: 'rose-500' },
+    { name: 'Wasser', shortName: null, priceCents: 200, taxRateBps: 2000, sortOrder: 6, color: 'sky-500' },
   ]
   for (const p of barProducts) {
     await prisma.product.create({ data: { ...p, stationId: bar.id } })
@@ -61,11 +61,11 @@ async function main() {
 
   // Products — Küche
   const kuecheProducts = [
-    { name: 'Schnitzel mit Pommes', shortName: 'Schnitzel', priceCents: 1200, taxRateBps: 1000, sortOrder: 1 },
-    { name: 'Bratwurst', shortName: 'Bratwurscht', priceCents: 450, taxRateBps: 1000, sortOrder: 2 },
-    { name: 'Pommes', shortName: null, priceCents: 300, taxRateBps: 1000, sortOrder: 3 },
-    { name: 'Käsebrot', shortName: null, priceCents: 250, taxRateBps: 1000, sortOrder: 4 },
-    { name: 'Gulasch', shortName: null, priceCents: 900, taxRateBps: 1000, sortOrder: 5 },
+    { name: 'Schnitzel mit Pommes', shortName: 'Schnitzel', priceCents: 1200, taxRateBps: 1000, sortOrder: 1, color: 'orange-500' },
+    { name: 'Bratwurst', shortName: 'Bratwurscht', priceCents: 450, taxRateBps: 1000, sortOrder: 2, color: 'red-500' },
+    { name: 'Pommes', shortName: null, priceCents: 300, taxRateBps: 1000, sortOrder: 3, color: 'yellow-500' },
+    { name: 'Käsebrot', shortName: null, priceCents: 250, taxRateBps: 1000, sortOrder: 4, color: 'green-500' },
+    { name: 'Gulasch', shortName: null, priceCents: 900, taxRateBps: 1000, sortOrder: 5, color: 'red-500' },
   ]
   for (const p of kuecheProducts) {
     await prisma.product.create({ data: { ...p, stationId: kueche.id } })
@@ -104,10 +104,10 @@ async function main() {
 
   // Products — Kaffee
   const kaffeeProducts = [
-    { name: 'Kaffee', shortName: null, priceCents: 200, taxRateBps: 2000, sortOrder: 1 },
-    { name: 'Cappuccino', shortName: 'Cappu', priceCents: 250, taxRateBps: 2000, sortOrder: 2 },
-    { name: 'Kuchen', shortName: null, priceCents: 250, taxRateBps: 1000, sortOrder: 3 },
-    { name: 'Tee', shortName: null, priceCents: 200, taxRateBps: 2000, sortOrder: 4 },
+    { name: 'Kaffee', shortName: null, priceCents: 200, taxRateBps: 2000, sortOrder: 1, color: 'amber-500' },
+    { name: 'Cappuccino', shortName: 'Cappu', priceCents: 250, taxRateBps: 2000, sortOrder: 2, color: 'orange-500' },
+    { name: 'Kuchen', shortName: null, priceCents: 250, taxRateBps: 1000, sortOrder: 3, color: 'pink-500' },
+    { name: 'Tee', shortName: null, priceCents: 200, taxRateBps: 2000, sortOrder: 4, color: 'teal-500' },
   ]
   for (const p of kaffeeProducts) {
     await prisma.product.create({ data: { ...p, stationId: kaffee.id } })

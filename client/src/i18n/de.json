@@ -94,7 +94,9 @@
     "extraName": "Extra-Name (z.B. \"Belag\")",
     "multiSelect": "Mehrfach",
     "optionsHint": "Optionen: Senf, Ketchup, Remoulade",
-    "freeTextHint": "Kellner können jederzeit Freitext-Kommentare hinzufügen (z.B. \"ohne Senf\")."
+    "freeTextHint": "Kellner können jederzeit Freitext-Kommentare hinzufügen (z.B. \"ohne Senf\").",
+    "productColor": "Button-Farbe",
+    "noColor": "Keine Farbe"
   },
   "common": {
     "save": "Speichern",

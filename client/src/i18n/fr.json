@@ -92,6 +92,8 @@
     "multiSelect": "Multiple",
     "optionsHint": "Options : moutarde, ketchup, rémoulade",
     "freeTextHint": "Les serveurs peuvent toujours ajouter des commentaires en texte libre (ex. \"sans moutarde\").",
+    "productColor": "Couleur du bouton",
+    "noColor": "Pas de couleur",
     "login": "Connexion",
     "enterPin": "Entrer le PIN",
     "wrongPin": "PIN incorrect"

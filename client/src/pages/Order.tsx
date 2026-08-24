@@ -87,11 +87,14 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
 
   const sectionRefCallbacks = useRef<Map<string, (el: HTMLDivElement | null) => void>>(new Map())
   const getSectionRef = useCallback((id: string) => {
+    // Create a new ref callback if one doesn't exist for this station.
+    // Each callback closes over the specific id — safe across StrictMode re-mounts.
     if (!sectionRefCallbacks.current.has(id)) {
-      sectionRefCallbacks.current.set(id, (el) => {
+      const cb = (el: HTMLDivElement | null) => {
         if (el) sectionRefs.current.set(id, el)
         else sectionRefs.current.delete(id)
-      })
+      }
+      sectionRefCallbacks.current.set(id, cb)
     }
     return sectionRefCallbacks.current.get(id)!
   }, [])

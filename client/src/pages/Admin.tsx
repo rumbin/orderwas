@@ -581,6 +581,7 @@ function ProductEditModal({ product, onClose, onSaved }: {
   const handleColorChange = async (color: string | null) => {
     setSelectedColor(color)
     await api.updateProduct(product.id, { color })
+    onSaved()
   }
 
   return (

@@ -1,7 +1,7 @@
 import type { Product } from '@/api/types'
 import { useCartStore } from '@/stores/cart'
 import { PRODUCT_COLORS, PRODUCT_BG_CLASSES } from '@/lib/productColors'
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 
 function formatCents(cents: number): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(cents / 100)
@@ -19,6 +19,11 @@ interface Props {
 export default function ProductSection({ station, products, t, onAdd, onLongPress, sectionRef }: Props) {
   const cart = useCartStore()
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Clean up long-press timer on unmount (prevents state update on unmounted component)
+  useEffect(() => {
+    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+  }, [])
 
   return (
     <div

@@ -92,6 +92,8 @@
     "multiSelect": "Multiple",
     "optionsHint": "Options: mustard, ketchup, remoulade",
     "freeTextHint": "Waiters can always add free-text comments (e.g. \"no mustard\").",
+    "productColor": "Button color",
+    "noColor": "No color",
     "login": "Login",
     "enterPin": "Enter PIN",
     "wrongPin": "Wrong PIN"
