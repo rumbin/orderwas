@@ -1,13 +1,19 @@
 {
   "app": {
-    "title": "OrderWas",
-    "tagline": "Système de commande pour fêtes de club"
+    "title": "Orderwas",
+    "tagline": "Système de commande pour festivités"
+  },
+  "landing": {
+    "waiter": "Serveur",
+    "station": "Station",
+    "admin": "Admin",
+    "selectStation": "Choisir la station"
   },
   "login": {
-    "selectEvent": "Choisir l'événement",
-    "selectWaiter": "Choisir le serveur",
+    "selectEvent": "Sélectionner l'événement",
+    "selectWaiter": "Sélectionner le serveur",
     "enterPin": "Entrer le PIN",
-    "login": "Se connecter",
+    "login": "Connexion",
     "wrongPin": "PIN incorrect"
   },
   "order": {
@@ -21,10 +27,36 @@
     "quantity": "Quantité",
     "add": "Ajouter",
     "remove": "Retirer",
+    "outOfStock": "Rupture de stock",
+    "inStock": "en stock",
+    "myOrders": "Mes commandes",
+    "newOrder": "Nouvelle commande",
+    "editComment": "Modifier le commentaire",
+    "commentFor": "Commentaire pour",
+    "commentPlaceholder": "ex. sans moutarde, avec ketchup",
+    "extrasLabel": "Options",
+    "statusOpen": "Ouvert",
+    "statusPreparing": "En préparation",
+    "statusPartial": "Partiel",
+    "statusDone": "Terminé",
+    "statusPaid": "Payé",
+    "statusCancelled": "Annulé",
+    "tabNew": "Nouvelle commande",
+    "tabOpen": "Ouvert",
+    "tabDone": "Terminé",
+    "onlyMyOrders": "Uniquement mes commandes",
+    "multiSelect": "Sélection multiple",
+    "newVariantPlaceholder": "Nouvelle variante...",
+    "confirmVariants": "Confirmer",
     "editOptions": "Modifier les options",
     "splitOff": "séparer",
-    "newVariantPlaceholder": "Nouvelle variante...",
-    "confirmVariants": "Confirmer"
+    "pay": "Payer",
+    "cancelOrder": "Annuler la commande",
+    "reopen": "Rouvrir",
+    "confirmPay": "Marquer la commande comme payée ?",
+    "confirmCancel": "Vraiment annuler la commande ?",
+    "confirmReopen": "Rouvrir la commande ?",
+    "closedOrders": "Commandes terminées"
   },
   "station": {
     "title": "Station",
@@ -33,7 +65,9 @@
     "markOrderDone": "Commande terminée",
     "waitTime": "Temps d'attente",
     "table": "Table",
-    "noOrders": "Aucune commande ouverte"
+    "noOrders": "Aucune commande ouverte",
+    "done": "Terminé",
+    "noDoneOrders": "Aucune commande terminée"
   },
   "admin": {
     "title": "Administration",
@@ -42,8 +76,23 @@
     "stations": "Stations",
     "products": "Produits",
     "printers": "Imprimantes",
+    "appLayout": "Disposition de l'application",
     "settings": "Paramètres",
-    "login": "Connexion admin",
+    "changePin": "Changer le PIN admin",
+    "newPin": "Nouveau PIN",
+    "currentPin": "PIN actuel",
+    "pinChanged": "PIN modifié avec succès",
+    "confirmDeleteProduct": "Vraiment supprimer le produit \"{{name}}\" ?",
+    "price": "Prix",
+    "priceUpdated": "Prix mis à jour",
+    "extras": "Extras",
+    "noExtras": "Aucun extra défini. Les commentaires en texte libre sont toujours possibles.",
+    "addExtraHint": "Ajouter un nouvel extra (séparer les options par une virgule) :",
+    "extraName": "Nom de l'extra (ex. \"garniture\")",
+    "multiSelect": "Multiple",
+    "optionsHint": "Options : moutarde, ketchup, rémoulade",
+    "freeTextHint": "Les serveurs peuvent toujours ajouter des commentaires en texte libre (ex. \"sans moutarde\").",
+    "login": "Connexion",
     "enterPin": "Entrer le PIN",
     "wrongPin": "PIN incorrect"
   },
@@ -58,8 +107,11 @@
     "yes": "Oui",
     "no": "Non",
     "loading": "Chargement...",
+    "saving": "Enregistrement...",
+    "saved": "Enregistré !",
     "error": "Erreur",
-    "confirm": "Confirmer"
+    "confirm": "Confirmer",
+    "logout": "Déconnexion"
   },
   "theme": {
     "dark": "Sombre",

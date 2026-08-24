@@ -1,13 +1,19 @@
 {
   "app": {
-    "title": "OrderWas",
-    "tagline": "Ordering system for club festivals"
+    "title": "Orderwas",
+    "tagline": "Bestellsystem für Vereinsfeste"
+  },
+  "landing": {
+    "waiter": "Waiter",
+    "station": "Station",
+    "admin": "Admin",
+    "selectStation": "Select station"
   },
   "login": {
     "selectEvent": "Select event",
     "selectWaiter": "Select waiter",
     "enterPin": "Enter PIN",
-    "login": "Log in",
+    "login": "Login",
     "wrongPin": "Wrong PIN"
   },
   "order": {
@@ -23,10 +29,34 @@
     "remove": "Remove",
     "outOfStock": "Out of stock",
     "inStock": "in stock",
+    "myOrders": "My orders",
+    "newOrder": "New order",
+    "editComment": "Edit comment",
+    "commentFor": "Comment for",
+    "commentPlaceholder": "e.g. no mustard, with ketchup",
+    "extrasLabel": "Options",
+    "statusOpen": "Open",
+    "statusPreparing": "Preparing",
+    "statusPartial": "Partial",
+    "statusDone": "Done",
+    "statusPaid": "Paid",
+    "statusCancelled": "Cancelled",
+    "tabNew": "New Order",
+    "tabOpen": "Open",
+    "tabDone": "Closed",
+    "onlyMyOrders": "Only my orders",
+    "multiSelect": "Multiple selection",
+    "newVariantPlaceholder": "New variant...",
+    "confirmVariants": "Confirm",
     "editOptions": "Edit options",
     "splitOff": "split off",
-    "newVariantPlaceholder": "New variant...",
-    "confirmVariants": "Confirm"
+    "pay": "Pay",
+    "cancelOrder": "Cancel order",
+    "reopen": "Reopen",
+    "confirmPay": "Mark order as paid?",
+    "confirmCancel": "Really cancel order?",
+    "confirmReopen": "Reopen order?",
+    "closedOrders": "Closed orders"
   },
   "station": {
     "title": "Station",
@@ -35,7 +65,9 @@
     "markOrderDone": "Complete order",
     "waitTime": "Wait time",
     "table": "Table",
-    "noOrders": "No open orders"
+    "noOrders": "No open orders",
+    "done": "Done",
+    "noDoneOrders": "No completed orders"
   },
   "admin": {
     "title": "Administration",
@@ -53,7 +85,14 @@
     "confirmDeleteProduct": "Really delete product \"{{name}}\"?",
     "price": "Price",
     "priceUpdated": "Price updated",
-    "login": "Admin Login",
+    "extras": "Extras",
+    "noExtras": "No extras defined. Free-text comments are always possible.",
+    "addExtraHint": "Add new extra (separate options with comma):",
+    "extraName": "Extra name (e.g. \"topping\")",
+    "multiSelect": "Multiple",
+    "optionsHint": "Options: mustard, ketchup, remoulade",
+    "freeTextHint": "Waiters can always add free-text comments (e.g. \"no mustard\").",
+    "login": "Login",
     "enterPin": "Enter PIN",
     "wrongPin": "Wrong PIN"
   },
@@ -68,6 +107,8 @@
     "yes": "Yes",
     "no": "No",
     "loading": "Loading...",
+    "saving": "Saving...",
+    "saved": "Saved!",
     "error": "Error",
     "confirm": "Confirm",
     "logout": "Logout"
