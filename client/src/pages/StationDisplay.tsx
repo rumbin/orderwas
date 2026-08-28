@@ -30,7 +30,7 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
       setStation(st)
       const allOrders = await api.getOrders(st.eventId)
       const stationOrders = allOrders.filter((o) => {
-        if (o.status === 'done') return false // order-level done → not open for anyone
+        if (o.status === 'done' || o.status === 'paid' || o.status === 'cancelled') return false // terminal → not open for anyone
         const stationItems = o.items.filter((i) => i.product.stationId === stationId)
         return stationItems.length > 0 && stationItems.some((i) => i.status === 'open')
       })
@@ -49,6 +49,14 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
     const interval = setInterval(() => setTick((t) => t + 1), 1000)
     return () => clearInterval(interval)
   }, [])
+
+  // Poll fallback: if a WebSocket event is missed (e.g. page socket joins the
+  // room a moment after the event fired), we don't want a cancelled/paid order
+  // to linger on a public screen forever. Reload every 15s as a safety net.
+  useEffect(() => {
+    const interval = setInterval(() => loadOrders(), 15000)
+    return () => clearInterval(interval)
+  }, [loadOrders])
 
   // WebSocket: live updates — any order event triggers a reload (simplest correct strategy)
   const handleOrderCreated = useCallback(() => {

@@ -17,10 +17,12 @@ describe('Order flow integration', () => {
   let colaId: string
   let schnitzelId: string
   let waiterId: string
+  let adminHeaders: { authorization: string }
 
   beforeAll(async () => {
     server = buildServer()
     await server.ready()
+    adminHeaders = { authorization: `Bearer ${server.jwt.sign({ admin: true }, { expiresIn: '8h' })}` }
   })
 
   afterAll(async () => {
@@ -255,6 +257,7 @@ describe('Order flow integration', () => {
     const res = await server.inject({
       method: 'DELETE',
       url: `/api/products/${beerId}`,
+      headers: adminHeaders,
     })
 
     expect(res.statusCode).toBe(409)
@@ -271,6 +274,7 @@ describe('Order flow integration', () => {
     const res = await server.inject({
       method: 'DELETE',
       url: `/api/products/${colaId}`,
+      headers: adminHeaders,
     })
 
     expect(res.statusCode).toBe(204)
@@ -282,6 +286,7 @@ describe('Order flow integration', () => {
     const res = await server.inject({
       method: 'DELETE',
       url: '/api/products/nonexistent-id',
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(404)
   })

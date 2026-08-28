@@ -6,10 +6,12 @@ describe('Product CRUD routes', () => {
   let server: AppServer
   let eventId: string
   let stationId: string
+  let adminHeaders: { authorization: string }
 
   beforeAll(async () => {
     server = buildServer()
     await server.listen({ port: 0, host: '127.0.0.1' })
+    adminHeaders = { authorization: `Bearer ${server.jwt.sign({ admin: true }, { expiresIn: '8h' })}` }
   })
 
   afterAll(async () => {
@@ -42,6 +44,7 @@ describe('Product CRUD routes', () => {
       method: 'POST',
       url: `/api/stations/${stationId}/products`,
       payload: { name: 'Bier', priceCents: 300, taxRateBps: 2000 },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(201)
     const body = res.json()
@@ -71,6 +74,7 @@ describe('Product CRUD routes', () => {
         stockCount: 50,
         sortOrder: 5,
       },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(201)
     const body = res.json()
@@ -85,6 +89,7 @@ describe('Product CRUD routes', () => {
       method: 'POST',
       url: `/api/stations/${stationId}/products`,
       payload: { priceCents: 300 },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(400)
   })
@@ -94,6 +99,7 @@ describe('Product CRUD routes', () => {
       method: 'POST',
       url: `/api/stations/${stationId}/products`,
       payload: { name: 'Bier' },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(400)
   })
@@ -103,6 +109,7 @@ describe('Product CRUD routes', () => {
       method: 'POST',
       url: '/api/stations/nonexistent/products',
       payload: { name: 'Bier', priceCents: 300 },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(404)
   })
@@ -162,6 +169,7 @@ describe('Product CRUD routes', () => {
       method: 'PUT',
       url: `/api/products/${created.id}`,
       payload: { name: 'Helles Bier', priceCents: 350, available: false, sortOrder: 10 },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(200)
     const body = res.json()
@@ -176,6 +184,7 @@ describe('Product CRUD routes', () => {
       method: 'PUT',
       url: '/api/products/nonexistent',
       payload: { name: 'Nope' },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(404)
   })
@@ -187,6 +196,7 @@ describe('Product CRUD routes', () => {
     const res = await server.inject({
       method: 'DELETE',
       url: `/api/products/${created.id}`,
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(204)
 
@@ -198,6 +208,7 @@ describe('Product CRUD routes', () => {
     const res = await server.inject({
       method: 'DELETE',
       url: '/api/products/nonexistent',
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(404)
   })
@@ -218,6 +229,7 @@ describe('Product CRUD routes', () => {
     const res = await server.inject({
       method: 'DELETE',
       url: `/api/products/${product.id}`,
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(409)
   })

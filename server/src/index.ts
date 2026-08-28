@@ -87,8 +87,11 @@ async function main() {
 
   try {
     await server.listen({ port, host })
-    // Attach WebSocket to the underlying HTTP server
-    attachWebSocket(server.server)
+    // Attach WebSocket to the underlying HTTP server; authenticate connections
+    // by verifying the JWT against the same secret used for the HTTP API.
+    attachWebSocket(server.server, {
+      verifyToken: (token) => server.jwt.verify<{ waiterId?: string; admin?: boolean }>(token),
+    })
     server.log.info(`Orderwas server running on http://${host}:${port}`)
   } catch (err) {
     server.log.error(err)

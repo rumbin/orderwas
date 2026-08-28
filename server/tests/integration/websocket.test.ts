@@ -10,12 +10,24 @@ describe('WebSocket order events', () => {
   let baseUrl: string
   let client: Socket
   let data: TestData
+  let dataToken: string
+
+  function connectClient(token: string): Socket {
+    const s = ioClient(baseUrl, {
+      path: '/socket.io/',
+      transports: ['websocket'],
+      auth: { token },
+    })
+    return s
+  }
 
   beforeAll(async () => {
     server = buildServer()
     await server.listen({ port: 0, host: '127.0.0.1' })
     // Attach WebSocket to the underlying HTTP server (normally done in main())
-    attachWebSocket(server.server)
+    attachWebSocket(server.server, {
+      verifyToken: (token) => server.jwt.verify<{ waiterId?: string; admin?: boolean }>(token),
+    })
     const address = server.server.address()
     const port = typeof address === 'object' && address ? address.port : 3000
     baseUrl = `http://127.0.0.1:${port}`
@@ -23,8 +35,12 @@ describe('WebSocket order events', () => {
     // Create test data
     data = await createTestData(server)
 
-    // Connect Socket.io client
-    client = ioClient(baseUrl, { path: '/socket.io/', transports: ['websocket'] })
+    // Sign a token the socket client will use to authenticate
+    const token = server.jwt.sign({ waiterId: data.waiter.id })
+    dataToken = token
+
+    // Connect authenticated Socket.io client
+    client = connectClient(token)
     await new Promise<void>((resolve, reject) => {
       client.on('connect', () => resolve())
       client.on('connect_error', (err) => reject(err))
@@ -97,18 +113,51 @@ describe('WebSocket order events', () => {
       client.on('order:updated', (payload: Record<string, unknown>) => resolve(payload))
     })
 
-    // Update order status
+    // Update order status to a preparation status (paid/cancelled are gated)
     await server.inject({
       method: 'PATCH',
       url: `/api/orders/${orderId}`,
-      payload: { status: 'paid' },
+      payload: { status: 'preparing' },
     })
 
     const payload = await eventPromise
     const order = payload.order as Record<string, unknown>
     expect(order.id).toBe(orderId)
-    expect(order.status).toBe('paid')
+    expect(order.status).toBe('preparing')
   }, 15000)
+
+  it('rejects socket connections without a valid token', async () => {
+    // Enforcement is per-connection; toggle AUTH_ENFORCED for this test only.
+    process.env.AUTH_ENFORCED = 'true'
+    const unauthed = ioClient(baseUrl, { path: '/socket.io/', transports: ['websocket'] })
+    const err = await new Promise<Error | null>((resolve) => {
+      unauthed.on('connect', () => resolve(null))
+      unauthed.on('connect_error', (e) => resolve(e))
+      setTimeout(() => resolve(new Error('timeout: neither connect nor connect_error')), 5000)
+    })
+    unauthed.disconnect()
+    delete process.env.AUTH_ENFORCED
+    expect(err).not.toBeNull()
+    expect(err!.message).toMatch(/unauthorized/i)
+  })
+
+  it('rejects socket connections with an invalid token', async () => {
+    process.env.AUTH_ENFORCED = 'true'
+    const bad = ioClient(baseUrl, {
+      path: '/socket.io/',
+      transports: ['websocket'],
+      auth: { token: 'not-a-real-jwt' },
+    })
+    const err = await new Promise<Error | null>((resolve) => {
+      bad.on('connect', () => resolve(null))
+      bad.on('connect_error', (e) => resolve(e))
+      setTimeout(() => resolve(new Error('timeout: neither connect nor connect_error')), 5000)
+    })
+    bad.disconnect()
+    delete process.env.AUTH_ENFORCED
+    expect(err).not.toBeNull()
+    expect(err!.message).toMatch(/unauthorized/i)
+  })
 
   it('station room receives orders containing its station items only', async () => {
     // Create a second station with a product
@@ -119,8 +168,8 @@ describe('WebSocket order events', () => {
       data: { name: 'Schnitzel', priceCents: 800, stationId: station2.id },
     })
 
-    // Connect a client that joins only the kitchen station room
-    const kitchenClient = ioClient(baseUrl, { path: '/socket.io/', transports: ['websocket'] })
+    // Connect a client that joins only the kitchen station room (authenticated)
+    const kitchenClient = connectClient(dataToken)
     await new Promise<void>((resolve) => {
       kitchenClient.on('connect', () => resolve())
     })

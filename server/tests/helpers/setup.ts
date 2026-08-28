@@ -71,10 +71,13 @@ export async function createTestData(server: FastifyInstance): Promise<TestData>
     select: { id: true, name: true, priceCents: true },
   })
 
+  // Waiter creation requires an admin token (gated with requireAdmin).
+  const adminHeaders = { authorization: `Bearer ${server.jwt.sign({ admin: true }, { expiresIn: '8h' })}` }
   const waiterRes = await server.inject({
     method: 'POST',
     url: `/api/events/${event.id}/waiters`,
     payload: { name: 'Alice', pin: '1234' },
+    headers: adminHeaders,
   })
 
   const waiter = waiterRes.json() as { id: string; name: string; pin: string }

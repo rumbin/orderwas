@@ -5,10 +5,12 @@ import { prisma } from '@/db/client'
 describe('Printer CRUD routes', () => {
   let server: AppServer
   let eventId: string
+  let adminHeaders: { authorization: string }
 
   beforeAll(async () => {
     server = buildServer()
     await server.listen({ port: 0, host: '127.0.0.1' })
+    adminHeaders = { authorization: `Bearer ${server.jwt.sign({ admin: true }, { expiresIn: '8h' })}` }
   })
 
   afterAll(async () => {
@@ -29,6 +31,7 @@ describe('Printer CRUD routes', () => {
       method: 'POST',
       url: `/api/events/${eventId}/printers`,
       payload: { name: 'Bar Drucker', type: 'network', ip: '192.168.1.50', charsPerLine: 48 },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(201)
     const body = res.json()
@@ -48,6 +51,7 @@ describe('Printer CRUD routes', () => {
       method: 'POST',
       url: `/api/events/${eventId}/printers`,
       payload: { name: 'Dummy Printer', type: 'dummy' },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(201)
     const body = res.json()
@@ -61,6 +65,7 @@ describe('Printer CRUD routes', () => {
       method: 'POST',
       url: `/api/events/${eventId}/printers`,
       payload: { type: 'dummy' },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(400)
   })
@@ -70,6 +75,7 @@ describe('Printer CRUD routes', () => {
       method: 'POST',
       url: '/api/events/nonexistent/printers',
       payload: { name: 'Test', type: 'dummy' },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(404)
   })
@@ -108,6 +114,7 @@ describe('Printer CRUD routes', () => {
       method: 'PUT',
       url: `/api/printers/${created.id}`,
       payload: { name: 'Updated', ip: '10.0.0.1', charsPerLine: 80, buzzer: true },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(200)
     const body = res.json()
@@ -122,6 +129,7 @@ describe('Printer CRUD routes', () => {
       method: 'PUT',
       url: '/api/printers/nonexistent',
       payload: { name: 'Nope' },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(404)
   })
@@ -129,7 +137,7 @@ describe('Printer CRUD routes', () => {
   it('DELETE removes a printer', async () => {
     const created = await prisma.printer.create({ data: { name: 'ToDelete', type: 'dummy', eventId } })
 
-    const res = await server.inject({ method: 'DELETE', url: `/api/printers/${created.id}` })
+    const res = await server.inject({ method: 'DELETE', url: `/api/printers/${created.id}`, headers: adminHeaders })
     expect(res.statusCode).toBe(204)
 
     const exists = await prisma.printer.findUnique({ where: { id: created.id } })
@@ -137,14 +145,14 @@ describe('Printer CRUD routes', () => {
   })
 
   it('DELETE returns 404 for missing printer', async () => {
-    const res = await server.inject({ method: 'DELETE', url: '/api/printers/nonexistent' })
+    const res = await server.inject({ method: 'DELETE', url: '/api/printers/nonexistent', headers: adminHeaders })
     expect(res.statusCode).toBe(404)
   })
 
   it('POST /printers/:id/test returns 200 for dummy printer', async () => {
     const created = await prisma.printer.create({ data: { name: 'Dummy', type: 'dummy', eventId } })
 
-    const res = await server.inject({ method: 'POST', url: `/api/printers/${created.id}/test` })
+    const res = await server.inject({ method: 'POST', url: `/api/printers/${created.id}/test`, headers: adminHeaders })
     expect(res.statusCode).toBe(200)
     expect(res.json().message).toContain('Test print')
     expect(res.json().bytes).toBeGreaterThan(0)
@@ -153,21 +161,21 @@ describe('Printer CRUD routes', () => {
   it('POST /printers/:id/test returns 502 for unreachable network printer', async () => {
     const created = await prisma.printer.create({ data: { name: 'Net', type: 'network', ip: '192.168.99.99', eventId } })
 
-    const res = await server.inject({ method: 'POST', url: `/api/printers/${created.id}/test` })
+    const res = await server.inject({ method: 'POST', url: `/api/printers/${created.id}/test`, headers: adminHeaders })
     expect(res.statusCode).toBe(502)
   })
 
   it('POST /printers/:id/test returns 400 for network printer without IP', async () => {
     const created = await prisma.printer.create({ data: { name: 'NoIP', type: 'network', eventId } })
 
-    const res = await server.inject({ method: 'POST', url: `/api/printers/${created.id}/test` })
+    const res = await server.inject({ method: 'POST', url: `/api/printers/${created.id}/test`, headers: adminHeaders })
     expect(res.statusCode).toBe(400)
   })
 
   it('POST /printers/:id/test returns 200 for ignore printer (no-op)', async () => {
     const created = await prisma.printer.create({ data: { name: 'Ign', type: 'ignore', eventId } })
 
-    const res = await server.inject({ method: 'POST', url: `/api/printers/${created.id}/test` })
+    const res = await server.inject({ method: 'POST', url: `/api/printers/${created.id}/test`, headers: adminHeaders })
     expect(res.statusCode).toBe(200)
     expect(res.json().message).toContain('ignore')
   })

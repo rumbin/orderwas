@@ -12,7 +12,7 @@ import {
 
 export const auditRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
   // GET /api/events/:eventId/audit — list audit logs
-  server.get('/events/:eventId/audit', async (request, reply) => {
+  server.get('/events/:eventId/audit', { preHandler: server.requirePermission('canStatistics') }, async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     const query = request.query as { action?: string; entityType?: string; limit?: string; offset?: string }
     const logs = await listAuditLogs(eventId, {
@@ -25,7 +25,7 @@ export const auditRoutes: FastifyPluginAsync = async (server: FastifyInstance) =
   })
 
   // GET /api/events/:eventId/audit/stock/:productId — stock history for a product
-  server.get('/events/:eventId/audit/stock/:productId', async (request, reply) => {
+  server.get('/events/:eventId/audit/stock/:productId', { preHandler: server.requirePermission('canStatistics') }, async (request, reply) => {
     const { eventId, productId } = request.params as { eventId: string; productId: string }
     return getStockHistory(eventId, productId)
   })
@@ -35,7 +35,7 @@ export const auditRoutes: FastifyPluginAsync = async (server: FastifyInstance) =
     physicalCount: z.number().min(0),
   })
 
-  server.post('/products/:id/settle', async (request, reply) => {
+  server.post('/products/:id/settle', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = settleSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -80,7 +80,7 @@ export const auditRoutes: FastifyPluginAsync = async (server: FastifyInstance) =
     })),
   })
 
-  server.post('/events/:eventId/settle', async (request, reply) => {
+  server.post('/events/:eventId/settle', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     const parsed = bulkSettleSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -107,25 +107,25 @@ export const auditRoutes: FastifyPluginAsync = async (server: FastifyInstance) =
   })
 
   // GET /api/events/:eventId/report/peak-times — order counts by hour
-  server.get('/events/:eventId/report/peak-times', async (request) => {
+  server.get('/events/:eventId/report/peak-times', { preHandler: server.requirePermission('canStatistics') }, async (request) => {
     const { eventId } = request.params as { eventId: string }
     return getPeakTimes(eventId)
   })
 
   // GET /api/events/:eventId/report/station-revenue — per-station revenue
-  server.get('/events/:eventId/report/station-revenue', async (request) => {
+  server.get('/events/:eventId/report/station-revenue', { preHandler: server.requirePermission('canStatistics') }, async (request) => {
     const { eventId } = request.params as { eventId: string }
     return getStationRevenue(eventId)
   })
 
   // GET /api/events/:eventId/report/waiters — per-waiter summary
-  server.get('/events/:eventId/report/waiters', async (request) => {
+  server.get('/events/:eventId/report/waiters', { preHandler: server.requirePermission('canStatistics') }, async (request) => {
     const { eventId } = request.params as { eventId: string }
     return getWaiterSummary(eventId)
   })
 
   // GET /api/events/:eventId/report/products — product consumption
-  server.get('/events/:eventId/report/products', async (request) => {
+  server.get('/events/:eventId/report/products', { preHandler: server.requirePermission('canStatistics') }, async (request) => {
     const { eventId } = request.params as { eventId: string }
     return getProductConsumption(eventId)
   })

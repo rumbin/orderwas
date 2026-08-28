@@ -51,7 +51,7 @@ const toggleActiveBody = z.object({
 
 export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
   // POST /events/:eventId/waiters — create waiter
-  server.post('/events/:eventId/waiters', async (request, reply) => {
+  server.post('/events/:eventId/waiters', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     const parsed = createWaiterBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -91,7 +91,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   })
 
   // PUT /waiters/:id — update waiter
-  server.put('/waiters/:id', async (request, reply) => {
+  server.put('/waiters/:id', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = updateWaiterBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -106,7 +106,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   })
 
   // DELETE /waiters/:id
-  server.delete('/waiters/:id', async (request, reply) => {
+  server.delete('/waiters/:id', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     try {
       await prisma.waiter.delete({ where: { id } })
@@ -119,7 +119,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   })
 
   // PATCH /waiters/:id/active — toggle active flag
-  server.patch('/waiters/:id/active', async (request, reply) => {
+  server.patch('/waiters/:id/active', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = toggleActiveBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })

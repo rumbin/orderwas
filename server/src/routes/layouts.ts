@@ -41,7 +41,7 @@ export const layoutsRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   })
 
   // POST /events/:eventId/layouts — create a layout
-  server.post('/events/:eventId/layouts', async (request, reply) => {
+  server.post('/events/:eventId/layouts', { preHandler: server.authenticate }, async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     const parsed = createLayoutSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -64,7 +64,7 @@ export const layoutsRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   })
 
   // PUT /layouts/:id — update a layout
-  server.put('/layouts/:id', async (request, reply) => {
+  server.put('/layouts/:id', { preHandler: server.authenticate }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = updateLayoutSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -84,7 +84,7 @@ export const layoutsRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   })
 
   // DELETE /layouts/:id — delete a layout
-  server.delete('/layouts/:id', async (request, reply) => {
+  server.delete('/layouts/:id', { preHandler: server.authenticate }, async (request, reply) => {
     const { id } = request.params as { id: string }
     try {
       await prisma.appLayout.delete({ where: { id } })

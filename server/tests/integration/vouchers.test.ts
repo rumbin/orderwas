@@ -5,6 +5,8 @@ import { prisma } from '@/db/client'
 describe('Voucher routes', () => {
   let server: AppServer
   let eventId: string
+  let adminHeaders: { authorization: string }
+  let redeemHeaders: { authorization: string }
 
   beforeAll(async () => {
     server = buildServer()
@@ -35,6 +37,9 @@ describe('Voucher routes', () => {
 
     const ev = await prisma.event.create({ data: { name: 'Voucher Test' } })
     eventId = ev.id
+    // Voucher create/bulk/expire are admin-gated; redeem requires any authenticated token.
+    adminHeaders = { authorization: `Bearer ${server.jwt.sign({ admin: true }, { expiresIn: '8h' })}` }
+    redeemHeaders = { authorization: `Bearer ${server.jwt.sign({ waiterId: 'voucher-redeemer' })}` }
   })
 
   it('POST creates a voucher', async () => {
@@ -42,6 +47,7 @@ describe('Voucher routes', () => {
       method: 'POST',
       url: `/api/events/${eventId}/vouchers`,
       payload: { code: 'GUT001', valueCents: 500 },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(201)
     const body = res.json()
@@ -55,11 +61,13 @@ describe('Voucher routes', () => {
       method: 'POST',
       url: `/api/events/${eventId}/vouchers`,
       payload: { code: 'GUT001', valueCents: 500 },
+      headers: adminHeaders,
     })
     const res = await server.inject({
       method: 'POST',
       url: `/api/events/${eventId}/vouchers`,
       payload: { code: 'GUT001', valueCents: 300 },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(400)
     expect(res.json().error).toContain('already exists')
@@ -70,6 +78,7 @@ describe('Voucher routes', () => {
       method: 'POST',
       url: `/api/events/${eventId}/vouchers`,
       payload: { code: 'GUT001', valueCents: 500 },
+      headers: adminHeaders,
     })
     const res = await server.inject({
       method: 'GET',
@@ -84,6 +93,7 @@ describe('Voucher routes', () => {
       method: 'POST',
       url: `/api/events/${eventId}/vouchers/bulk`,
       payload: { prefix: 'BON', valueCents: 1000, count: 5, startNumber: 1 },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(201)
     expect(res.json().count).toBe(5)
@@ -103,6 +113,7 @@ describe('Voucher routes', () => {
       method: 'POST',
       url: `/api/events/${eventId}/vouchers`,
       payload: { code: 'GUT001', valueCents: 500 },
+      headers: adminHeaders,
     })
 
     // Create order
@@ -121,6 +132,7 @@ describe('Voucher routes', () => {
       method: 'POST',
       url: '/api/vouchers/redeem',
       payload: { code: 'GUT001', orderId: order.id },
+      headers: redeemHeaders,
     })
     expect(res.statusCode).toBe(200)
     expect(res.json().status).toBe('redeemed')
@@ -136,6 +148,7 @@ describe('Voucher routes', () => {
       method: 'POST',
       url: `/api/events/${eventId}/vouchers`,
       payload: { code: 'GUT001', valueCents: 500 },
+      headers: adminHeaders,
     })
 
     const order = await prisma.order.create({
@@ -150,6 +163,7 @@ describe('Voucher routes', () => {
       method: 'POST',
       url: '/api/vouchers/redeem',
       payload: { code: 'GUT001', orderId: order.id },
+      headers: redeemHeaders,
     })
 
     // Second redemption fails
@@ -157,6 +171,7 @@ describe('Voucher routes', () => {
       method: 'POST',
       url: '/api/vouchers/redeem',
       payload: { code: 'GUT001', orderId: order.id },
+      headers: redeemHeaders,
     })
     expect(res.statusCode).toBe(400)
     expect(res.json().error).toContain('redeemed')
@@ -167,11 +182,13 @@ describe('Voucher routes', () => {
       method: 'POST',
       url: `/api/events/${eventId}/vouchers`,
       payload: { code: 'GUT001', valueCents: 500 },
+      headers: adminHeaders,
     })
 
     const res = await server.inject({
       method: 'POST',
       url: `/api/events/${eventId}/vouchers/GUT001/expire`,
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(200)
     expect(res.json().status).toBe('expired')

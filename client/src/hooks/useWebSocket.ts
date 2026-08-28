@@ -34,9 +34,22 @@ export function useWebSocket(
   useEffect(() => {
     if (!stationId) return
 
+    // Authenticate the socket connection with the current session token.
+    const stored = localStorage.getItem('orderwas-session')
+    let token: string | null = null
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        token = parsed?.state?.token ?? null
+      } catch {
+        // ignore
+      }
+    }
+
     const socket = ioClient({
       path: '/socket.io/',
       transports: ['websocket'],
+      auth: token ? { token } : {},
     })
     socketRef.current = socket
 

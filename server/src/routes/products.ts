@@ -62,7 +62,7 @@ export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance
     productIds: z.array(z.string()).nonempty(),
   })
 
-  server.patch('/products/reorder', async (request, reply) => {
+  server.patch('/products/reorder', { preHandler: server.requireAdmin }, async (request, reply) => {
     const parsed = reorderSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
     const { stationId, productIds } = parsed.data
@@ -75,7 +75,7 @@ export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance
   })
 
   // POST /stations/:stationId/products — create product under a station
-  server.post('/stations/:stationId/products', async (request, reply) => {
+  server.post('/stations/:stationId/products', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { stationId } = request.params as { stationId: string }
     const parsed = createProductSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -105,7 +105,7 @@ export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance
   })
 
   // PUT /products/:id — update product
-  server.put('/products/:id', async (request, reply) => {
+  server.put('/products/:id', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = updateProductSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -116,7 +116,7 @@ export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance
   })
 
   // DELETE /products/:id — delete product (409 if referenced by OrderItems)
-  server.delete('/products/:id', async (request, reply) => {
+  server.delete('/products/:id', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     try {
       const deleted = await deleteProduct(id)
@@ -131,7 +131,7 @@ export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance
   })
 
   // POST /products/:id/extras — create extra group with options
-  server.post('/products/:id/extras', async (request, reply) => {
+  server.post('/products/:id/extras', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = createExtraSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -152,7 +152,7 @@ export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance
   })
 
   // DELETE /extras/:id — delete extra group (cascades options)
-  server.delete('/extras/:id', async (request, reply) => {
+  server.delete('/extras/:id', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     try {
       await prisma.productExtra.delete({ where: { id } })
@@ -169,7 +169,7 @@ export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance
     delta: z.number(),
   })
 
-  server.patch('/products/:id/stock', async (request, reply) => {
+  server.patch('/products/:id/stock', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = adjustStockSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })

@@ -7,6 +7,7 @@ const PIN = '1234'
 const NAME = 'Test Waiter'
 
 let server: AppServer
+let adminHeaders: { authorization: string }
 
 beforeAll(async () => {
   // Build a fresh server (buildServer already registers cors + /health) and
@@ -15,6 +16,8 @@ beforeAll(async () => {
   server = buildServer()
   server.register(waitersRoutes)
   await server.ready()
+  // Mutating waiters routes are gated with requireAdmin.
+  adminHeaders = { authorization: `Bearer ${server.jwt.sign({ admin: true }, { expiresIn: '8h' })}` }
 })
 
 afterAll(async () => {
@@ -54,6 +57,7 @@ describe('Waiter CRUD - POST /api/events/:eventId/waiters', () => {
       method: 'POST',
       url: `/api/events/${eventId}/waiters`,
       payload: { name: NAME, pin: PIN, canCancel: true, canCashOut: true },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(201)
     const body = res.json() as Record<string, unknown>
@@ -73,6 +77,7 @@ describe('Waiter CRUD - POST /api/events/:eventId/waiters', () => {
       method: 'POST',
       url: `/api/events/${eventId}/waiters`,
       payload: { pin: PIN }, // name missing
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(400)
   })
@@ -85,11 +90,13 @@ describe('Waiter CRUD - GET /api/events/:eventId/waiters', () => {
       method: 'POST',
       url: `/api/events/${eventId}/waiters`,
       payload: { name: `${NAME}-a`, pin: '1' },
+      headers: adminHeaders,
     })
     await server.inject({
       method: 'POST',
       url: `/api/events/${eventId}/waiters`,
       payload: { name: `${NAME}-b`, pin: '2' },
+      headers: adminHeaders,
     })
     const res = await server.inject({
       method: 'GET',
@@ -111,6 +118,7 @@ describe('Waiter CRUD - GET /api/waiters/:id', () => {
       method: 'POST',
       url: `/api/events/${eventId}/waiters`,
       payload: { name: NAME, pin: PIN },
+      headers: adminHeaders,
     })
     const waiterId = created.json().id
 
@@ -132,6 +140,7 @@ describe('Waiter CRUD - PUT /api/waiters/:id', () => {
       method: 'POST',
       url: `/api/events/${eventId}/waiters`,
       payload: { name: NAME, pin: PIN },
+      headers: adminHeaders,
     })
     const id = created.json().id
 
@@ -139,6 +148,7 @@ describe('Waiter CRUD - PUT /api/waiters/:id', () => {
       method: 'PUT',
       url: `/api/waiters/${id}`,
       payload: { name: `${NAME}-upd`, canStatistics: true, pin: '9999' },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(200)
     const body = res.json() as Record<string, unknown>
@@ -155,10 +165,11 @@ describe('Waiter CRUD - DELETE /api/waiters/:id', () => {
       method: 'POST',
       url: `/api/events/${eventId}/waiters`,
       payload: { name: NAME, pin: PIN },
+      headers: adminHeaders,
     })
     const id = created.json().id
 
-    const del = await server.inject({ method: 'DELETE', url: `/api/waiters/${id}` })
+    const del = await server.inject({ method: 'DELETE', url: `/api/waiters/${id}`, headers: adminHeaders })
     expect(del.statusCode).toBe(204)
 
     const get = await server.inject({ method: 'GET', url: `/api/waiters/${id}` })
@@ -173,6 +184,7 @@ describe('Waiter CRUD - PATCH /api/waiters/:id/active', () => {
       method: 'POST',
       url: `/api/events/${eventId}/waiters`,
       payload: { name: NAME, pin: PIN },
+      headers: adminHeaders,
     })
     const id = created.json().id
     expect(created.json().active).toBe(true)
@@ -181,6 +193,7 @@ describe('Waiter CRUD - PATCH /api/waiters/:id/active', () => {
       method: 'PATCH',
       url: `/api/waiters/${id}/active`,
       payload: { active: false },
+      headers: adminHeaders,
     })
     expect(res.statusCode).toBe(200)
     expect((res.json() as Record<string, unknown>).active).toBe(false)
@@ -189,6 +202,7 @@ describe('Waiter CRUD - PATCH /api/waiters/:id/active', () => {
       method: 'PATCH',
       url: `/api/waiters/${id}/active`,
       payload: { active: true },
+      headers: adminHeaders,
     })
     expect(res2.statusCode).toBe(200)
     expect((res2.json() as Record<string, unknown>).active).toBe(true)

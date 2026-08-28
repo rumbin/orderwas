@@ -191,17 +191,35 @@ describe('Orders API - GET /api/orders/:id', () => {
 })
 
 describe('Orders API - PATCH /api/orders/:id', () => {
-  it('updates order status to paid', async () => {
+  it('updates order status to paid via /pay endpoint', async () => {
     const data = await setup()
     const { beer } = data.products
-    const { waiter, event } = data
+    const { event } = data
+
+    // Generic PATCH is restricted to preparation statuses; 'paid' goes through
+    // the dedicated /pay endpoint which requires canCashOut.
+    const cashier = await prisma.waiter.create({
+      data: { name: 'Cashier', pin: '1234', eventId: event.id, canCashOut: true },
+    })
+    const cashierToken = server.jwt.sign({
+      waiterId: cashier.id,
+      eventId: event.id,
+      permissions: {
+        canCancel: false,
+        canCashOut: true,
+        canStatistics: false,
+        canCreateWaiters: false,
+        canTransfer: false,
+        isStationWaiter: false,
+      },
+    })
 
     const created = await server.inject({
       method: 'POST',
       url: '/api/orders',
       payload: {
         tableNumber: '30',
-        waiterId: waiter.id,
+        waiterId: data.waiter.id,
         eventId: event.id,
         items: [{ productId: beer.id, quantity: 1 }],
       },
@@ -209,9 +227,9 @@ describe('Orders API - PATCH /api/orders/:id', () => {
     const id = (created.json() as Record<string, unknown>).id as string
 
     const res = await server.inject({
-      method: 'PATCH',
-      url: `/api/orders/${id}`,
-      payload: { status: 'paid' },
+      method: 'POST',
+      url: `/api/orders/${id}/pay`,
+      headers: { authorization: `Bearer ${cashierToken}` },
     })
     expect(res.statusCode).toBe(200)
     const body = res.json() as Record<string, unknown>

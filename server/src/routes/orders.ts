@@ -34,8 +34,11 @@ const createOrderBody = z.object({
   { message: 'Exactly one of tableNumber or pickupCode must be provided' },
 )
 
+// Preparation-status PATCH. 'paid'/'cancelled' are exclusive to the dedicated
+// /pay and /cancel endpoints (behind canCashOut / canCancel) — the generic
+// PATCH must NOT allow a caller to sneak a terminal status through.
 const updateOrderStatusBody = z.object({
-  status: z.enum(['open', 'preparing', 'partial', 'paid', 'cancelled']),
+  status: z.enum(['open', 'preparing', 'partial', 'done']),
 })
 
 const updateOrderItemBody = z.object({

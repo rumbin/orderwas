@@ -9,11 +9,14 @@ const BUTTONS_JSON = JSON.stringify([
 ])
 
 let server: AppServer
+let authHeaders: { authorization: string }
 
 beforeAll(async () => {
   server = buildServer()
   server.register(layoutsRoutes)
   await server.ready()
+  // Layout mutations require a valid JWT (any logged-in user).
+  authHeaders = { authorization: `Bearer ${server.jwt.sign({ admin: true }, { expiresIn: '8h' })}` }
 })
 
 afterAll(async () => {
@@ -47,6 +50,7 @@ describe('Layout CRUD - POST /api/events/:eventId/layouts', () => {
       method: 'POST',
       url: `/api/events/${eventId}/layouts`,
       payload: { columns: 4, rows: 6, buttons: BUTTONS_JSON },
+      headers: authHeaders,
     })
     expect(res.statusCode).toBe(201)
     const body = res.json() as Record<string, unknown>
@@ -64,6 +68,7 @@ describe('Layout CRUD - POST /api/events/:eventId/layouts', () => {
       method: 'POST',
       url: `/api/events/${eventId}/layouts`,
       payload: { waiterId: 'w1', columns: 3, rows: 5 },
+      headers: authHeaders,
     })
     expect(res.statusCode).toBe(201)
     const body = res.json() as Record<string, unknown>
@@ -76,6 +81,7 @@ describe('Layout CRUD - POST /api/events/:eventId/layouts', () => {
       method: 'POST',
       url: `/api/events/${eventId}/layouts`,
       payload: {},
+      headers: authHeaders,
     })
     expect(res.statusCode).toBe(201)
     const body = res.json() as Record<string, unknown>
@@ -90,6 +96,7 @@ describe('Layout CRUD - POST /api/events/:eventId/layouts', () => {
       method: 'POST',
       url: `/api/events/${eventId}/layouts`,
       payload: { columns: 0 },
+      headers: authHeaders,
     })
     expect(res.statusCode).toBe(400)
   })
@@ -99,6 +106,7 @@ describe('Layout CRUD - POST /api/events/:eventId/layouts', () => {
       method: 'POST',
       url: '/api/events/nonexistent/layouts',
       payload: { columns: 3 },
+      headers: authHeaders,
     })
     expect(res.statusCode).toBe(404)
   })
@@ -111,11 +119,13 @@ describe('Layout CRUD - GET /api/events/:eventId/layouts', () => {
       method: 'POST',
       url: `/api/events/${eventId}/layouts`,
       payload: { columns: 3 },
+      headers: authHeaders,
     })
     await server.inject({
       method: 'POST',
       url: `/api/events/${eventId}/layouts`,
       payload: { waiterId: 'w1', columns: 4 },
+      headers: authHeaders,
     })
     const res = await server.inject({
       method: 'GET',
@@ -137,6 +147,7 @@ describe('Layout CRUD - PUT /api/layouts/:id', () => {
       method: 'POST',
       url: `/api/events/${eventId}/layouts`,
       payload: { columns: 3 },
+      headers: authHeaders,
     })
     const id = created.json().id as string
 
@@ -144,6 +155,7 @@ describe('Layout CRUD - PUT /api/layouts/:id', () => {
       method: 'PUT',
       url: `/api/layouts/${id}`,
       payload: { columns: 5, buttons: BUTTONS_JSON },
+      headers: authHeaders,
     })
     expect(res.statusCode).toBe(200)
     const body = res.json() as Record<string, unknown>
@@ -156,6 +168,7 @@ describe('Layout CRUD - PUT /api/layouts/:id', () => {
       method: 'PUT',
       url: '/api/layouts/nonexistent',
       payload: { columns: 5 },
+      headers: authHeaders,
     })
     expect(res.statusCode).toBe(404)
   })
@@ -168,10 +181,11 @@ describe('Layout CRUD - DELETE /api/layouts/:id', () => {
       method: 'POST',
       url: `/api/events/${eventId}/layouts`,
       payload: { columns: 3 },
+      headers: authHeaders,
     })
     const id = created.json().id as string
 
-    const del = await server.inject({ method: 'DELETE', url: `/api/layouts/${id}` })
+    const del = await server.inject({ method: 'DELETE', url: `/api/layouts/${id}`, headers: authHeaders })
     expect(del.statusCode).toBe(204)
 
     const get = await server.inject({ method: 'GET', url: `/api/events/${eventId}/layouts` })
@@ -180,7 +194,7 @@ describe('Layout CRUD - DELETE /api/layouts/:id', () => {
   })
 
   it('returns 404 for unknown layout', async () => {
-    const res = await server.inject({ method: 'DELETE', url: '/api/layouts/nonexistent' })
+    const res = await server.inject({ method: 'DELETE', url: '/api/layouts/nonexistent', headers: authHeaders })
     expect(res.statusCode).toBe(404)
   })
 })
@@ -197,12 +211,14 @@ describe('Layout CRUD - GET /api/waiters/:waiterId/layout', () => {
       method: 'POST',
       url: `/api/events/${eventId}/layouts`,
       payload: { columns: 3, rows: 5 },
+      headers: authHeaders,
     })
     // Create waiter-specific layout
     await server.inject({
       method: 'POST',
       url: `/api/events/${eventId}/layouts`,
       payload: { waiterId: waiter.id, columns: 4, rows: 6 },
+      headers: authHeaders,
     })
 
     const res = await server.inject({
@@ -225,6 +241,7 @@ describe('Layout CRUD - GET /api/waiters/:waiterId/layout', () => {
       method: 'POST',
       url: `/api/events/${eventId}/layouts`,
       payload: { columns: 5, rows: 7 },
+      headers: authHeaders,
     })
 
     const res = await server.inject({

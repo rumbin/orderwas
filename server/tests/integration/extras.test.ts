@@ -12,6 +12,7 @@ describe('Product extras (Auswahl)', () => {
   let sauceExtraId: string
   let ketchupOptionId: string
   let noMustardOptionId: string
+  let adminHeaders: { authorization: string }
 
   afterAll(async () => {
     await server?.close()
@@ -37,6 +38,8 @@ describe('Product extras (Auswahl)', () => {
 
     server = buildServer()
     await server.ready()
+    // Extra group create/delete are admin-gated.
+    adminHeaders = { authorization: `Bearer ${server.jwt.sign({ admin: true }, { expiresIn: '8h' })}` }
 
     const ev = await prisma.event.create({ data: { name: 'Extras Test' } })
     eventId = ev.id
@@ -58,6 +61,7 @@ describe('Product extras (Auswahl)', () => {
           { name: 'Mit Ketchup', priceDeltaCents: 50 },
         ],
       },
+      headers: adminHeaders,
     })
     expect(extraRes.statusCode).toBe(201)
     const extra = extraRes.json()
@@ -128,6 +132,7 @@ describe('Product extras (Auswahl)', () => {
     const otherExtra = await server.inject({
       method: 'POST', url: `/api/products/${other.id}/extras`,
       payload: { name: 'Größe', options: [{ name: 'Klein' }, { name: 'Groß', priceDeltaCents: 100 }] },
+      headers: adminHeaders,
     })
     const otherExtraId = otherExtra.json().id
     const otherOptionId = otherExtra.json().options[0].id
@@ -177,6 +182,7 @@ describe('Product extras (Auswahl)', () => {
         multiSelect: true,
         options: [{ name: 'Röstzwiebeln', priceDeltaCents: 30 }, { name: 'Curry', priceDeltaCents: 10 }],
       },
+      headers: adminHeaders,
     })
     const multi = extrasRes.json()
     const opt1 = multi.options[0]
@@ -227,7 +233,7 @@ describe('Product extras (Auswahl)', () => {
   })
 
   it('DELETE /extras/:id removes the group', async () => {
-    const res = await server.inject({ method: 'DELETE', url: `/api/extras/${sauceExtraId}` })
+    const res = await server.inject({ method: 'DELETE', url: `/api/extras/${sauceExtraId}`, headers: adminHeaders })
     expect(res.statusCode).toBe(204)
 
     const product = await server.inject({ method: 'GET', url: `/api/products/${bratwurstId}` })

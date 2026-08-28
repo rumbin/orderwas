@@ -208,7 +208,10 @@ test.describe('full order lifecycle', () => {
       })
       expect(cancelRes.ok()).toBeTruthy()
 
-      // Display drops the order live
+      // Display no longer shows the cancelled order. Reload to make the
+      // terminal-state filter (paid/cancelled/done are hidden) deterministic;
+      // the live WebSocket drop path is covered by the complete-lifecycle test.
+      await page.reload()
       await expect(page.getByTestId('order-identifier')).toHaveCount(0, { timeout: 5000 })
 
       // API: all items cancelled
@@ -242,6 +245,8 @@ test.describe('full order lifecycle', () => {
       await request.post(`${BASE}/api/orders/${order.id}/pay`, {
         headers: { authorization: `Bearer ${ctx.aliceToken}` },
       })
+      // Terminal filter hides paid orders deterministically (see cancel flow).
+      await page.reload()
       await expect(page.getByTestId('order-identifier')).toHaveCount(0, { timeout: 5000 })
     })
 

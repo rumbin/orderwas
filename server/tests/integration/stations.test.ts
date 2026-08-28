@@ -5,10 +5,12 @@ import { prisma } from '@/db/client'
 describe('Station CRUD routes', () => {
   let server: AppServer
   let eventId: string
+  let adminHeaders: { authorization: string }
 
   beforeAll(async () => {
     server = buildServer()
     await server.listen({ port: 0, host: '127.0.0.1' })
+    adminHeaders = { authorization: `Bearer ${server.jwt.sign({ admin: true }, { expiresIn: '8h' })}` }
   })
 
   afterAll(async () => {
@@ -41,6 +43,7 @@ describe('Station CRUD routes', () => {
       method: 'POST',
       url: `/api/events/${eventId}/stations`,
       payload: { name: 'Main Bar', kitchenMonitor: true, sortOrder: 1 },
+      headers: adminHeaders,
     })
     expect(response.statusCode).toBe(201)
     const body = response.json()
@@ -57,6 +60,7 @@ describe('Station CRUD routes', () => {
       method: 'POST',
       url: `/api/events/${eventId}/stations`,
       payload: { sortOrder: 1 },
+      headers: adminHeaders,
     })
     expect(response.statusCode).toBe(400)
   })
@@ -66,6 +70,7 @@ describe('Station CRUD routes', () => {
       method: 'POST',
       url: '/api/events/nonexistent/stations',
       payload: { name: 'Ghost Station' },
+      headers: adminHeaders,
     })
     expect(response.statusCode).toBe(404)
   })
@@ -78,6 +83,7 @@ describe('Station CRUD routes', () => {
       method: 'POST',
       url: `/api/events/${eventId}/stations`,
       payload: { name: 'Bar', printerId: printer.id, kitchenMonitor: true },
+      headers: adminHeaders,
     })
     expect(response.statusCode).toBe(201)
     const body = response.json()
@@ -131,6 +137,7 @@ describe('Station CRUD routes', () => {
       method: 'PUT',
       url: `/api/stations/${created.id}`,
       payload: { name: 'Updated', kitchenMonitor: true, sortOrder: 5 },
+      headers: adminHeaders,
     })
     expect(response.statusCode).toBe(200)
     const body = response.json()
@@ -144,6 +151,7 @@ describe('Station CRUD routes', () => {
       method: 'PUT',
       url: '/api/stations/nonexistent',
       payload: { name: 'Nope' },
+      headers: adminHeaders,
     })
     expect(response.statusCode).toBe(404)
   })
@@ -154,6 +162,7 @@ describe('Station CRUD routes', () => {
     const response = await server.inject({
       method: 'DELETE',
       url: `/api/stations/${created.id}`,
+      headers: adminHeaders,
     })
     expect(response.statusCode).toBe(204)
 
@@ -165,6 +174,7 @@ describe('Station CRUD routes', () => {
     const response = await server.inject({
       method: 'DELETE',
       url: '/api/stations/nonexistent',
+      headers: adminHeaders,
     })
     expect(response.statusCode).toBe(404)
   })

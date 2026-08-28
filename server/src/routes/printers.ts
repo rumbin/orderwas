@@ -28,7 +28,7 @@ const updatePrinterSchema = z.object({
 
 export const printersRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
   // POST /events/:eventId/printers — create printer
-  server.post('/events/:eventId/printers', async (request, reply) => {
+  server.post('/events/:eventId/printers', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     const parsed = createPrinterSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -58,7 +58,7 @@ export const printersRoutes: FastifyPluginAsync = async (server: FastifyInstance
   })
 
   // PUT /printers/:id — update printer
-  server.put('/printers/:id', async (request, reply) => {
+  server.put('/printers/:id', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = updatePrinterSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -69,7 +69,7 @@ export const printersRoutes: FastifyPluginAsync = async (server: FastifyInstance
   })
 
   // DELETE /printers/:id — delete printer
-  server.delete('/printers/:id', async (request, reply) => {
+  server.delete('/printers/:id', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const deleted = await printerService.deletePrinter(id)
     if (!deleted) return reply.status(404).send({ error: 'Printer not found' })
@@ -77,7 +77,7 @@ export const printersRoutes: FastifyPluginAsync = async (server: FastifyInstance
   })
 
   // POST /printers/:id/test — test print (real ESC/POS)
-  server.post('/printers/:id/test', async (request, reply) => {
+  server.post('/printers/:id/test', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const printer = await printerService.getPrinter(id)
     if (!printer) return reply.status(404).send({ error: 'Printer not found' })

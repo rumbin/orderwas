@@ -50,6 +50,7 @@ describe('Configuration export/import', () => {
       method: 'POST',
       url: `/api/events/${eventId}/printers`,
       payload: { name: 'Bar Drucker', type: 'dummy', charsPerLine: 48 },
+      headers: { authorization: `Bearer ${adminToken}` },
     })
     const printerId = printerRes.json().id
 
@@ -58,6 +59,7 @@ describe('Configuration export/import', () => {
       method: 'POST',
       url: `/api/events/${eventId}/stations`,
       payload: { name: 'Bar', printerId, sortOrder: 1, kitchenMonitor: false },
+      headers: { authorization: `Bearer ${adminToken}` },
     })
     const stationId = stationRes.json().id
 
@@ -66,11 +68,13 @@ describe('Configuration export/import', () => {
       method: 'POST',
       url: `/api/stations/${stationId}/products`,
       payload: { name: 'Bier', priceCents: 300, taxRateBps: 2000, sortOrder: 1 },
+      headers: { authorization: `Bearer ${adminToken}` },
     })
     await server.inject({
       method: 'POST',
       url: `/api/stations/${stationId}/products`,
       payload: { name: 'Cola', priceCents: 250, sortOrder: 2 },
+      headers: { authorization: `Bearer ${adminToken}` },
     })
 
     // Add waiter
@@ -78,6 +82,7 @@ describe('Configuration export/import', () => {
       method: 'POST',
       url: `/api/events/${eventId}/waiters`,
       payload: { name: 'Alice', pin: '1234', canCancel: true },
+      headers: { authorization: `Bearer ${adminToken}` },
     })
   })
 

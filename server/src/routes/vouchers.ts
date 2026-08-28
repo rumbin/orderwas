@@ -35,7 +35,7 @@ export const voucherRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   })
 
   // POST /events/:eventId/vouchers — create single voucher
-  server.post('/events/:eventId/vouchers', async (request, reply) => {
+  server.post('/events/:eventId/vouchers', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     const parsed = createVoucherSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -50,7 +50,7 @@ export const voucherRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   })
 
   // POST /events/:eventId/vouchers/bulk — bulk create
-  server.post('/events/:eventId/vouchers/bulk', async (request, reply) => {
+  server.post('/events/:eventId/vouchers/bulk', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     const parsed = bulkCreateSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
@@ -66,7 +66,7 @@ export const voucherRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   })
 
   // POST /vouchers/redeem — redeem a voucher
-  server.post('/vouchers/redeem', async (request, reply) => {
+  server.post('/vouchers/redeem', { preHandler: server.authenticate }, async (request, reply) => {
     const parsed = redeemSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
 
@@ -88,7 +88,7 @@ export const voucherRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   })
 
   // POST /events/:eventId/vouchers/:code/expire — expire a voucher
-  server.post('/events/:eventId/vouchers/:code/expire', async (request, reply) => {
+  server.post('/events/:eventId/vouchers/:code/expire', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { eventId, code } = request.params as { eventId: string; code: string }
     try {
       return await expireVoucher(eventId, code)

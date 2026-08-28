@@ -25,7 +25,7 @@ export default async function stationRoutes(server: FastifyInstance): Promise<vo
     sortOrder: z.number().int(),
   })).min(1)
 
-  server.post('/stations/reorder', async (request, reply) => {
+  server.post('/stations/reorder', { preHandler: server.requireAdmin }, async (request, reply) => {
     const parsed = reorderSchema.safeParse(request.body)
     if (!parsed.success) {
       return reply.code(400).send({ error: parsed.error.flatten() })
@@ -39,7 +39,7 @@ export default async function stationRoutes(server: FastifyInstance): Promise<vo
   })
 
   // Create station under an event
-  server.post('/events/:eventId/stations', async (request, reply) => {
+  server.post('/events/:eventId/stations', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     const parsed = createStationSchema.safeParse(request.body)
     if (!parsed.success) {
@@ -92,7 +92,7 @@ export default async function stationRoutes(server: FastifyInstance): Promise<vo
   })
 
   // Update station
-  server.put('/stations/:id', async (request, reply) => {
+  server.put('/stations/:id', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = updateStationSchema.safeParse(request.body)
     if (!parsed.success) {
@@ -111,7 +111,7 @@ export default async function stationRoutes(server: FastifyInstance): Promise<vo
   })
 
   // Delete station
-  server.delete('/stations/:id', async (request, reply) => {
+  server.delete('/stations/:id', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const station = await prisma.station.findUnique({ where: { id } })
     if (!station) {

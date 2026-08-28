@@ -32,14 +32,39 @@ export interface OrderEventPayload {
 
 let io: SocketIOServer | null = null
 
+export interface WebSocketOptions {
+  /** Verifies a JWT. Returns the payload on success or throws on failure. */
+  verifyToken: (token: string) => Promise<unknown> | unknown
+}
+
 /**
  * Attaches Socket.io to an HTTP server.
  * Rooms: event:{eventId} and station:{stationId}.
+ *
+ * Auth: when AUTH_ENFORCED (or production), connections MUST present a valid
+ * JWT — otherwise the connection is refused. Station/kitchen displays are
+ * public screen pages that connect without a token, so enforcement is opt-in
+ * (default off in dev/tests, matching the HTTP global guard).
  */
-export function attachWebSocket(httpServer: HTTPServer): SocketIOServer {
+export function attachWebSocket(httpServer: HTTPServer, opts: WebSocketOptions): SocketIOServer {
   io = new SocketIOServer(httpServer, {
     cors: { origin: true },
     path: '/socket.io/',
+  })
+
+  const enforcedNow = () =>
+    process.env.AUTH_ENFORCED === 'true' || process.env.NODE_ENV === 'production'
+
+  io.use(async (socket, next) => {
+    if (!enforcedNow()) return next()
+    const token = (socket.handshake.auth as { token?: string })?.token
+    if (!token) return next(new Error('Unauthorized'))
+    try {
+      await opts.verifyToken(token)
+      next()
+    } catch {
+      next(new Error('Unauthorized'))
+    }
   })
 
   io.on('connection', (socket) => {
