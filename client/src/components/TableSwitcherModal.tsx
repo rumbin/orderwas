@@ -2,9 +2,10 @@ import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import type { OpenTable } from '@/api/types'
+import { formatPrice } from '@/lib/money'
 
 function formatCents(cents: number): string {
-  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(cents / 100)
+  return formatPrice(cents)
 }
 
 interface Props {

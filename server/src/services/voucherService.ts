@@ -131,3 +131,15 @@ export async function expireVoucher(eventId: string, code: string) {
     data: { status: 'expired' },
   })
 }
+
+/**
+ * Resolves the eventId an order belongs to. Returns null if the order does not
+ * exist (caller maps to a 404). Used to derive the event for a voucher redeem.
+ */
+export async function getOrderEventId(orderId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    select: { eventId: true },
+  })
+  return order?.eventId ?? null
+}

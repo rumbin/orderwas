@@ -8,6 +8,7 @@ import {
   getStationRevenue,
   getWaiterSummary,
   getProductConsumption,
+  getProductEventId,
 } from '@/services/auditService'
 
 export const auditRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
@@ -52,15 +53,11 @@ export const auditRoutes: FastifyPluginAsync = async (server: FastifyInstance) =
 
     try {
       // Resolve eventId from product
-      const { prisma } = await import('@/db/client')
-      const product = await prisma.product.findUnique({
-        where: { id },
-        select: { station: { select: { eventId: true } } },
-      })
-      if (!product) return reply.status(404).send({ error: 'Product not found' })
+      const eventId = await getProductEventId(id)
+      if (!eventId) return reply.status(404).send({ error: 'Product not found' })
 
       const updated = await settleStock(
-        product.station.eventId,
+        eventId,
         id,
         parsed.data.physicalCount,
         actorId,

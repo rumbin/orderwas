@@ -1,6 +1,11 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
-import { prisma } from '@/db/client'
+import {
+  getAdminPin,
+  setAdminPin,
+  findWaiterForLogin,
+  getMeWaiter,
+} from '@/services/authService'
 
 const loginSchema = z.object({
   waiterId: z.string().min(1),
@@ -19,8 +24,7 @@ export const authRoutes: FastifyPluginAsync = async (server: FastifyInstance) =>
 
     const { pin } = parsed.data
     // Check DB setting first, fallback to env, fallback to 'admin'
-    const dbSetting = await prisma.systemSetting.findUnique({ where: { key: 'admin_pin' } })
-    const validPin = dbSetting?.value ?? process.env.ADMIN_PIN ?? 'admin'
+    const validPin = await getAdminPin()
     if (pin !== validPin) {
       return reply.status(401).send({ error: 'Wrong PIN' })
     }
@@ -35,11 +39,7 @@ export const authRoutes: FastifyPluginAsync = async (server: FastifyInstance) =>
     if (!newPin || newPin.length < 3) {
       return reply.status(400).send({ error: 'PIN must be at least 3 characters' })
     }
-    await prisma.systemSetting.upsert({
-      where: { key: 'admin_pin' },
-      update: { value: newPin },
-      create: { key: 'admin_pin', value: newPin },
-    })
+    await setAdminPin(newPin)
     return reply.status(200).send({ ok: true })
   })
 
@@ -50,22 +50,7 @@ export const authRoutes: FastifyPluginAsync = async (server: FastifyInstance) =>
 
     const { waiterId, pin } = parsed.data
 
-    const waiter = await prisma.waiter.findUnique({
-      where: { id: waiterId },
-      select: {
-        id: true,
-        name: true,
-        pin: true,
-        eventId: true,
-        canCancel: true,
-        canCashOut: true,
-        canStatistics: true,
-        canCreateWaiters: true,
-        canTransfer: true,
-        isStationWaiter: true,
-        active: true,
-      },
-    })
+    const waiter = await findWaiterForLogin(waiterId)
 
     if (!waiter || !waiter.active) return reply.status(401).send({ error: 'Invalid credentials' })
     if (waiter.pin !== pin) return reply.status(401).send({ error: 'Invalid credentials' })
@@ -93,26 +78,7 @@ export const authRoutes: FastifyPluginAsync = async (server: FastifyInstance) =>
   server.get('/auth/me', async (request, reply) => {
     try {
       const payload = await request.jwtVerify() as { waiterId: string }
-      const waiter = await prisma.waiter.findUnique({
-        where: { id: payload.waiterId },
-        select: {
-          id: true,
-          name: true,
-          eventId: true,
-          printerId: true,
-          pickupCode: true,
-          printsImmediately: true,
-          canCancel: true,
-          canCashOut: true,
-          canStatistics: true,
-          canCreateWaiters: true,
-          canTransfer: true,
-          isStationWaiter: true,
-          hidden: true,
-          autoSammelbon: true,
-          active: true,
-        },
-      })
+      const waiter = await getMeWaiter(payload.waiterId)
       if (!waiter) return reply.status(404).send({ error: 'Waiter not found' })
       return reply.status(200).send(waiter)
     } catch {

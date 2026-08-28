@@ -1,28 +1,13 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
-import { prisma } from '@/db/client'
-
-// Fields returned to clients. PIN is NEVER included.
-const waiterSelect = {
-  id: true,
-  name: true,
-  logo: true,
-  eventId: true,
-  printerId: true,
-  pickupCode: true,
-  printsImmediately: true,
-  canCancel: true,
-  canCashOut: true,
-  canStatistics: true,
-  canCreateWaiters: true,
-  canTransfer: true,
-  isStationWaiter: true,
-  hidden: true,
-  autoSammelbon: true,
-  active: true,
-  createdAt: true,
-  updatedAt: true,
-} as const
+import {
+  createWaiter,
+  listWaitersByEvent,
+  getWaiter,
+  updateWaiter,
+  deleteWaiter,
+  toggleWaiterActive,
+} from '@/services/waiterService'
 
 const createWaiterBody = z.object({
   name: z.string().min(1),
@@ -55,27 +40,21 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
     const { eventId } = request.params as { eventId: string }
     const parsed = createWaiterBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
-    const { name, pin, printerId, pickupCode, canCancel, canCashOut, canStatistics } = parsed.data
 
     try {
-      const event = await prisma.event.findUnique({ where: { id: eventId }, select: { id: true } })
-      if (!event) return reply.status(404).send({ error: 'Event not found' })
+      const waiter = await createWaiter(eventId, parsed.data)
+      if (!waiter) return reply.status(404).send({ error: 'Event not found' })
+      return reply.status(201).send(waiter)
     } catch (err) {
       return reply.status(500).send({ error: (err as Error).message })
     }
-
-    const waiter = await prisma.waiter.create({
-      data: { name, pin, printerId, pickupCode, canCancel, canCashOut, canStatistics, eventId },
-      select: waiterSelect,
-    })
-    return reply.status(201).send(waiter)
   })
 
   // GET /events/:eventId/waiters — list waiters for event
   server.get('/events/:eventId/waiters', async (request, reply) => {
     const { eventId } = request.params as { eventId: string }
     try {
-      const waiters = await prisma.waiter.findMany({ where: { eventId }, select: waiterSelect })
+      const waiters = await listWaitersByEvent(eventId)
       return reply.status(200).send(waiters)
     } catch (err) {
       return reply.status(500).send({ error: (err as Error).message })
@@ -85,7 +64,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   // GET /waiters/:id — single waiter
   server.get('/waiters/:id', async (request, reply) => {
     const { id } = request.params as { id: string }
-    const waiter = await prisma.waiter.findUnique({ where: { id }, select: waiterSelect })
+    const waiter = await getWaiter(id)
     if (!waiter) return reply.status(404).send({ error: 'Waiter not found' })
     return reply.status(200).send(waiter)
   })
@@ -96,7 +75,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
     const parsed = updateWaiterBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
     try {
-      const waiter = await prisma.waiter.update({ where: { id }, data: parsed.data, select: waiterSelect })
+      const waiter = await updateWaiter(id, parsed.data)
       return reply.status(200).send(waiter)
     } catch (err) {
       const code = (err as { code?: string }).code
@@ -109,7 +88,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
   server.delete('/waiters/:id', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     try {
-      await prisma.waiter.delete({ where: { id } })
+      await deleteWaiter(id)
       return reply.status(204).send()
     } catch (err) {
       const code = (err as { code?: string }).code
@@ -124,7 +103,7 @@ export const waitersRoutes: FastifyPluginAsync = async (server: FastifyInstance)
     const parsed = toggleActiveBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
     try {
-      const waiter = await prisma.waiter.update({ where: { id }, data: { active: parsed.data.active }, select: waiterSelect })
+      const waiter = await toggleWaiterActive(id, parsed.data.active)
       return reply.status(200).send(waiter)
     } catch (err) {
       const code = (err as { code?: string }).code

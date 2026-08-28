@@ -9,9 +9,10 @@ import CartBar from '@/components/CartBar'
 import VariantDialog from '@/components/VariantDialog'
 import CashierView from '@/components/CashierView'
 import type { Station, Product, Order } from '@/api/types'
+import { formatPrice } from '@/lib/money'
 
 function formatCents(cents: number): string {
-  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(cents / 100)
+  return formatPrice(cents)
 }
 
 const STATUS_I18N: Record<string, string> = {
@@ -24,7 +25,7 @@ function statusText(status: string, t: (key: string) => string): string {
 
 export default function OrderPage({ navigate }: { navigate: (path: string) => void }) {
   const { t } = useTranslation()
-  const { event, waiter, token, clear } = useSessionStore()
+  const { event, waiter, clear } = useSessionStore()
   const cart = useCartStore()
   const [stations, setStations] = useState<Station[]>([])
   const [sortedStations, setSortedStations] = useState<Station[]>([])
@@ -127,7 +128,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   }, [tab, event])
 
   const handleCancelOrder = async (orderId: string) => {
-    try { await api.cancelOrder(orderId, token!); setMyOrders((prev) => prev.filter((o) => o.id !== orderId)) }
+    try { await api.cancelOrder(orderId); setMyOrders((prev) => prev.filter((o) => o.id !== orderId)) }
     catch (err) { console.error('Cancel failed:', err) }
   }
 

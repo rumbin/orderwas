@@ -4,6 +4,7 @@ import { api } from '@/api/client'
 import { useSessionStore } from '@/stores/session'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
 import type { Order } from '@/api/types'
+import { formatPrice } from '@/lib/money'
 
 const STATUS_COLORS: Record<string, string> = {
   open: 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200',
@@ -14,12 +15,12 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 function formatCents(cents: number): string {
-  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(cents / 100)
+  return formatPrice(cents)
 }
 
 export default function OrdersPage({ navigate }: { navigate: (path: string) => void }) {
   const { t } = useTranslation()
-  const { event, waiter, token, clear } = useSessionStore()
+  const { event, waiter, clear } = useSessionStore()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [confirming, setConfirming] = useState<{ type: 'cancel' | 'reopen'; orderId: string } | null>(null)
@@ -43,13 +44,13 @@ export default function OrdersPage({ navigate }: { navigate: (path: string) => v
   if (!event || !waiter) return null
 
   const handleCancel = async (orderId: string) => {
-    await api.cancelOrder(orderId, token!)
+    await api.cancelOrder(orderId)
     setConfirming(null)
     loadOrders()
   }
 
   const handleReopen = async (orderId: string) => {
-    await api.reopenOrder(orderId, token!)
+    await api.reopenOrder(orderId)
     setConfirming(null)
     loadOrders()
   }

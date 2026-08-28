@@ -10,6 +10,9 @@ import type {
   AppLayout,
   OpenTable,
   TableOrder,
+  AuditLogEntry,
+  WaiterSummary,
+  ProductConsumption,
 } from './types'
 
 export type { Event, Station, Product, Waiter, Order, OrderItem, Printer, Voucher, AppLayout } from './types'
@@ -171,28 +174,27 @@ export const api = {
     pickupCode?: string
     waiterId: string
     eventId: string
-    items: { productId: string; quantity?: number; comment?: string }[]
+    items: { productId: string; quantity?: number; comment?: string; optionSelections?: { extraId: string; optionId: string }[] }[]
   }) => request<Order>('/orders', { method: 'POST', body: JSON.stringify(data) }),
   getOrders: (eventId: string) => request<Order[]>(`/events/${eventId}/orders`),
   getOrder: (id: string) => request<Order>(`/orders/${id}`),
   updateOrderStatus: (id: string, status: string) =>
     request<Order>(`/orders/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
-  cancelOrder: (id: string, token: string) =>
-    request<Order>(`/orders/${id}/cancel`, { method: 'POST', headers: { authorization: `Bearer ${token}` } }),
-  payOrder: (id: string, token: string) =>
-    request<Order>(`/orders/${id}/pay`, { method: 'POST', headers: { authorization: `Bearer ${token}` } }),
-  reopenOrder: (id: string, token: string) =>
-    request<Order>(`/orders/${id}/reopen`, { method: 'POST', headers: { authorization: `Bearer ${token}` } }),
+  cancelOrder: (id: string) =>
+    request<Order>(`/orders/${id}/cancel`, { method: 'POST' }),
+  payOrder: (id: string) =>
+    request<Order>(`/orders/${id}/pay`, { method: 'POST' }),
+  reopenOrder: (id: string) =>
+    request<Order>(`/orders/${id}/reopen`, { method: 'POST' }),
   updateOrderItem: (id: string, data: { comment?: string; status?: string }) =>
     request<OrderItem>(`/order-items/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
-  cancelOrderItem: (id: string, token: string) =>
-    request<OrderItem>(`/order-items/${id}/cancel`, { method: 'POST', headers: { authorization: `Bearer ${token}` } }),
+  cancelOrderItem: (id: string) =>
+    request<OrderItem>(`/order-items/${id}/cancel`, { method: 'POST' }),
 
   // Payments
-  payItems: (itemIds: string[], token: string) =>
+  payItems: (itemIds: string[]) =>
     request<{ paidCount: number; sumCents: number; updatedOrders: { id: string; status: string }[] }>('/orders/pay-items', {
       method: 'POST',
-      headers: { authorization: `Bearer ${token}` },
       body: JSON.stringify({ itemIds }),
     }),
   getOpenTables: (eventId: string) =>
@@ -206,20 +208,20 @@ export const api = {
     if (opts?.action) params.set('action', opts.action)
     if (opts?.entityType) params.set('entityType', opts.entityType)
     const qs = params.toString()
-    return request<any[]>(`/events/${eventId}/audit${qs ? `?${qs}` : ''}`)
+    return request<AuditLogEntry[]>(`/events/${eventId}/audit${qs ? `?${qs}` : ''}`)
   },
   getStockHistory: (eventId: string, productId: string) =>
-    request<any[]>(`/events/${eventId}/audit/stock/${productId}`),
+    request<AuditLogEntry[]>(`/events/${eventId}/audit/stock/${productId}`),
   settleStock: (productId: string, physicalCount: number) =>
-    request<any>(`/products/${productId}/settle`, { method: 'POST', body: JSON.stringify({ physicalCount }) }),
+    request<Product>(`/products/${productId}/settle`, { method: 'POST', body: JSON.stringify({ physicalCount }) }),
   bulkSettle: (eventId: string, settlements: { productId: string; physicalCount: number }[]) =>
-    request<any[]>(`/events/${eventId}/settle`, { method: 'POST', body: JSON.stringify({ settlements }) }),
+    request<Product[]>(`/events/${eventId}/settle`, { method: 'POST', body: JSON.stringify({ settlements }) }),
   getPeakTimes: (eventId: string) =>
     request<{ hour: number; count: number }[]>(`/events/${eventId}/report/peak-times`),
   getStationRevenue: (eventId: string) =>
     request<{ stationId: string; stationName: string; totalItems: number; revenueCents: number }[]>(`/events/${eventId}/report/station-revenue`),
   getWaiterSummary: (eventId: string) =>
-    request<any[]>(`/events/${eventId}/report/waiters`),
+    request<WaiterSummary[]>(`/events/${eventId}/report/waiters`),
   getProductConsumption: (eventId: string) =>
-    request<any[]>(`/events/${eventId}/report/products`),
+    request<ProductConsumption[]>(`/events/${eventId}/report/products`),
 }

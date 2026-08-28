@@ -1,12 +1,14 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
-import { prisma } from '@/db/client'
 import {
   createProduct,
   listProductsByStation,
   getProduct,
   updateProduct,
   deleteProduct,
+  reorderProducts,
+  createExtra,
+  deleteExtra,
   ProductReferencedError,
 } from '@/services/productService'
 import { adjustStock } from '@/services/stockService'
@@ -49,12 +51,6 @@ const createExtraSchema = z.object({
   })).min(1),
 })
 
-const updateExtraSchema = z.object({
-  name: z.string().min(1).optional(),
-  multiSelect: z.boolean().optional(),
-  sortOrder: z.number().int().optional(),
-})
-
 export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
   // PATCH /products/reorder — bulk update sortOrder for products in a station
   const reorderSchema = z.object({
@@ -65,12 +61,7 @@ export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance
   server.patch('/products/reorder', { preHandler: server.requireAdmin }, async (request, reply) => {
     const parsed = reorderSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
-    const { stationId, productIds } = parsed.data
-    await prisma.$transaction(
-      productIds.map((id, index) =>
-        prisma.product.update({ where: { id }, data: { sortOrder: index } })
-      )
-    )
+    await reorderProducts(parsed.data.productIds)
     return { ok: true }
   })
 
@@ -80,20 +71,17 @@ export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance
     const parsed = createProductSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
 
-    const station = await prisma.station.findUnique({ where: { id: stationId }, select: { id: true } })
-    if (!station) return reply.status(404).send({ error: 'Station not found' })
-
     const product = await createProduct(stationId, parsed.data)
+    if (!product) return reply.status(404).send({ error: 'Station not found' })
     return reply.status(201).send(product)
   })
 
   // GET /stations/:stationId/products — list products for station
   server.get('/stations/:stationId/products', async (request, reply) => {
     const { stationId } = request.params as { stationId: string }
-    const station = await prisma.station.findUnique({ where: { id: stationId }, select: { id: true } })
-    if (!station) return reply.status(404).send({ error: 'Station not found' })
-
-    return listProductsByStation(stationId)
+    const products = await listProductsByStation(stationId)
+    if (!products) return reply.status(404).send({ error: 'Station not found' })
+    return products
   })
 
   // GET /products/:id — single product
@@ -136,18 +124,8 @@ export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance
     const parsed = createExtraSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
 
-    const product = await prisma.product.findUnique({ where: { id }, select: { id: true } })
-    if (!product) return reply.status(404).send({ error: 'Product not found' })
-
-    const { options, ...extraData } = parsed.data
-    const extra = await prisma.productExtra.create({
-      data: {
-        productId: id,
-        ...extraData,
-        options: { create: options },
-      },
-      include: { options: true },
-    })
+    const extra = await createExtra(id, parsed.data)
+    if (!extra) return reply.status(404).send({ error: 'Product not found' })
     return reply.status(201).send(extra)
   })
 
@@ -155,7 +133,7 @@ export const productsRoutes: FastifyPluginAsync = async (server: FastifyInstance
   server.delete('/extras/:id', { preHandler: server.requireAdmin }, async (request, reply) => {
     const { id } = request.params as { id: string }
     try {
-      await prisma.productExtra.delete({ where: { id } })
+      await deleteExtra(id)
       return reply.status(204).send()
     } catch (err) {
       const code = (err as { code?: string }).code

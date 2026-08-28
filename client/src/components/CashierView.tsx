@@ -5,9 +5,10 @@ import { api } from '@/api/client'
 import type { TableOrder, TableOrderItem, OpenTable } from '@/api/types'
 import TableSwitcherModal from './TableSwitcherModal'
 import CalculatorModal from './CalculatorModal'
+import { formatPrice } from '@/lib/money'
 
 function formatCents(cents: number): string {
-  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(cents / 100)
+  return formatPrice(cents)
 }
 
 interface Props {
@@ -123,7 +124,7 @@ export default function CashierView({ initialTable }: Props) {
     if (selected.size === 0 || !token) return
     setPaying(true)
     try {
-      const result = await api.payItems([...selected], token)
+      const result = await api.payItems([...selected])
       setLastPayment({ paidCount: result.paidCount, sumCents: result.sumCents })
       setSelected(new Set())
       if (tableNumber) fetchOrders(tableNumber)

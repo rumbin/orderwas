@@ -2,17 +2,23 @@ import { prisma } from '@/db/client'
 import type { Prisma } from '@prisma/client'
 
 /**
- * Creates a product under a station.
+ * Creates a product under a station. Returns null if the station does not exist
+ * (caller maps to a 404).
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function createProduct(stationId: string, data: any) {
+  const station = await prisma.station.findUnique({ where: { id: stationId }, select: { id: true } })
+  if (!station) return null
   return prisma.product.create({ data: { stationId, ...data } })
 }
 
 /**
  * Lists products for a station, ordered by sortOrder then name. Includes extras.
+ * Returns null if the station does not exist (caller maps to a 404).
  */
 export async function listProductsByStation(stationId: string) {
+  const station = await prisma.station.findUnique({ where: { id: stationId }, select: { id: true } })
+  if (!station) return null
   return prisma.product.findMany({
     where: { stationId },
     orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
@@ -21,6 +27,44 @@ export async function listProductsByStation(stationId: string) {
       _count: { select: { orderItems: true } },
     },
   })
+}
+
+/**
+ * Bulk-updates sortOrder for a list of products within a transaction, using the
+ * array index as the new sort order.
+ */
+export async function reorderProducts(productIds: string[]) {
+  await prisma.$transaction(
+    productIds.map((id, index) => prisma.product.update({ where: { id }, data: { sortOrder: index } })),
+  )
+}
+
+/**
+ * Creates an extra group (with options) under a product. Returns null if the
+ * product does not exist (caller maps to a 404).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function createExtra(productId: string, data: any) {
+  const product = await prisma.product.findUnique({ where: { id: productId }, select: { id: true } })
+  if (!product) return null
+
+  const { options, ...extraData } = data
+  return prisma.productExtra.create({
+    data: {
+      productId,
+      ...extraData,
+      options: { create: options },
+    },
+    include: { options: true },
+  })
+}
+
+/**
+ * Deletes an extra group (cascades options). Throws P2025 if the extra does not
+ * exist (caller maps to a 404).
+ */
+export async function deleteExtra(id: string) {
+  await prisma.productExtra.delete({ where: { id } })
 }
 
 /**

@@ -6,6 +6,7 @@ import {
   listVouchers,
   bulkCreateVouchers,
   expireVoucher,
+  getOrderEventId,
   VoucherError,
 } from '@/services/voucherService'
 
@@ -71,15 +72,11 @@ export const voucherRoutes: FastifyPluginAsync = async (server: FastifyInstance)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
 
     // Need eventId — derive from orderId
-    const { prisma } = await import('@/db/client')
-    const order = await prisma.order.findUnique({
-      where: { id: parsed.data.orderId },
-      select: { eventId: true },
-    })
-    if (!order) return reply.status(404).send({ error: 'Order not found' })
+    const eventId = await getOrderEventId(parsed.data.orderId)
+    if (!eventId) return reply.status(404).send({ error: 'Order not found' })
 
     try {
-      const voucher = await redeemVoucher(order.eventId, parsed.data.code, parsed.data.orderId)
+      const voucher = await redeemVoucher(eventId, parsed.data.code, parsed.data.orderId)
       return voucher
     } catch (err) {
       if (err instanceof VoucherError) return reply.status(err.statusCode).send({ error: err.message })

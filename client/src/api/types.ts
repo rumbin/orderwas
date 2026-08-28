@@ -167,3 +167,38 @@ export interface Voucher {
   createdAt: string
   redeemedAt: string | null
 }
+
+export interface AuditLogEntry {
+  id: string
+  eventId: string
+  actorId: string | null
+  actorName: string | null
+  action: string
+  entityType: string
+  entityId: string | null
+  beforeData: string | null
+  afterData: string | null
+  quantity: number | null
+  createdAt: string
+}
+
+export interface WaiterSummary {
+  waiterId: string
+  waiterName: string
+  totalOrders: number
+  openOrders: number
+  paidOrders: number
+  cancelledOrders: number
+  totalRevenueCents: number
+  totalItems: number
+}
+
+export interface ProductConsumption {
+  productId: string
+  productName: string
+  stationId: string
+  totalQuantity: number
+  revenueCents: number
+  stockMode: string
+  initialStock: number | null
+}

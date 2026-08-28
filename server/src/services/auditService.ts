@@ -114,6 +114,18 @@ export async function settleStock(
 }
 
 /**
+ * Resolves the eventId of a product's station. Returns null if the product does
+ * not exist (caller maps to a 404). Used to derive the event for a stock settle.
+ */
+export async function getProductEventId(productId: string) {
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { station: { select: { eventId: true } } },
+  })
+  return product?.station.eventId ?? null
+}
+
+/**
  * Returns peak-time data: order counts grouped by hour of day for an event.
  */
 export async function getPeakTimes(eventId: string) {

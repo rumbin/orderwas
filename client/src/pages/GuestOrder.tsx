@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/api/client'
 import type { Product, Station } from '@/api/types'
+import { formatPrice } from '@/lib/money'
 
 function formatCents(cents: number): string {
-  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(cents / 100)
+  return formatPrice(cents)
 }
 
 /**

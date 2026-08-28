@@ -2,9 +2,10 @@ import type { Product } from '@/api/types'
 import { useCartStore } from '@/stores/cart'
 import { PRODUCT_COLORS, PRODUCT_BG_CLASSES } from '@/lib/productColors'
 import { useRef, useEffect } from 'react'
+import { formatPrice } from '@/lib/money'
 
 function formatCents(cents: number): string {
-  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(cents / 100)
+  return formatPrice(cents)
 }
 
 interface Props {
