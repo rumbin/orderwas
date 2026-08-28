@@ -139,17 +139,19 @@ export async function createOrder(input: CreateOrderInput) {
     items.reduce((sum, item) => sum + (productMap.get(item.productId)?.priceCents ?? 0) * item.quantity, 0) +
     optionsDeltaTotal
 
-  // Check stock availability before entering the transaction
-  const stockCheck = await checkStockAvailability(items)
-  if (!stockCheck.ok) {
-    const details = stockCheck.errors
-      .map((e) => `${e.productName}: ${e.available} available, ${e.requested} requested`)
-      .join('; ')
-    throw new OrderValidationError(`Insufficient stock: ${details}`, 409)
-  }
-
-  // Atomically increment the event's tear-off counter, create the order, and decrement stock
+  // Atomically check stock, increment the event's tear-off counter, create the
+  // order, and decrement stock — ALL in one transaction. Checking availability
+  // inside the transaction closes the TOCTOU race where two concurrent orders
+  // for the last unit could both pass the outside check and oversell.
   const order = await prisma.$transaction(async (tx) => {
+    const stockCheck = await checkStockAvailability(items, tx)
+    if (!stockCheck.ok) {
+      const details = stockCheck.errors
+        .map((e) => `${e.productName}: ${e.available} available, ${e.requested} requested`)
+        .join('; ')
+      throw new OrderValidationError(`Insufficient stock: ${details}`, 409)
+    }
+
     const updatedEvent = await tx.event.update({
       where: { id: eventId },
       data: { lastTearOffNumber: { increment: 1 } },

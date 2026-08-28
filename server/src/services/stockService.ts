@@ -23,7 +23,10 @@ export interface StockCheckResult {
  * Products with stockMode 'tracked' check stockCount directly.
  * Products with stockMode 'composite' expand into ingredient checks.
  */
-export async function checkStockAvailability(items: StockItem[]): Promise<StockCheckResult> {
+export async function checkStockAvailability(
+  items: StockItem[],
+  client: Prisma.TransactionClient | typeof prisma = prisma,
+): Promise<StockCheckResult> {
   // Aggregate quantities per product (multiple items may reference the same product)
   const quantities = new Map<string, number>()
   for (const item of items) {
@@ -31,7 +34,7 @@ export async function checkStockAvailability(items: StockItem[]): Promise<StockC
   }
 
   const productIds = [...quantities.keys()]
-  const products = await prisma.product.findMany({
+  const products = await client.product.findMany({
     where: { id: { in: productIds } },
     select: { id: true, name: true, stockMode: true, stockCount: true },
   })
@@ -60,10 +63,10 @@ export async function checkStockAvailability(items: StockItem[]): Promise<StockC
     }
 
     if (product.stockMode === 'composite') {
-      const components = await expandComponents(productId)
+      const components = await expandComponents(productId, client)
       for (const comp of components) {
         const needed = comp.quantity * totalQty
-        const ingredient = await prisma.product.findUnique({
+        const ingredient = await client.product.findUnique({
           where: { id: comp.ingredientId },
           select: { id: true, name: true, stockCount: true, stockMode: true },
         })

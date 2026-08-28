@@ -22,6 +22,7 @@ model Event {
   printers          Printer[]
   vouchers          Voucher[]
   auditLogs         AuditLog[]
+  layouts           AppLayout[]
 }
 
 model Station {
@@ -89,6 +90,8 @@ model Product {
   components ProductComponent[] @relation("Composite")
   usedIn     ProductComponent[] @relation("Ingredient")
   extras     ProductExtra[]
+
+  @@index([stationId])
 }
 
 model ProductExtra {
@@ -160,6 +163,10 @@ model Order {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   items         OrderItem[]
+
+  @@index([eventId, status])
+  @@index([waiterId])
+  @@index([tableNumber])
 }
 
 model OrderItem {
@@ -174,6 +181,10 @@ model OrderItem {
   options   String? // JSON: [{extraName, optionName, priceDeltaCents}]
   paidAt    DateTime? // null = unpaid; set when payment collected
   paidByWaiterId String? // waiter who collected the payment
+
+  @@index([orderId])
+  @@index([paidAt])
+  @@index([productId])
 }
 
 model Voucher {
@@ -186,18 +197,23 @@ model Voucher {
   redeemedOrderId String?
   createdAt       DateTime  @default(now())
   redeemedAt      DateTime?
+
   @@unique([eventId, code])
+  @@index([eventId])
 }
 
 model AppLayout {
   id        String   @id @default(cuid())
   eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   waiterId  String?
   columns   Int      @default(3)
   rows      Int      @default(5)
   buttons   String   @default("[]") // JSON array of {name, color, productId, row, col}
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([eventId])
 }
 
 model AuditLog {

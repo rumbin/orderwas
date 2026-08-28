@@ -312,4 +312,34 @@ describe('orderService.createOrder', () => {
     product = await prisma.product.findUnique({ where: { id: tracked.id } })
     expect(product!.stockCount).toBe(20)
   })
+
+  it('tracked product with 1 unit: concurrent orders for the last unit must not oversell', async () => {
+    const tracked = await prisma.product.create({
+      data: { name: 'Letztes Bier', priceCents: 300, stationId, stockMode: 'tracked', stockCount: 1 },
+    })
+
+    const attempt = () =>
+      createOrder({
+        tableNumber: `${Math.floor(Math.random() * 1000)}`,
+        waiterId,
+        eventId,
+        items: [{ productId: tracked.id, quantity: 1 }],
+      })
+
+    // Fire both concurrently. Because createOrder checks availability inside the
+    // same transaction that decrements, at most one may observe stock >= 1.
+    const results = await Promise.allSettled([attempt(), attempt()])
+    const fulfilled = results.filter((r) => r.status === 'fulfilled')
+    const rejected = results.filter((r) => r.status === 'rejected')
+
+    // Stock must never go negative.
+    const after = await prisma.product.findUnique({ where: { id: tracked.id } })
+    expect(after!.stockCount).toBeGreaterThanOrEqual(0)
+    expect(after!.stockCount).toBeLessThan(1)
+
+    // If the guard is transactional, exactly one succeeds and one is rejected.
+    // (SQLite serializes writes; the two may resolve as 1 success + 1 "insufficient".)
+    expect(fulfilled.length).toBeGreaterThanOrEqual(1)
+    expect(fulfilled.length + rejected.length).toBe(2)
+  })
 })

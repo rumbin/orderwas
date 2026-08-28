@@ -2,6 +2,8 @@ import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
 import QRCode from 'qrcode'
 import { prisma } from '@/db/client'
+import { guestOrder } from '@/services/guestOrderService'
+import { OrderValidationError } from '@/services/orderService'
 
 /**
  * QR code routes for table ordering.
@@ -81,65 +83,13 @@ export const qrRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
     const parsed = guestOrderSchema.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
 
-    // Decode token to get eventId + tableNumber
-    let eventId: string
-    let tableNumber: string
     try {
-      const decoded = Buffer.from(parsed.data.token, 'base64url').toString()
-      const [eid, table] = decoded.split(':')
-      if (!eid || !table) throw new Error()
-      eventId = eid
-      tableNumber = table
-    } catch {
-      return reply.status(400).send({ error: 'Invalid token' })
-    }
-
-    // Verify event exists and is live
-    const event = await prisma.event.findUnique({ where: { id: eventId }, select: { id: true, status: true } })
-    if (!event) return reply.status(404).send({ error: 'Event not found' })
-
-    // Find a system waiter for guest orders (or use first available)
-    const waiter = await prisma.waiter.findFirst({
-      where: { eventId, active: true },
-      select: { id: true },
-    })
-    if (!waiter) return reply.status(400).send({ error: 'No active waiter found for this event' })
-
-    // Validate products and calculate total
-    const productIds = parsed.data.items.map((i) => i.productId)
-    const products = await prisma.product.findMany({
-      where: { id: { in: productIds }, available: true },
-      select: { id: true, priceCents: true },
-    })
-    if (products.length !== productIds.length) {
-      return reply.status(400).send({ error: 'One or more products not found or unavailable' })
-    }
-
-    const productMap = new Map(products.map((p) => [p.id, p]))
-    const totalCents = parsed.data.items.reduce(
-      (sum, item) => sum + (productMap.get(item.productId)?.priceCents ?? 0) * item.quantity,
-      0,
-    )
-
-    // Create order (using the existing createOrder logic)
-    const { createOrder } = await import('@/services/orderService')
-    try {
-      const order = await createOrder({
-        tableNumber,
-        waiterId: waiter.id,
-        eventId,
-        items: parsed.data.items.map((i) => ({
-          productId: i.productId,
-          quantity: i.quantity,
-          comment: i.comment,
-        })),
-      })
-      return reply.status(201).send({
-        orderId: order.id,
-        tearOffNumber: order.tearOffNumber,
-        totalCents: order.totalCents,
-      })
+      const result = await guestOrder(parsed.data)
+      return reply.status(201).send(result)
     } catch (err) {
+      if (err instanceof OrderValidationError) {
+        return reply.status(err.statusCode).send({ error: err.message })
+      }
       return reply.status(400).send({ error: (err as Error).message })
     }
   })

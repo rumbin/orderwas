@@ -13,15 +13,17 @@ export class VoucherError extends Error {
  * Creates a voucher for an event.
  */
 export async function createVoucher(eventId: string, code: string, valueCents: number) {
-  // Check uniqueness
-  const existing = await prisma.voucher.findUnique({
-    where: { eventId_code: { eventId, code } },
-  })
-  if (existing) throw new VoucherError('Voucher code already exists for this event')
-
-  const voucher = await prisma.voucher.create({
-    data: { eventId, code, valueCents },
-  })
+  let voucher
+  try {
+    voucher = await prisma.voucher.create({
+      data: { eventId, code, valueCents },
+    })
+  } catch (err) {
+    // Rely on the DB unique constraint; surface P2002 as a clean 409.
+    const code2 = (err as { code?: string }).code
+    if (code2 === 'P2002') throw new VoucherError('Voucher code already exists for this event', 409)
+    throw err
+  }
 
   logAudit({
     eventId,
@@ -37,6 +39,8 @@ export async function createVoucher(eventId: string, code: string, valueCents: n
 /**
  * Redeems a voucher code against an event.
  * Returns the voucher if valid, throws if not.
+ * The status flip is a conditional update (where status: 'active') so two
+ * concurrent redemptions can't both win — exactly one reduces to 'redeemed'.
  */
 export async function redeemVoucher(eventId: string, code: string, orderId: string) {
   const voucher = await prisma.voucher.findUnique({
@@ -44,16 +48,23 @@ export async function redeemVoucher(eventId: string, code: string, orderId: stri
   })
 
   if (!voucher) throw new VoucherError('Voucher not found', 404)
-  if (voucher.status !== 'active') throw new VoucherError(`Voucher is ${voucher.status}`)
+  if (voucher.status !== 'active') throw new VoucherError(`Voucher is ${voucher.status}`, 409)
   if (voucher.valueCents <= 0) throw new VoucherError('Voucher has no value')
 
-  const updated = await prisma.voucher.update({
-    where: { id: voucher.id },
+  const updated = await prisma.voucher.updateMany({
+    where: { id: voucher.id, status: 'active' },
     data: {
       status: 'redeemed',
       redeemedOrderId: orderId,
       redeemedAt: new Date(),
     },
+  })
+  if (updated.count === 0) {
+    throw new VoucherError('Voucher was already redeemed (concurrent redemption)', 409)
+  }
+
+  const redeemed = await prisma.voucher.findUniqueOrThrow({
+    where: { id: voucher.id },
   })
 
   logAudit({
@@ -62,11 +73,11 @@ export async function redeemVoucher(eventId: string, code: string, orderId: stri
     entityType: 'Voucher',
     entityId: voucher.id,
     beforeData: { code: voucher.code, valueCents: voucher.valueCents, status: 'active' },
-    afterData: { code: updated.code, valueCents: updated.valueCents, status: 'redeemed', redeemedOrderId: orderId },
+    afterData: { code: redeemed.code, valueCents: redeemed.valueCents, status: 'redeemed', redeemedOrderId: orderId },
     quantity: -voucher.valueCents,
   }).catch((err) => console.error('[audit] log error:', err))
 
-  return updated
+  return redeemed
 }
 
 /**

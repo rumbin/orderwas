@@ -69,7 +69,7 @@ describe('Voucher routes', () => {
       payload: { code: 'GUT001', valueCents: 300 },
       headers: adminHeaders,
     })
-    expect(res.statusCode).toBe(400)
+    expect(res.statusCode).toBe(409)
     expect(res.json().error).toContain('already exists')
   })
 
@@ -166,14 +166,14 @@ describe('Voucher routes', () => {
       headers: redeemHeaders,
     })
 
-    // Second redemption fails
+    // Second redemption fails (conflict after first redeem)
     const res = await server.inject({
       method: 'POST',
       url: '/api/vouchers/redeem',
       payload: { code: 'GUT001', orderId: order.id },
       headers: redeemHeaders,
     })
-    expect(res.statusCode).toBe(400)
+    expect(res.statusCode).toBe(409)
     expect(res.json().error).toContain('redeemed')
   })
 
@@ -192,5 +192,48 @@ describe('Voucher routes', () => {
     })
     expect(res.statusCode).toBe(200)
     expect(res.json().status).toBe('expired')
+  })
+
+  it('POST concurrent redemptions of the same voucher → exactly one succeeds', async () => {
+    const station = await prisma.station.create({ data: { name: 'Bar', eventId } })
+    const product = await prisma.product.create({ data: { name: 'Bier', priceCents: 300, stationId: station.id } })
+    const waiter = await prisma.waiter.create({ data: { name: 'Alice', pin: '1234', eventId } })
+
+    await server.inject({
+      method: 'POST',
+      url: `/api/events/${eventId}/vouchers`,
+      payload: { code: 'RACE', valueCents: 500 },
+      headers: adminHeaders,
+    })
+    const order = await prisma.order.create({
+      data: {
+        tableNumber: '1', waiterId: waiter.id, eventId, totalCents: 300,
+        items: { create: [{ productId: product.id, quantity: 1 }] },
+      },
+    })
+
+    const results = await Promise.all([
+      server.inject({ method: 'POST', url: '/api/vouchers/redeem', payload: { code: 'RACE', orderId: order.id }, headers: redeemHeaders }),
+      server.inject({ method: 'POST', url: '/api/vouchers/redeem', payload: { code: 'RACE', orderId: order.id }, headers: redeemHeaders }),
+    ])
+    const codes = results.map((r) => r.statusCode).sort()
+    expect(codes.filter((c) => c === 200).length).toBe(1)
+    expect(codes.some((c) => c === 400 || c === 409)).toBe(true)
+  })
+
+  it('POST duplicate voucher code → 409 (not 500)', async () => {
+    await server.inject({
+      method: 'POST',
+      url: `/api/events/${eventId}/vouchers`,
+      payload: { code: 'DUP', valueCents: 500 },
+      headers: adminHeaders,
+    })
+    const res = await server.inject({
+      method: 'POST',
+      url: `/api/events/${eventId}/vouchers`,
+      payload: { code: 'DUP', valueCents: 900 },
+      headers: adminHeaders,
+    })
+    expect(res.statusCode).toBe(409)
   })
 })

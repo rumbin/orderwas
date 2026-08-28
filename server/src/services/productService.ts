@@ -1,4 +1,5 @@
 import { prisma } from '@/db/client'
+import type { Prisma } from '@prisma/client'
 
 /**
  * Creates a product under a station.
@@ -72,8 +73,11 @@ export class ProductReferencedError extends Error {
  * Expands a composite product's components into ingredient quantities.
  * Returns array of { ingredientId, ingredientName, quantity }.
  */
-export async function expandComponents(compositeId: string) {
-  const components = await prisma.productComponent.findMany({
+export async function expandComponents(
+  compositeId: string,
+  client: Prisma.TransactionClient | typeof prisma = prisma,
+) {
+  const components = await client.productComponent.findMany({
     where: { compositeId },
     include: { ingredient: { select: { id: true, name: true } } },
   })
