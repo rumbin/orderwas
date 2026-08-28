@@ -12,6 +12,7 @@ import {
   OrderValidationError,
 } from '@/services/orderService'
 import { updateItem, cancelItem, OrderItemValidationError } from '@/services/orderItemService'
+import type { JwtPayload } from '@/plugins/auth'
 
 const createOrderItemSchema = z.object({
   productId: z.string().min(1),
@@ -83,14 +84,15 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
     return order
   })
 
-  // PATCH /orders/:id — update order status (generic)
-  server.patch('/orders/:id', async (request, reply) => {
+  // PATCH /orders/:id — update order status (generic, preparation statuses only)
+  server.patch('/orders/:id', { preHandler: server.authenticate }, async (request, reply) => {
     const { id } = request.params as { id: string }
     const parsed = updateOrderStatusBody.safeParse(request.body)
     if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() })
 
     try {
-      const order = await updateOrderStatus(id, parsed.data.status)
+      const payload = (await request.jwtVerify()) as JwtPayload
+      const order = await updateOrderStatus(id, parsed.data.status, payload.waiterId)
       return reply.status(200).send(order)
     } catch (err) {
       if (err instanceof OrderValidationError) {
@@ -122,7 +124,8 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
   }, async (request, reply) => {
     const { id } = request.params as { id: string }
     try {
-      const order = await markPaid(id)
+      const payload = (await request.jwtVerify()) as JwtPayload
+      const order = await markPaid(id, payload.waiterId)
       return reply.status(200).send(order)
     } catch (err) {
       if (err instanceof OrderValidationError) {
@@ -138,7 +141,8 @@ export const ordersRoutes: FastifyPluginAsync = async (server: FastifyInstance) 
   }, async (request, reply) => {
     const { id } = request.params as { id: string }
     try {
-      const order = await reopenOrder(id)
+      const payload = (await request.jwtVerify()) as JwtPayload
+      const order = await reopenOrder(id, payload.waiterId)
       return reply.status(200).send(order)
     } catch (err) {
       if (err instanceof OrderValidationError) {

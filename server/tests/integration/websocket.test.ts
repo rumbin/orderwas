@@ -117,6 +117,7 @@ describe('WebSocket order events', () => {
     await server.inject({
       method: 'PATCH',
       url: `/api/orders/${orderId}`,
+      headers: { authorization: `Bearer ${dataToken}` },
       payload: { status: 'preparing' },
     })
 

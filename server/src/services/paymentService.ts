@@ -34,6 +34,7 @@ export interface PayItemsResult {
 export async function payItems(
   itemIds: string[],
   actorWaiterId: string,
+  actorEventId?: string,
 ): Promise<PayItemsResult> {
   if (!Array.isArray(itemIds) || itemIds.length === 0) {
     throw new OrderValidationError('No items selected', 400)
@@ -42,32 +43,7 @@ export async function payItems(
   // De-duplicate
   const uniqueIds = [...new Set(itemIds)]
 
-  // Load items with order + product price
-  const items = await prisma.orderItem.findMany({
-    where: { id: { in: uniqueIds } },
-    include: {
-      order: { select: { id: true, eventId: true, tableNumber: true } },
-      product: { select: { priceCents: true } },
-    },
-  })
-
-  if (items.length !== uniqueIds.length) {
-    const foundIds = new Set(items.map((i) => i.id))
-    const missing = uniqueIds.filter((id) => !foundIds.has(id))
-    throw new OrderValidationError(`Items not found: ${missing.join(', ')}`, 404)
-  }
-
-  // Validate
-  for (const item of items) {
-    if (item.status === 'cancelled') {
-      throw new OrderValidationError(`Item ${item.id} is cancelled`, 409)
-    }
-    if (item.paidAt) {
-      throw new OrderValidationError(`Item ${item.id} is already paid`, 409)
-    }
-  }
-
-  // Verify actor waiter exists
+  // Verify actor waiter exists (and belongs to actorEventId if provided)
   const waiter = await prisma.waiter.findUnique({
     where: { id: actorWaiterId },
     select: { id: true, name: true, eventId: true },
@@ -75,63 +51,105 @@ export async function payItems(
   if (!waiter) {
     throw new OrderValidationError('Waiter not found', 404)
   }
+  const eventId = actorEventId ?? waiter.eventId
 
-  // Compute total from server-side data (never trust client)
-  const sumCents = items.reduce((sum, item) => {
-    return sum + computeLineTotalCents(item.product.priceCents, item.quantity, item.options)
-  }, 0)
-
-  const eventId = waiter.eventId
-  const tableNumber = items[0]?.order.tableNumber ?? null
-  const affectedOrderIds = [...new Set(items.map((i) => i.orderId))]
-
+  // Validate + compute + persist atomically. All of it inside the transaction
+  // so two concurrent payItems calls for the same item cannot both pass the
+  // "still unpaid" check (double payment). The conditional updateMany only
+  // matches rows that are still paidAt: null.
   const now = new Date()
-
   const result = await prisma.$transaction(async (tx) => {
-    // Mark items as paid
-    await tx.orderItem.updateMany({
+    // Load items with order (for event ownership) + product (for price math).
+    const items = await tx.orderItem.findMany({
       where: { id: { in: uniqueIds } },
-      data: { paidAt: now, paidByWaiterId: actorWaiterId },
+      include: {
+        order: { select: { id: true, eventId: true, tableNumber: true, status: true } },
+        product: { select: { priceCents: true } },
+      },
     })
 
-    // Check affected orders
+    if (items.length !== uniqueIds.length) {
+      const foundIds = new Set(items.map((i) => i.id))
+      const missing = uniqueIds.filter((id) => !foundIds.has(id))
+      throw new OrderValidationError(`Items not found: ${missing.join(', ')}`, 404)
+    }
+
+    // Event ownership: a waiter may only pay items belonging to their own event.
+    for (const item of items) {
+      if (item.order.eventId !== eventId) {
+        throw new OrderValidationError('Item belongs to another event', 403)
+      }
+      if (item.status === 'cancelled') {
+        throw new OrderValidationError(`Item ${item.id} is cancelled`, 409)
+      }
+      if (item.paidAt) {
+        throw new OrderValidationError(`Item ${item.id} is already paid`, 409)
+      }
+    }
+
+    // Compute total from server-side data (never trust client)
+    const sumCents = items.reduce(
+      (sum, item) => sum + computeLineTotalCents(item.product.priceCents, item.quantity, item.options),
+      0,
+    )
+
+    // Race-safe: only rows that are still unpaid match. If another request paid
+    // one of them first, count < uniqueIds.length and we reject (409).
+    const updated = await tx.orderItem.updateMany({
+      where: { id: { in: uniqueIds }, paidAt: null },
+      data: { paidAt: now, paidByWaiterId: actorWaiterId },
+    })
+    if (updated.count !== uniqueIds.length) {
+      throw new OrderValidationError('One or more items were already paid (concurrent payment)', 409)
+    }
+
+    // Recompute order statuses for the affected orders.
+    const affectedOrderIds = [...new Set(items.map((i) => i.order.id))]
     const updatedOrders: { id: string; status: string }[] = []
 
     for (const orderId of affectedOrderIds) {
       const remaining = await tx.orderItem.count({
-        where: {
-          orderId,
-          paidAt: null,
-          status: { not: 'cancelled' },
-        },
+        where: { orderId, paidAt: null, status: { not: 'cancelled' } },
       })
 
       let newStatus: string | undefined
-      if (remaining === 0) {
-        newStatus = 'paid'
-      }
+      if (remaining === 0) newStatus = 'paid'
 
       const order = await tx.order.update({
         where: { id: orderId },
         data: newStatus ? { status: newStatus } : {},
-        select: { id: true, status: true, eventId: true },
+        select: { id: true, status: true, eventId: true, tableNumber: true },
       })
 
       updatedOrders.push({ id: order.id, status: order.status })
 
-      // Emit WebSocket event
-      orderEvents.emit('order:updated', {
-        order: {
-          id: order.id,
-          eventId: order.eventId,
-          tableNumber,
-          status: order.status,
-        },
-      })
+      // Emit AFTER commit (post-commit broadcast) — done below.
+      void order
     }
 
-    return updatedOrders
+    return { sumCents, updatedOrders }
   })
+
+  // Rebuild a tableNumber for the audit/events (from the first order of the set).
+  // We emit post-commit so clients never observe a payment that then rolls back.
+  const firstOrder = await prisma.order.findUnique({
+    where: { id: result.updatedOrders[0]?.id ?? '' },
+    select: { id: true, eventId: true, tableNumber: true, status: true },
+  })
+  if (firstOrder) {
+    orderEvents.emit('order:updated', {
+      order: {
+        id: firstOrder.id,
+        eventId: firstOrder.eventId,
+        tableNumber: firstOrder.tableNumber,
+        pickupCode: null,
+        tearOffNumber: null,
+        status: firstOrder.status,
+        totalCents: 0,
+        items: [],
+      },
+    })
+  }
 
   // Audit log
   logAudit({
@@ -143,16 +161,16 @@ export async function payItems(
     entityId: uniqueIds[0],
     afterData: {
       itemIds: uniqueIds,
-      sumCents,
-      tableNumber,
+      sumCents: result.sumCents,
+      tableNumber: firstOrder?.tableNumber ?? null,
       actorName: waiter.name,
     },
-  })
+  }).catch((err) => console.error('[audit] log error:', err))
 
   return {
     paidCount: uniqueIds.length,
-    sumCents,
-    updatedOrders: result,
+    sumCents: result.sumCents,
+    updatedOrders: result.updatedOrders,
   }
 }
 

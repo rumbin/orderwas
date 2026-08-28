@@ -257,9 +257,16 @@ describe('Orders API - PATCH /api/orders/:id', () => {
     })
     const id = (created.json() as Record<string, unknown>).id as string
 
+    const token = server.jwt.sign({
+      waiterId: waiter.id,
+      eventId: event.id,
+      permissions: { canCancel: false, canCashOut: false, canStatistics: false, canCreateWaiters: false, canTransfer: false, isStationWaiter: false },
+    })
+
     const res = await server.inject({
       method: 'PATCH',
       url: `/api/orders/${id}`,
+      headers: { authorization: `Bearer ${token}` },
       payload: { status: 'bogus-status' },
     })
     expect(res.statusCode).toBe(400)

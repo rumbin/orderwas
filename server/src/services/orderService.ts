@@ -32,6 +32,33 @@ export class OrderValidationError extends Error {
 }
 
 /**
+ * Emits the canonical `order:updated` WebSocket payload. Centralizes the shape
+ * so every caller (pay/cancel/reopen/status/transfer) broadcasts identically.
+ */
+function emitOrderUpdated(order: {
+  id: string
+  eventId: string
+  tableNumber: string | null
+  pickupCode: string | null
+  tearOffNumber: number | null
+  status: string
+  totalCents: number
+}) {
+  orderEvents.emit('order:updated', {
+    order: {
+      id: order.id,
+      eventId: order.eventId,
+      tableNumber: order.tableNumber,
+      pickupCode: order.pickupCode,
+      tearOffNumber: order.tearOffNumber,
+      status: order.status,
+      totalCents: order.totalCents,
+      items: [],
+    },
+  } satisfies OrderEventPayload)
+}
+
+/**
  * Creates an order: validates entities, calculates total in integer cents,
  * atomically assigns a per-event tear-off number, persists order + items,
  * returns the created order with items.
@@ -248,37 +275,49 @@ const VALID_STATUSES = ['open', 'preparing', 'partial', 'done', 'paid', 'cancell
 type OrderStatus = (typeof VALID_STATUSES)[number]
 
 /**
- * Updates order status. Throws OrderValidationError for invalid status or missing order.
+ * Updates order status (preparation statuses). Throws OrderValidationError for
+ * invalid status or missing order. Writes an audit trail entry.
  */
-export async function updateOrderStatus(id: string, status: string) {
+export async function updateOrderStatus(id: string, status: string, actorId?: string) {
   if (!VALID_STATUSES.includes(status as OrderStatus)) {
     throw new OrderValidationError('Invalid status', 400)
   }
 
+  let order: {
+    id: string
+    eventId: string
+    tableNumber: string | null
+    pickupCode: string | null
+    tearOffNumber: number | null
+    status: string
+    totalCents: number
+  }
   try {
-    const order = await prisma.order.update({
+    order = await prisma.order.update({
       where: { id },
       data: { status: status as OrderStatus },
+      select: { id: true, eventId: true, tableNumber: true, pickupCode: true, tearOffNumber: true, status: true, totalCents: true },
     })
-    // Emit WebSocket event
-    orderEvents.emit('order:updated', {
-      order: {
-        id: order.id,
-        eventId: order.eventId,
-        tableNumber: order.tableNumber,
-        pickupCode: order.pickupCode,
-        tearOffNumber: order.tearOffNumber,
-        status: order.status,
-        totalCents: order.totalCents,
-        items: [],
-      },
-    })
-    return order
   } catch (err) {
     const code = (err as { code?: string }).code
     if (code === 'P2025') throw new OrderValidationError('Order not found', 404)
     throw err
   }
+
+  emitOrderUpdated(order)
+
+  // Audit trail (status is an order-level state change)
+  logAudit({
+    eventId: order.eventId,
+    actorId: actorId,
+    action: 'order.statusChanged',
+    entityType: 'Order',
+    entityId: id,
+    beforeData: { status: null as unknown },
+    afterData: { status },
+  }).catch((err) => console.error('[audit] log error:', err))
+
+  return order
 }
 
 // Type helper for transaction context
@@ -318,18 +357,7 @@ export async function cancelOrder(id: string) {
     return tx.order.update({ where: { id }, data: { status: 'cancelled' } })
   })
 
-  orderEvents.emit('order:updated', {
-    order: {
-      id: order.id,
-      eventId: order.eventId,
-      tableNumber: order.tableNumber,
-      pickupCode: order.pickupCode,
-      tearOffNumber: order.tearOffNumber,
-      status: order.status,
-      totalCents: order.totalCents,
-      items: [],
-    },
-  })
+  emitOrderUpdated(order)
 
   // Audit log
   logAudit({
@@ -346,31 +374,41 @@ export async function cancelOrder(id: string) {
 
 /**
  * Marks an order paid (cash-out). Only open/preparing/partial → paid.
+ * Unifies the payment model: order-level pay also stamps every non-cancelled
+ * item with paidAt, so item-level cashier views and order-level status agree.
  */
-export async function markPaid(id: string) {
+export async function markPaid(id: string, actorId?: string) {
   const existing = await prisma.order.findUnique({
     where: { id },
-    select: { status: true },
+    select: { status: true, eventId: true },
   })
   if (!existing) throw new OrderValidationError('Order not found', 404)
   if (!['open', 'preparing', 'partial'].includes(existing.status)) {
     throw new OrderValidationError(`Cannot pay order in status '${existing.status}'`, 409)
   }
 
-  const order = await prisma.order.update({ where: { id }, data: { status: 'paid' } })
-
-  orderEvents.emit('order:updated', {
-    order: {
-      id: order.id,
-      eventId: order.eventId,
-      tableNumber: order.tableNumber,
-      pickupCode: order.pickupCode,
-      tearOffNumber: order.tearOffNumber,
-      status: order.status,
-      totalCents: order.totalCents,
-      items: [],
-    },
+  const now = new Date()
+  const order = await prisma.$transaction(async (tx) => {
+    await tx.orderItem.updateMany({
+      where: { orderId: id, status: { not: 'cancelled' }, paidAt: null },
+      data: { paidAt: now, ...(actorId ? { paidByWaiterId: actorId } : {}) },
+    })
+    return tx.order.update({ where: { id }, data: { status: 'paid' } })
   })
+
+  emitOrderUpdated(order)
+
+  // Audit trail (money-relevant action)
+  logAudit({
+    eventId: existing.eventId,
+    actorId: actorId,
+    action: 'order.paid',
+    entityType: 'Order',
+    entityId: id,
+    beforeData: { status: existing.status },
+    afterData: { status: 'paid' },
+  }).catch((err) => console.error('[audit] log error:', err))
+
   return order
 }
 
@@ -404,18 +442,7 @@ export async function transferOrder(id: string, newWaiterId: string, actorId?: s
 
   const order = await prisma.order.update({ where: { id }, data: { waiterId: newWaiterId } })
 
-  orderEvents.emit('order:updated', {
-    order: {
-      id: order.id,
-      eventId: order.eventId,
-      tableNumber: order.tableNumber,
-      pickupCode: order.pickupCode,
-      tearOffNumber: order.tearOffNumber,
-      status: order.status,
-      totalCents: order.totalCents,
-      items: [],
-    },
-  })
+  emitOrderUpdated(order)
 
   // Audit log (fire-and-forget)
   logAudit({
@@ -433,30 +460,38 @@ export async function transferOrder(id: string, newWaiterId: string, actorId?: s
 
 /**
  * Reopens a paid order (e.g. payment mistake). Only paid → open.
+ * Clears item-level paidAt/paidByWaiterId so the cashier sees the items again.
  */
-export async function reopenOrder(id: string) {
+export async function reopenOrder(id: string, actorId?: string) {
   const existing = await prisma.order.findUnique({
     where: { id },
-    select: { status: true },
+    select: { status: true, eventId: true },
   })
   if (!existing) throw new OrderValidationError('Order not found', 404)
   if (existing.status !== 'paid') {
     throw new OrderValidationError(`Cannot reopen order in status '${existing.status}'`, 409)
   }
 
-  const order = await prisma.order.update({ where: { id }, data: { status: 'open' } })
-
-  orderEvents.emit('order:updated', {
-    order: {
-      id: order.id,
-      eventId: order.eventId,
-      tableNumber: order.tableNumber,
-      pickupCode: order.pickupCode,
-      tearOffNumber: order.tearOffNumber,
-      status: order.status,
-      totalCents: order.totalCents,
-      items: [],
-    },
+  const order = await prisma.$transaction(async (tx) => {
+    await tx.orderItem.updateMany({
+      where: { orderId: id },
+      data: { paidAt: null, paidByWaiterId: null },
+    })
+    return tx.order.update({ where: { id }, data: { status: 'open' } })
   })
+
+  emitOrderUpdated(order)
+
+  // Audit trail (money-relevant action)
+  logAudit({
+    eventId: existing.eventId,
+    actorId: actorId,
+    action: 'order.reopened',
+    entityType: 'Order',
+    entityId: id,
+    beforeData: { status: 'paid' },
+    afterData: { status: 'open' },
+  }).catch((err) => console.error('[audit] log error:', err))
+
   return order
 }
