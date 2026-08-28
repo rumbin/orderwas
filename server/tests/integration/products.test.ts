@@ -233,4 +233,30 @@ describe('Product CRUD routes', () => {
     })
     expect(res.statusCode).toBe(409)
   })
+
+  it('PATCH /api/products/reorder updates sortOrder for products in a station', async () => {
+    const p1 = await prisma.product.create({ data: { name: 'P1', priceCents: 100, stationId, sortOrder: 0 } })
+    const p2 = await prisma.product.create({ data: { name: 'P2', priceCents: 200, stationId, sortOrder: 1 } })
+
+    const res = await server.inject({
+      method: 'PATCH',
+      url: '/api/products/reorder',
+      headers: adminHeaders,
+      payload: { stationId, productIds: [p2.id, p1.id] },
+    })
+    expect(res.statusCode).toBe(200)
+
+    const list = await (await server.inject({ method: 'GET', url: `/api/stations/${stationId}/products` })).json()
+    expect(list.map((p: { name: string }) => p.name)).toEqual(['P2', 'P1'])
+  })
+
+  it('PATCH /api/products/reorder rejects empty product list (400)', async () => {
+    const res = await server.inject({
+      method: 'PATCH',
+      url: '/api/products/reorder',
+      headers: adminHeaders,
+      payload: { stationId, productIds: [] },
+    })
+    expect(res.statusCode).toBe(400)
+  })
 })

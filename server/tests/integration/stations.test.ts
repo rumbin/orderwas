@@ -178,4 +178,35 @@ describe('Station CRUD routes', () => {
     })
     expect(response.statusCode).toBe(404)
   })
+
+  it('POST /api/stations/reorder updates sortOrder for all stations', async () => {
+    const a = await prisma.station.create({ data: { name: 'Zulu', eventId, sortOrder: 1 } })
+    const b = await prisma.station.create({ data: { name: 'Alpha', eventId, sortOrder: 2 } })
+
+    const response = await server.inject({
+      method: 'POST',
+      url: '/api/stations/reorder',
+      headers: adminHeaders,
+      payload: [
+        { id: b.id, sortOrder: 0 },
+        { id: a.id, sortOrder: 1 },
+      ],
+    })
+    expect(response.statusCode).toBe(200)
+
+    const bAfter = await prisma.station.findUnique({ where: { id: b.id } })
+    const aAfter = await prisma.station.findUnique({ where: { id: a.id } })
+    expect(bAfter!.sortOrder).toBe(0)
+    expect(aAfter!.sortOrder).toBe(1)
+  })
+
+  it('POST /api/stations/reorder rejects empty payload (400)', async () => {
+    const response = await server.inject({
+      method: 'POST',
+      url: '/api/stations/reorder',
+      headers: adminHeaders,
+      payload: [],
+    })
+    expect(response.statusCode).toBe(400)
+  })
 })
