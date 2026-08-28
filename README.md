@@ -143,6 +143,15 @@ npm run build           # Build both client + server
 cd server && npx prisma db push --force-reset && npx prisma generate && npx prisma db seed
 ```
 
+### Environment variables
+
+In development auth enforcement is off by default (the seeded waiter logins are enough). For any real deployment set:
+
+- **`JWT_SECRET`** — required. The server **refuses to boot** when `NODE_ENV=production` and `JWT_SECRET` is unset (never runs with the dev default secret).
+- **`AUTH_ENFORCED=true`** — turns on the global auth guard in dev/test (and is implied in production). When enabled, every `/api/*` request and every WebSocket connection must carry a valid JWT, except the public pre-login reads and `POST /api/auth/login` / `POST /api/auth/admin/login` / `POST /api/guest/orders`. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §8.
+
+Admin superuser PIN: DB setting → `ADMIN_PIN` env → default `admin` (change it).
+
 ## Hardware Requirements
 
 ### Minimum Setup
@@ -292,7 +301,7 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 
 ## License
 
-Orderwas is licensed under the [MIT License](LICENSE).
+Orderwas is licensed under the [GPL-3.0 License](LICENSE).
 
 ## Acknowledgments
 

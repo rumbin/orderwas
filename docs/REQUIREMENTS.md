@@ -4,6 +4,8 @@
 **Date:** 2026-08-14
 **Status:** Draft
 
+> **Implementation status (as of 2026-08-29, after remediation Phases 0–5).** The following are **implemented and covered by automated tests** (server unit+integration, client, E2E): waiter/admin authentication and authorization (`canCashOut`/`canCancel`/`canTransfer`/`canStatistics`/admin) with the `AUTH_ENFORCED` global guard and JWT-enforced WebSocket; unified order-level + item-level payment (`POST /orders/:id/pay`, `POST /orders/:id/reopen`, `POST /orders/pay-items`) under the invariant *order `paid` ⇔ all non-cancelled items paid*; race-safe **stock** checks inside the order transaction (single-winner, no TOCTOU); atomic **voucher** redemption (unique code → 409 on duplicate; conditional update → 409 on double-redeem); **guest QR** ordering attributed to a hidden per-event ghost waiter named "Gast" (invalid token 400, unknown event 404, insufficient stock 409); **reports & audit** (`GET /events/:eventId/report/*`, `/audit`, `POST /products/:id/settle`, `POST /events/:eventId/settle`); structured **product extras** (§17.4); and full-lifecycle E2E coverage (§17.5). The checkboxes below that still list these as open are **requirements/roadmap artifacts** of the original analysis, not the current state — see [docs/ARCHITECTURE.md](ARCHITECTURE.md) §5/§8 for the authoritative behavior.
+
 ---
 
 ## 1. Executive Summary

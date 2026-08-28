@@ -1,7 +1,7 @@
 # Orderwas — Architecture
 
 **Status:** Living document. Update when module boundaries, data flow, or deployment topology change.
-**Last updated:** 2026-08-14 (architecture review, model kimi-k3)
+**Last updated:** 2026-08-29 (auth + payment model reconciliation after Phases 0–5)
 
 ---
 
@@ -73,7 +73,7 @@ orderwas/
 
 ## 3. Layering Rules (binding)
 
-1. **Routes are thin.** A route handler does exactly three things: validate input with Zod, call one service method, map the result/error to an HTTP response. No Prisma calls in routes.
+1. **Routes are thin.** A route handler does exactly three things: validate input with Zod, call one service method, map the result/error to an HTTP response. No Prisma calls in routes. *Exception (verified after Phase 0):* `server/src/routes/qr.ts` — the QR-*generation* GETs (`GET /api/events/:id/qr/:tableNumber`, `GET /api/events/:id/qr-all`) still query Prisma directly to verify the event and list table numbers. The guest-order POST path (`POST /api/guest/orders`) does **not** — it delegates to `services/guestOrderService.ts`. This is the single documented deviation; all other route files are Prisma-free.
 2. **Services own business logic.** Order total calculation, tear-off number assignment, stock decrement, print dispatch, WebSocket emission, test→live data wipe. Services are plain async functions taking Prisma client (or a tx) as an argument — unit-testable without Fastify.
 3. **Side effects fan out from services, not routes.** Creating an order in `orderService.create()` triggers, in one transaction + post-commit hooks: persist → assign tear-off → decrement stock → dispatch print jobs → emit `order:created`.
 4. **The client never receives secrets.** Waiter `pin` is write-only: accepted on create/update, verified by `/api/auth/login`, never selected into any response.
@@ -89,18 +89,31 @@ SQLite via Prisma. **Money is integer cents everywhere** (`priceCents`, `totalCe
 ### Core hierarchy
 - **Event** — one festival. `status: test|live`. Switching test→live **deletes all orders** (wiki §14 business rule, enforced in `eventService`). Owns `lastTearOffNumber` counter. `hidePrices`, `tseEnabled` (reserved, v2).
 - **Station** — prep point (Bar, Küche, Kaffee). `kitchenMonitor` toggle, `copyPrint`, sortOrder. FK to primary **Printer**; **alternative printers** via join table with optional table-range/pickup-code routing (Phase 3).
-- **Product** — `priceCents Int`, `taxRate` (stored as basis points, e.g. 2000 = 20.00%), `stockMode: none|tracked|composite`, `stockCount Decimal` (decimal allowed: 0.5L beer), `isVoucher`, `addable`, `shortName` (for receipts).
+- **Product** — `priceCents Int`, `taxRateBps` (basis points, e.g. 2000 = 20.00%), `stockMode: none|tracked|composite`, `stockCount Float` (Float allows 0.5L beer; it is a stock quantity, not money), `isVoucher`, `addable`, `shortName` (for receipts).
 - **ProductComponent** *(new)* — join table for composite products: `compositeId → ingredientId, quantity Decimal`. Required for Task 34 stock management; without it `stockMode: composite` is meaningless.
 - **Waiter** — `pin` (write-only), permission flags (canCancel, canCashOut, canStatistics, canCreateWaiters, canTransfer, isStationWaiter), `printsImmediately`, `autoSammelbon`, `hidden`, optional own Printer, optional `pickupCode` (Abholkennzeichen: when set, orders skip table number and get auto tear-off numbers — Bonkasse/Abholscheine mode).
 - **Printer** *(new, first-class)* — `name`, `type: network|ignore|dummy`, `ip`, `charsPerLine`, `font`, `buzzer`, `paperCut: full|partial|none`. Replaces the flat `printerIp`/`printerType` strings on Station/Waiter (those columns migrate to FKs).
 - **Order** — `tableNumber String?` (nullable: pickup orders use `pickupCode` instead), `status: open|preparing|partial|paid|cancelled`, `totalCents Int`, `tearOffNumber Int?` (atomic per-event increment), `pickupCode String?`, `sammelbonId String?` (reserved for collective receipts, Phase 6).
-- **OrderItem** — quantity, `status: open|prepared|delivered|cancelled`, free-text `comment` for extras (deliberate simplification: extras are free text in v1, not structured option sets).
+- **OrderItem** — quantity, `status: open|prepared|delivered|cancelled`, free-text `comment`, plus `options` JSON (`[{extraName, optionName, priceDeltaCents}]`) for **structured product `ProductExtra` option groups** (radio/checkbox, optional price deltas — §17.4 of REQUIREMENTS). `paidAt` + `paidByWaiterId` stamp payment per item.
 - **Voucher** *(new)* — `code` (unique per event), `valueCents Int`, `status: active|redeemed|expired`, `redeemedOrderId?`. Backs Task 33.
-- **AppLayout** — per event, optionally per waiter: columns, rows, `buttons` JSON `[{name, color, productId, row, col}]`.
+- **AppLayout** — per event (real FK to **Event**, `onDelete: Cascade`), optionally per waiter: columns, rows, `buttons` JSON `[{name, color, productId, row, col}]`.
+
+### Hot-path indexes (added Phase 5)
+
+The read/write paths that dominate at festival scale are indexed in `server/prisma/schema.prisma`: `Order(eventId, status)`, `Order(waiterId)`, `Order(tableNumber)`, `OrderItem(orderId)`, `OrderItem(paidAt)`, `OrderItem(productId)`, `Product(stationId)`, `Voucher(eventId, code)` (unique) + `Voucher(eventId)`, `AppLayout(eventId)`, `AuditLog(eventId, action)`, `AuditLog(eventId, entityType, entityId)`, `AuditLog(createdAt)`. `stockCount` is `Float` (a stock quantity, not money); all monetary columns remain integer cents.
+
+### Payment lifecycle (unified `paid` ⇔ all items paid)
+
+Order-level and item-level payment are unified by a single invariant: **an order is `paid` iff every non-cancelled item carries a `paidAt` stamp.**
+
+- **Order-level pay** — `POST /api/orders/:id/pay` (requires `canCashOut`): `orderService.markPaid` stamps `paidAt`/`paidByWaiterId` on **all** non-cancelled items of the order in one transaction and flips the order to `paid`. A paid order therefore always has all items paid.
+- **Item-level pay** — `POST /api/orders/pay-items` (requires `canCashOut`): `paymentService.payItems` batch-pays a set of items. It is **race-safe** (the conditional `updateMany(… where paidAt: null)` only matches still-unpaid rows, so a concurrent double-pay of the same item fails with 409) and enforces **event ownership** from the JWT `eventId` (an item of another event → 403; cancelled/already-paid item → 409). When the last unpaid non-cancelled item of an order is paid, the order recomputes to `paid`.
+- **Reopen** — `POST /api/orders/:id/reopen` (requires `canCashOut`): clears item-level `paidAt`/`paidByWaiterId` and returns the order to `open`.
+
+Terminal statuses are reachable **only** through these dedicated endpoints — the generic `PATCH /api/orders/:id` accepts only the preparation statuses `['open','preparing','partial','done']`.
 
 ### Deferred entities (documented non-goals for v1)
 - **Veranstalter / User** (multi-organizer, system users) — v1 is single-organizer, single-event-lifecycle. Config export/import covers reuse. Revisit when multi-tenancy is requested.
-- **Structured extras/options** — free-text comments suffice for MVP.
 - **TSE fiscal module** — see §10.
 
 ---
@@ -142,9 +155,37 @@ Socket.io, one namespace, rooms keyed `event:{eventId}` and `station:{stationId}
 
 ---
 
-## 8. Auth
+## 8. Security / Auth
 
-`POST /api/auth/login {eventId, waiterId, pin}` → verifies pin → returns JWT (24h, event-scoped claims: waiterId, eventId, permission flags). Fastify `onRequest` hook guards all `/api/*` except `/health`, `/api/auth/login`, and the guest QR ordering endpoint (token in URL instead). Admin routes get an `admin` claim — v1: a single admin PIN in env config.
+### Login & tokens
+
+`POST /api/auth/login {waiterId, pin}` verifies the active waiter's PIN and returns a JWT carrying event-scoped claims `{ waiterId, eventId, permissions { canCancel, canCashOut, canStatistics, canCreateWaiters, canTransfer, isStationWaiter } }` (24h). `POST /api/auth/admin/login {pin}` verifies a single admin PIN (DB setting → env → default) and returns an `{ admin: true }` JWT (8h). Waiter `pin` is write-only — accepted at login, never selected into any response. `GET /api/auth/me` returns the current waiter from the JWT.
+
+### Enforcement (global guard)
+
+`server/src/plugins/auth.ts` installs a global `onRequest` guard. When `AUTH_ENFORCED=true` **or** `NODE_ENV=production`, every `/api/*` request must present a valid JWT **except**:
+
+- the public allowlist (`PUBLIC_PATHS`): `POST /api/auth/login`, `POST /api/auth/admin/login`, `POST /api/guest/orders`;
+- the pre-login GET reads the Landing/Login/Guest flows need — `/api/events`, `/api/events/:id`, `/api/events/:id/stations`, `/api/events/:id/waiters`, `/api/stations/:id/products` (id + name config only);
+- `/health`.
+
+A valid JWT alone is enough for reads; writes/mutations are gated per-route by permission (below). The WebSocket endpoint (`server/src/websocket/index.ts`) enforces the **same opt-in**: under `AUTH_ENFORCED`/production, a connection must present a valid JWT via `handshake.auth.token` or it is refused.
+
+**Fail-fast:** the server refuses to boot in production without `JWT_SECRET` set — it never runs with the hardcoded dev secret.
+
+### Endpoint → permission matrix
+
+Per-route `preHandler`s add permission granularity on top of the global guard (401 without a token, 403 without the permission):
+
+| Guard | Endpoints (method + path) |
+|-------|---------------------------|
+| **Public / pre-login reads** | `POST /auth/login`, `POST /auth/admin/login`, `POST /guest/orders`; `GET /events`, `GET /events/:id`, `GET /events/:id/stations`, `GET /events/:id/waiters`, `GET /stations/:id/products`; `GET /health` |
+| **Any valid JWT (no permission gate)** | open `/api/*` GET reads (orders, events, stations, waiters, products, printers, vouchers, layouts, tables, audit-free reads) and plain `authenticate` writes: `PATCH /orders/:id`, `PATCH /order-items/:id`, `POST /vouchers/redeem`, `POST/PUT/DELETE /events/:eventId/layouts`, `PUT /layouts/:id`, `GET /auth/me` |
+| **`canCancel`** | `POST /orders/:id/cancel`, `POST /order-items/:id/cancel` |
+| **`canCashOut`** | `POST /orders/:id/pay`, `POST /orders/:id/reopen`, `POST /orders/pay-items` |
+| **`canTransfer`** | `PATCH /orders/:id/transfer` |
+| **`canStatistics`** | `GET /events/:eventId/audit`, `GET /events/:eventId/audit/stock/:productId`, `GET /events/:eventId/report/peak-times`, `GET /events/:eventId/report/station-revenue`, `GET /events/:eventId/report/waiters`, `GET /events/:eventId/report/products` |
+| **`requireAdmin`** (`{ admin: true }`) | event/station/waiter/product/printer/voucher **create/update/delete**, `PATCH /products/reorder`, `PATCH /stations/reorder`, `PATCH /products/:id/stock`, `POST /products/:id/extras`, `DELETE /extras/:id`, `POST /products/:id/settle`, `POST /events/:eventId/settle`, `GET /events/:eventId/export`, `POST /events/import`, `PUT /auth/admin/pin`, `POST /vouchers/bulk`, `POST /events/:eventId/vouchers/:code/expire`, `POST /printers/:id/test` |
 
 ---
 
