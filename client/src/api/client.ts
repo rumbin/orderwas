@@ -8,6 +8,8 @@ import type {
   Printer,
   OrderItem,
   AppLayout,
+  OpenTable,
+  TableOrder,
 } from './types'
 
 export type { Event, Station, Product, Waiter, Order, OrderItem, Printer, Voucher, AppLayout } from './types'
@@ -185,6 +187,18 @@ export const api = {
     request<OrderItem>(`/order-items/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   cancelOrderItem: (id: string, token: string) =>
     request<OrderItem>(`/order-items/${id}/cancel`, { method: 'POST', headers: { authorization: `Bearer ${token}` } }),
+
+  // Payments
+  payItems: (itemIds: string[], token: string) =>
+    request<{ paidCount: number; sumCents: number; updatedOrders: { id: string; status: string }[] }>('/orders/pay-items', {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}` },
+      body: JSON.stringify({ itemIds }),
+    }),
+  getOpenTables: (eventId: string) =>
+    request<OpenTable[]>(`/events/${eventId}/tables/open`),
+  getUnpaidByTable: (eventId: string, tableNumber: string) =>
+    request<TableOrder[]>(`/events/${eventId}/tables/${encodeURIComponent(tableNumber)}/unpaid`),
 
   // Audit & Reporting
   getAuditLogs: (eventId: string, opts?: { action?: string; entityType?: string }) => {

@@ -56,7 +56,9 @@
     "confirmReopen": "Bestellung wieder öffnen?",
     "closedOrders": "Abgeschlossene Bestellungen",
     "outOfStock": "Ausverkauft",
-    "inStock": "auf Lager"
+    "inStock": "auf Lager",
+    "tabCashier": "Kassieren",
+    "tabOrders": "Bestellungen"
   },
   "station": {
     "title": "Station",
@@ -82,7 +84,7 @@
     "newPin": "Neue PIN",
     "currentPin": "Aktuelle PIN",
     "pinChanged": "PIN erfolgreich geändert",
-    "confirmDeleteProduct": "Produkt \u201e{{name}}\u201c wirklich löschen?",
+    "confirmDeleteProduct": "Produkt „{{name}}“ wirklich löschen?",
     "price": "Preis",
     "priceUpdated": "Preis aktualisiert",
     "login": "Admin-Anmeldung",
@@ -117,5 +119,27 @@
   "theme": {
     "dark": "Dunkel",
     "light": "Hell"
+  },
+  "cashier": {
+    "tabCashier": "Kassieren",
+    "tabOrders": "Bestellungen",
+    "selectTable": "Tisch wechseln",
+    "openSum": "Offen",
+    "selectAll": "Alle auswählen",
+    "sum": "Summe",
+    "pay": "Bezahlt",
+    "calculator": "Rechner",
+    "received": "Erhalten",
+    "change": "Rückgeld",
+    "changeMissing": "Fehlbetrag",
+    "split2": "Teilung ÷2",
+    "split3": "Teilung ÷3",
+    "noOpenItems": "Keine offenen Posten an diesem Tisch",
+    "tables": "Tische",
+    "unpaidItems": "offene Posten",
+    "paymentSuccess": "Zahlung erfasst",
+    "itemPaid": "bezahlt",
+    "perPerson": "pro Person",
+    "receivedPlaceholder": "0,00"
   }
 }

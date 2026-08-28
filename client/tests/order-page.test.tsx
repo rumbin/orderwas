@@ -122,8 +122,8 @@ describe('OrderPage', () => {
     })
     // Tab buttons should be present
     expect(screen.getByText('order.tabNew')).toBeDefined()
-    expect(screen.getByText('order.tabOpen')).toBeDefined()
-    expect(screen.getByText('order.tabDone')).toBeDefined()
+    expect(screen.getByText('order.tabCashier')).toBeDefined()
+    expect(screen.getByText('order.tabOrders')).toBeDefined()
   })
 
   it('renders user menu button with first letter of waiter name', async () => {

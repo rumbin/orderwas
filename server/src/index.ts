@@ -9,6 +9,7 @@ import eventRoutes from '@/routes/events'
 import stationRoutes from '@/routes/stations'
 import { waitersRoutes } from '@/routes/waiters'
 import { ordersRoutes } from '@/routes/orders'
+import { paymentsRoutes } from '@/routes/payments'
 import { productsRoutes } from '@/routes/products'
 import { printersRoutes } from '@/routes/printers'
 import { configRoutes } from '@/routes/config'
@@ -44,6 +45,7 @@ export function buildServer(): AppServer {
   server.register(stationRoutes, { prefix: '/api' })
   server.register(waitersRoutes, { prefix: '/api' })
   server.register(ordersRoutes, { prefix: '/api' })
+  server.register(paymentsRoutes, { prefix: '/api' })
   server.register(productsRoutes, { prefix: '/api' })
   server.register(printersRoutes, { prefix: '/api' })
   server.register(configRoutes, { prefix: '/api' })

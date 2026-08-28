@@ -56,7 +56,9 @@
     "confirmPay": "Mark order as paid?",
     "confirmCancel": "Really cancel order?",
     "confirmReopen": "Reopen order?",
-    "closedOrders": "Closed orders"
+    "closedOrders": "Closed orders",
+    "tabCashier": "Cashier",
+    "tabOrders": "Orders"
   },
   "station": {
     "title": "Station",
@@ -118,5 +120,27 @@
   "theme": {
     "dark": "Dark",
     "light": "Light"
+  },
+  "cashier": {
+    "tabCashier": "Cashier",
+    "tabOrders": "Orders",
+    "selectTable": "Change table",
+    "openSum": "Open",
+    "selectAll": "Select all",
+    "sum": "Total",
+    "pay": "Paid",
+    "calculator": "Calculator",
+    "received": "Received",
+    "change": "Change",
+    "changeMissing": "Missing",
+    "split2": "Split ÷2",
+    "split3": "Split ÷3",
+    "noOpenItems": "No open items at this table",
+    "tables": "Tables",
+    "unpaidItems": "open items",
+    "paymentSuccess": "Payment recorded",
+    "itemPaid": "paid",
+    "perPerson": "per person",
+    "receivedPlaceholder": "0.00"
   }
 }

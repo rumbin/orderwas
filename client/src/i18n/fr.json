@@ -56,7 +56,9 @@
     "confirmPay": "Marquer la commande comme payée ?",
     "confirmCancel": "Vraiment annuler la commande ?",
     "confirmReopen": "Rouvrir la commande ?",
-    "closedOrders": "Commandes terminées"
+    "closedOrders": "Commandes terminées",
+    "tabCashier": "Encaisser",
+    "tabOrders": "Commandes"
   },
   "station": {
     "title": "Station",
@@ -118,5 +120,27 @@
   "theme": {
     "dark": "Sombre",
     "light": "Clair"
+  },
+  "cashier": {
+    "tabCashier": "Encaisser",
+    "tabOrders": "Commandes",
+    "selectTable": "Changer de table",
+    "openSum": "À payer",
+    "selectAll": "Tout sélectionner",
+    "sum": "Total",
+    "pay": "Payé",
+    "calculator": "Calculatrice",
+    "received": "Reçu",
+    "change": "Monnaie",
+    "changeMissing": "Manquant",
+    "split2": "Partage ÷2",
+    "split3": "Partage ÷3",
+    "noOpenItems": "Aucun poste ouvert à cette table",
+    "tables": "Tables",
+    "unpaidItems": "postes ouverts",
+    "paymentSuccess": "Paiement enregistré",
+    "itemPaid": "payé",
+    "perPerson": "par personne",
+    "receivedPlaceholder": "0,00"
   }
 }

@@ -75,6 +75,37 @@ cd server && npx prisma generate                # regenerate Prisma client after
 
 `scripts/pre-commit` runs typecheck + unit tests + build. Installed via `scripts/install-hooks.sh` (also `npm install` triggers `postinstall`). Fast feedback only — E2E is in `npm run ci`, not the hook.
 
+## Graphify (Knowledge Graph)
+
+Graphify builds a queryable knowledge graph of the codebase (`graphify-out/graph.json`). Use it to understand architecture, trace dependencies, and find cross-module connections before implementing features.
+
+### Before planning any implementation
+
+Query the graph to understand affected modules and their connections:
+
+```bash
+graphify query "How does <feature> work?" .     # BFS traversal — broad context
+graphify path "ModuleA" "ModuleB" .              # shortest path between two concepts
+graphify explain "orderService.ts" .             # plain-language explanation of a node
+```
+
+Read `graphify-out/GRAPH_REPORT.md` for god nodes (highest-degree concepts), surprising connections, and community structure.
+
+### After commits
+
+A **post-commit git hook** (installed by `graphify hook install`) automatically rebuilds the graph after every commit. No manual step needed — the graph stays current.
+
+To manually refresh after large changes or if the hook was skipped:
+
+```bash
+graphify update .           # incremental — re-extracts only changed files (no LLM cost)
+graphify cluster-only .     # re-cluster + regenerate GRAPH_REPORT.md
+```
+
+### Graph staleness
+
+`GRAPH_REPORT.md` records the commit hash it was built from. If `git rev-parse HEAD` differs, the graph may be stale — run `graphify update .`.
+
 ## i18n
 
 German-first. Translation files: `client/src/i18n/de.json` (primary), `en.json`, `fr.json`. All UI strings through `t()` — no hardcoded strings.

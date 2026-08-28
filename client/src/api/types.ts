@@ -100,6 +100,33 @@ export interface OrderItem {
   status: 'open' | 'prepared' | 'delivered' | 'cancelled'
   comment: string | null
   options: string | null // JSON: [{extraName, optionName, priceDeltaCents}]
+  paidAt: string | null
+  paidByWaiterId: string | null
+}
+
+export interface OpenTable {
+  tableNumber: string
+  openSumCents: number
+  orderCount: number
+}
+
+export interface TableOrderItem {
+  id: string
+  productName: string
+  quantity: number
+  status: string
+  comment: string | null
+  options: string | null
+  lineTotalCents: number
+  paidAt: string | null
+}
+
+export interface TableOrder {
+  orderId: string
+  tearOffNumber: number | null
+  waiterName: string
+  createdAt: string
+  items: TableOrderItem[]
 }
 
 export interface Order {

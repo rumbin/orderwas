@@ -129,6 +129,7 @@ async function main() {
       name: 'Bob',
       pin: '5678',
       eventId: event.id,
+      canCashOut: true,
       canStatistics: true,
       isStationWaiter: true,
     },

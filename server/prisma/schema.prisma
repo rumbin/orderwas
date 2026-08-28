@@ -172,6 +172,8 @@ model OrderItem {
   status    String  @default("open") // "open" | "prepared" | "delivered" | "cancelled"
   comment   String?
   options   String? // JSON: [{extraName, optionName, priceDeltaCents}]
+  paidAt    DateTime? // null = unpaid; set when payment collected
+  paidByWaiterId String? // waiter who collected the payment
 }
 
 model Voucher {
