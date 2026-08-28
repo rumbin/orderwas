@@ -73,8 +73,12 @@ export default function Admin({ navigate }: { navigate: (path: string) => void }
     }
   }, [selectedEventId])
 
-  useEffect(() => { if (isAdminLoggedIn()) loadEvents() }, [loadEvents, isAdminLoggedIn])
-  useEffect(() => { if (isAdminLoggedIn()) loadEventData() }, [loadEventData, isAdminLoggedIn])
+  // Load admin data once the admin token is present (reacts to login). Depending
+  // on adminToken (not just isAdminLoggedIn) is what makes these fire AFTER a
+  // fresh login — isAdminLoggedIn() reads localStorage and is not reactive, so
+  // on first mount both effects see false and would never re-run after login.
+  useEffect(() => { if (isAdminLoggedIn()) loadEvents() }, [loadEvents, isAdminLoggedIn, adminToken])
+  useEffect(() => { if (isAdminLoggedIn()) loadEventData() }, [loadEventData, isAdminLoggedIn, adminToken])
 
   const loadProducts = useCallback(async (stationId: string) => {
     const prods = await api.getProducts(stationId)
