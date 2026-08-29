@@ -30,7 +30,7 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
       setStation(st)
       const allOrders = await api.getOrders(st.eventId)
       const stationOrders = allOrders.filter((o) => {
-        if (o.status === 'done' || o.status === 'paid' || o.status === 'cancelled') return false // terminal → not open for anyone
+        if (o.status === 'done' || o.status === 'cancelled') return false // terminal → not open for anyone
         const stationItems = o.items.filter((i) => i.product.stationId === stationId)
         return stationItems.length > 0 && stationItems.some((i) => i.status === 'open')
       })
