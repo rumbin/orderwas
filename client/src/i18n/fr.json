@@ -140,6 +140,7 @@
     "paymentSuccess": "Paiement enregistré",
     "itemPaid": "payé",
     "perPerson": "par personne",
-    "receivedPlaceholder": "0,00"
+    "receivedPlaceholder": "0,00",
+    "payFailed": "Échec du paiement"
   }
 }

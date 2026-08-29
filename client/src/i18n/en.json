@@ -140,6 +140,7 @@
     "paymentSuccess": "Payment recorded",
     "itemPaid": "paid",
     "perPerson": "per person",
-    "receivedPlaceholder": "0.00"
+    "receivedPlaceholder": "0.00",
+    "payFailed": "Payment failed"
   }
 }

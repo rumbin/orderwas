@@ -154,7 +154,7 @@ describe('CashierView', () => {
     })
   })
 
-  it('keeps the selection when payItems rejects (e.g. concurrent double-payment 409)', async () => {
+  it('keeps the selection AND surfaces an error when payItems rejects (e.g. concurrent 409)', async () => {
     mockPayItems.mockRejectedValueOnce(new Error('conflict'))
     renderCashier()
 
@@ -165,11 +165,14 @@ describe('CashierView', () => {
     fireEvent.click(screen.getByText('2× Bier'))
     fireEvent.click(screen.getByText('cashier.pay'))
 
-    // Selection is preserved: sum stays at 6,00 € and the pay button is enabled again
+    // Error message is shown to the cashier (not silent)
     await waitFor(() => {
-      expect((screen.getByText('cashier.pay') as HTMLButtonElement).disabled).toBe(false)
+      expect(screen.getByText(/cashier.payFailed/)).toBeDefined()
     })
+
+    // Selection is preserved: sum stays at 6,00 € and the pay button is enabled again
     expect(screen.getAllByText('6,00 €')).toHaveLength(2)
+    expect((screen.getByText('cashier.pay') as HTMLButtonElement).disabled).toBe(false)
     expect(screen.queryByText('0,00 €')).toBeNull()
   })
 })

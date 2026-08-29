@@ -28,6 +28,7 @@ export default function CashierView({ initialTable }: Props) {
   const [tableModalOpen, setTableModalOpen] = useState(false)
   const [calculatorOpen, setCalculatorOpen] = useState(false)
   const [lastPayment, setLastPayment] = useState<{ paidCount: number; sumCents: number } | null>(null)
+  const [payError, setPayError] = useState(false)
 
   // Fetch unpaid items for current table
   const fetchOrders = useCallback(async (tn: string | null) => {
@@ -82,10 +83,16 @@ export default function CashierView({ initialTable }: Props) {
     if (tableNumber) fetchOrders(tableNumber)
   }, [tableNumber, fetchOrders])
 
-  // Clear selection when table changes
+  // Clear selection + errors when table changes
   useEffect(() => {
     setSelected(new Set())
+    setPayError(false)
   }, [tableNumber])
+
+  // Clear the error toast when a new selection is made
+  useEffect(() => {
+    if (selected.size > 0) setPayError(false)
+  }, [selected])
 
   // Collect all unpaid item ids
   const allUnpaidIds = orders.flatMap((o) =>
@@ -126,11 +133,15 @@ export default function CashierView({ initialTable }: Props) {
     try {
       const result = await api.payItems([...selected])
       setLastPayment({ paidCount: result.paidCount, sumCents: result.sumCents })
+      setPayError(false)
       setSelected(new Set())
       if (tableNumber) fetchOrders(tableNumber)
       fetchOpenTables()
     } catch {
-      // Error handled silently — could add toast here
+      // Failed (e.g. concurrent double-payment 409). Keep the selection and
+      // surface a clear error so the cashier knows the items were NOT paid.
+      setLastPayment(null)
+      setPayError(true)
     } finally {
       setPaying(false)
     }
@@ -156,6 +167,13 @@ export default function CashierView({ initialTable }: Props) {
           <span className="text-gray-400 dark:text-gray-500 text-lg">▾</span>
         </button>
       </div>
+
+      {/* Payment error toast */}
+      {payError && (
+        <div className="mx-4 mt-3 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
+          ❌ {t('cashier.payFailed')}
+        </div>
+      )}
 
       {/* Success toast */}
       {lastPayment && (
