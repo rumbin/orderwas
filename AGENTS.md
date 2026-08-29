@@ -5,7 +5,7 @@
 
 ## What This Is
 
-Open-source ordering + receipt-printing system for club festivals (Vereinsfeste). Clone of Orderjutsu. PWA frontend, Fastify backend, SQLite, ESC/POS printers. GPL-3.0. **Not a cash register** — no TSE in v1.
+Open-source ordering + receipt-printing system for club festivals (Vereinsfeste). Clone of Orderjutsu. PWA frontend, Fastify backend, SQLite, ESC/POS printers, item-level cashier (Kassieren). GPL-3.0. **Not a cash register** — no TSE in v1.
 
 ## Tech Stack
 
@@ -18,7 +18,8 @@ Open-source ordering + receipt-printing system for club festivals (Vereinsfeste)
 
 ```
 server/          Fastify backend (src/routes, src/services, src/plugins, src/printer, src/websocket)
-client/          React PWA (src/api, src/stores, src/pages, src/components, src/i18n)
+client/          React PWA (src/api, src/stores, src/pages, src/components, src/i18n, src/lib)
+client/src/pages/admin/   Admin sub-pages (Stations, Waiters, Printers, Products, Settings, Export)
 e2e/             Playwright E2E tests
 docs/            Architecture, requirements, design decisions, research
 scripts/         pre-commit hook, install-hooks.sh

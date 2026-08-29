@@ -1,5 +1,4 @@
 import { prisma } from '@/db/client'
-import type { Prisma } from '@prisma/client'
 import { orderEvents, type OrderEventPayload } from '@/websocket'
 import { dispatchOrderPrints } from '@/printer/dispatch'
 import { checkStockAvailability, decrementStock, restoreStock } from '@/services/stockService'
@@ -321,9 +320,6 @@ export async function updateOrderStatus(id: string, status: string, actorId?: st
 
   return order
 }
-
-// Type helper for transaction context
-export type TxClient = Prisma.TransactionClient
 
 /**
  * Cancels a full order: status → cancelled and all items cancelled.
