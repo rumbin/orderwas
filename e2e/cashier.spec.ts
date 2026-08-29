@@ -40,7 +40,7 @@ test.describe('cashier pay-items flow', () => {
     // CashierView auto-detects the last table for the current waiter (42),
     // then lists its unpaid items.
     await expect(page.getByText('Tisch 42')).toBeVisible()
-    await expect(page.getByText('2× E2E Cashier Bier')).toBeVisible()
+    await expect(page.getByText('E2E Cashier Bier')).toBeVisible()
 
     // --- 4. Select all open items; the running sum is shown ---
     await page.getByText('Alle auswählen').click()

@@ -77,9 +77,9 @@ describe('CashierView', () => {
     renderCashier()
 
     await waitFor(() => {
-      expect(screen.getByText('2× Bier')).toBeDefined()
+      expect(screen.getByText('Bier')).toBeDefined()
     })
-    expect(screen.getByText('1× Cola')).toBeDefined()
+    expect(screen.getByText('Cola')).toBeDefined()
     // unpaid items show their per-line price in de-DE format
     expect(screen.getByText('6,00 €')).toBeDefined()
     expect(screen.getByText('2,50 €')).toBeDefined()
@@ -90,7 +90,7 @@ describe('CashierView', () => {
     renderCashier()
 
     await waitFor(() => {
-      expect(screen.getByText('2× Bier')).toBeDefined()
+      expect(screen.getByText('Bier')).toBeDefined()
     })
 
     // Header shows current table; clicking it opens the table switcher modal
@@ -111,18 +111,18 @@ describe('CashierView', () => {
     renderCashier()
 
     await waitFor(() => {
-      expect(screen.getByText('2× Bier')).toBeDefined()
+      expect(screen.getByText('Bier')).toBeDefined()
     })
 
     // Initially only the item price is shown (sum is 0,00 €)
     expect(screen.getAllByText('6,00 €')).toHaveLength(1)
 
     // Select Bier → sum becomes 600 ¢ → total now also shows 6,00 €
-    fireEvent.click(screen.getByText('2× Bier'))
+    fireEvent.click(screen.getByText('Bier'))
     expect(screen.getAllByText('6,00 €')).toHaveLength(2)
 
     // Select Cola too → sum becomes 850 ¢ → 8,50 €
-    fireEvent.click(screen.getByText('1× Cola'))
+    fireEvent.click(screen.getByText('Cola'))
     expect(screen.getByText('8,50 €')).toBeDefined()
     expect(screen.getAllByText('6,00 €')).toHaveLength(1)
   })
@@ -131,10 +131,10 @@ describe('CashierView', () => {
     renderCashier()
 
     await waitFor(() => {
-      expect(screen.getByText('2× Bier')).toBeDefined()
+      expect(screen.getByText('Bier')).toBeDefined()
     })
 
-    fireEvent.click(screen.getByText('2× Bier'))
+    fireEvent.click(screen.getByText('Bier'))
 
     const paySubmit = screen.getByText('cashier.pay')
     fireEvent.click(paySubmit)
@@ -159,10 +159,10 @@ describe('CashierView', () => {
     renderCashier()
 
     await waitFor(() => {
-      expect(screen.getByText('2× Bier')).toBeDefined()
+      expect(screen.getByText('Bier')).toBeDefined()
     })
 
-    fireEvent.click(screen.getByText('2× Bier'))
+    fireEvent.click(screen.getByText('Bier'))
     fireEvent.click(screen.getByText('cashier.pay'))
 
     // Error message is shown to the cashier (not silent)
@@ -174,5 +174,135 @@ describe('CashierView', () => {
     expect(screen.getAllByText('6,00 €')).toHaveLength(2)
     expect((screen.getByText('cashier.pay') as HTMLButtonElement).disabled).toBe(false)
     expect(screen.queryByText('0,00 €')).toBeNull()
+  })
+
+  describe('order grouping and item flattening (regression)', () => {
+    it('groups items by order with order ID and waiter name', async () => {
+      // Two orders for the same table
+      mockGetUnpaidByTable.mockResolvedValue([
+        {
+          orderId: 'o-101',
+          tearOffNumber: 101,
+          waiterName: 'Alice',
+          createdAt: '2026-08-29T12:00:00Z',
+          items: [
+            { id: 'it-10', productName: 'Bier', quantity: 1, status: 'open', comment: null, options: null, lineTotalCents: 300, paidAt: null },
+          ],
+        },
+        {
+          orderId: 'o-102',
+          tearOffNumber: 102,
+          waiterName: 'Bob',
+          createdAt: '2026-08-29T12:05:00Z',
+          items: [
+            { id: 'it-20', productName: 'Cola', quantity: 1, status: 'open', comment: null, options: null, lineTotalCents: 250, paidAt: null },
+          ],
+        },
+      ])
+
+      renderCashier()
+
+      await waitFor(() => {
+        expect(screen.getByText('Bier')).toBeDefined()
+      })
+
+      // Both order sections are visible with waiter names
+      expect(screen.getByText(/Alice/)).toBeDefined()
+      expect(screen.getByText(/Bob/)).toBeDefined()
+      // Both items are visible
+      expect(screen.getByText('Bier')).toBeDefined()
+      expect(screen.getByText('Cola')).toBeDefined()
+    })
+
+    it('flattens items: each row is quantity 1, no quantity multiplier shown', async () => {
+      // Single order with 2 items (each quantity=1 in flattened view)
+      mockGetUnpaidByTable.mockResolvedValue([
+        {
+          orderId: 'o-201',
+          tearOffNumber: 201,
+          waiterName: 'Alice',
+          createdAt: '2026-08-29T12:00:00Z',
+          items: [
+            { id: 'it-30', productName: 'Bier', quantity: 1, status: 'open', comment: null, options: null, lineTotalCents: 300, paidAt: null },
+            { id: 'it-31', productName: 'Bier', quantity: 1, status: 'open', comment: null, options: null, lineTotalCents: 300, paidAt: null },
+          ],
+        },
+      ])
+
+      renderCashier()
+
+      await waitFor(() => {
+        expect(screen.getAllByText('Bier')).toHaveLength(2)
+      })
+
+      // Two separate rows for Bier (not aggregated as "2× Bier")
+      const bierElements = screen.getAllByText('Bier')
+      expect(bierElements).toHaveLength(2)
+    })
+
+    it('shows paid items with checkmark but still displays them', async () => {
+      mockGetUnpaidByTable.mockResolvedValue([
+        {
+          orderId: 'o-301',
+          tearOffNumber: 301,
+          waiterName: 'Alice',
+          createdAt: '2026-08-29T12:00:00Z',
+          items: [
+            { id: 'it-40', productName: 'Bier', quantity: 1, status: 'open', comment: null, options: null, lineTotalCents: 300, paidAt: null },
+            { id: 'it-41', productName: 'Cola', quantity: 1, status: 'open', comment: null, options: null, lineTotalCents: 250, paidAt: '2026-08-29T12:01:00Z' },
+          ],
+        },
+      ])
+
+      renderCashier()
+
+      await waitFor(() => {
+        expect(screen.getByText('Bier')).toBeDefined()
+      })
+
+      // Both items visible
+      expect(screen.getByText('Bier')).toBeDefined()
+      expect(screen.getByText('Cola')).toBeDefined()
+      // Paid item shows checkmark
+      expect(screen.getByText(/cashier.itemPaid/)).toBeDefined()
+    })
+
+    it('hides order only when ALL items are paid', async () => {
+      // First order: all items paid → should NOT appear
+      // Second order: has unpaid items → should appear
+      mockGetUnpaidByTable.mockResolvedValue([
+        {
+          orderId: 'o-401',
+          tearOffNumber: 401,
+          waiterName: 'Alice',
+          createdAt: '2026-08-29T12:00:00Z',
+          items: [
+            { id: 'it-50', productName: 'Bier', quantity: 1, status: 'open', comment: null, options: null, lineTotalCents: 300, paidAt: '2026-08-29T12:01:00Z' },
+            { id: 'it-51', productName: 'Cola', quantity: 1, status: 'open', comment: null, options: null, lineTotalCents: 250, paidAt: '2026-08-29T12:01:00Z' },
+          ],
+        },
+        {
+          orderId: 'o-402',
+          tearOffNumber: 402,
+          waiterName: 'Bob',
+          createdAt: '2026-08-29T12:05:00Z',
+          items: [
+            { id: 'it-60', productName: 'Fanta', quantity: 1, status: 'open', comment: null, options: null, lineTotalCents: 250, paidAt: null },
+          ],
+        },
+      ])
+
+      renderCashier()
+
+      await waitFor(() => {
+        expect(screen.getByText('Fanta')).toBeDefined()
+      })
+
+      // First order (o-401) should NOT appear (all items paid)
+      expect(screen.queryByText(/#401/)).toBeNull()
+      // Second order (o-402) SHOULD appear
+      expect(screen.getByText(/#402/)).toBeDefined()
+      expect(screen.getByText('Fanta')).toBeDefined()
+    })
   })
 })

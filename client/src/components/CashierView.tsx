@@ -196,64 +196,78 @@ export default function CashierView({ initialTable }: Props) {
           <div className="text-center text-gray-400 dark:text-gray-500 py-8">{t('cashier.selectTable')}</div>
         )}
 
-        {/* Items - flat list across all orders */}
-        <div className="space-y-1">
-          {orders.flatMap((order) =>
-            order.items.map((item) => {
-              const isPaid = !!item.paidAt
-              let parsedOptions: { extraName: string; optionName: string }[] = []
-              try { if (item.options) parsedOptions = JSON.parse(item.options) } catch { /* ignore */ }
-              
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => !isPaid && toggleItem(item.id, isPaid)}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded ${
-                    isPaid
-                      ? 'opacity-50 bg-gray-50 dark:bg-gray-700/30'
-                      : 'active:bg-gray-100 dark:active:bg-gray-700 cursor-pointer'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    {!isPaid ? (
-                      <span className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                        selected.has(item.id)
-                          ? 'bg-blue-600 border-blue-600'
-                          : 'border-gray-300 dark:border-gray-500'
-                      }`}>
-                        {selected.has(item.id) && (
-                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </span>
-                    ) : null}
-                    <div className="flex flex-col">
-                      <span className={`text-sm ${isPaid ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'}`}>
-                        {item.quantity}× {item.productName}
-                      </span>
-                      {(item.comment || parsedOptions.length > 0) && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {item.comment && <span>{item.comment}</span>}
-                          {item.comment && parsedOptions.length > 0 && <span>, </span>}
-                          {parsedOptions.map((o, i) => (
-                            <span key={i}>{o.extraName}: {o.optionName}{i < parsedOptions.length - 1 ? ', ' : ''}</span>
-                          ))}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {isPaid ? (
-                      <span className="text-xs text-green-600 dark:text-green-400">✓ {t('cashier.itemPaid')}</span>
-                    ) : (
-                      <span className="text-sm font-mono text-gray-900 dark:text-white">{formatCents(item.lineTotalCents)}</span>
-                    )}
-                  </div>
+        {/* Orders grouped by order, items flattened */}
+        <div className="space-y-4">
+          {orders
+            .filter((order) => order.items.some((item) => !item.paidAt))
+            .map((order) => (
+              <div key={order.orderId} className="border dark:border-gray-700 rounded-lg overflow-hidden">
+                {/* Order header */}
+                <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 border-b dark:border-gray-700 flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    #{order.tearOffNumber ?? order.orderId.slice(0, 6)} ({order.waiterName})
+                  </span>
                 </div>
-              )
-            })
-          )}
+
+                {/* Items - flattened, one per row */}
+                <div className="divide-y dark:divide-gray-700">
+                  {order.items.map((item) => {
+                    const isPaid = !!item.paidAt
+                    let parsedOptions: { extraName: string; optionName: string }[] = []
+                    try { if (item.options) parsedOptions = JSON.parse(item.options) } catch { /* ignore */ }
+                    
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => !isPaid && toggleItem(item.id, isPaid)}
+                        className={`flex items-center justify-between px-3 py-2.5 ${
+                          isPaid
+                            ? 'opacity-50 bg-gray-50 dark:bg-gray-700/30'
+                            : 'active:bg-gray-100 dark:active:bg-gray-700 cursor-pointer'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {!isPaid ? (
+                            <span className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                              selected.has(item.id)
+                                ? 'bg-blue-600 border-blue-600'
+                                : 'border-gray-300 dark:border-gray-500'
+                            }`}>
+                              {selected.has(item.id) && (
+                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </span>
+                          ) : null}
+                          <div className="flex flex-col">
+                            <span className={`text-sm ${isPaid ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'}`}>
+                              {item.productName}
+                            </span>
+                            {(item.comment || parsedOptions.length > 0) && (
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {item.comment && <span>{item.comment}</span>}
+                                {item.comment && parsedOptions.length > 0 && <span>, </span>}
+                                {parsedOptions.map((o, i) => (
+                                  <span key={i}>{o.extraName}: {o.optionName}{i < parsedOptions.length - 1 ? ', ' : ''}</span>
+                                ))}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {isPaid ? (
+                            <span className="text-xs text-green-600 dark:text-green-400">✓ {t('cashier.itemPaid')}</span>
+                          ) : (
+                            <span className="text-sm font-mono text-gray-900 dark:text-white">{formatCents(item.lineTotalCents)}</span>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
         </div>
       </div>
 
