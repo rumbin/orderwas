@@ -110,25 +110,15 @@ graphify cluster-only .     # re-cluster + regenerate GRAPH_REPORT.md
 
 German-first. Translation files: `client/src/i18n/de.json` (primary), `en.json`, `fr.json`. All UI strings through `t()` — no hardcoded strings.
 
-### ⚠️ Mandatory: All 3 languages must have identical key sets
+### ⚠️ Mandatory: All 3 languages must have identical key sets (bidirectional)
 
-Every key added to `de.json` MUST also be added to `en.json` and `fr.json` in the same commit. Before committing any i18n change, verify parity:
+Every key added to `de.json` MUST also be added to `en.json` and `fr.json` in the same commit — and keys must not exist in only one of EN/FR. Parity is enforced automatically and bidirectionally by **`client/tests/i18n-parity.test.ts`** (DE↔EN↔FR identical key sets; no orphans; all values non-empty), which runs as part of the client vitest suite and therefore `npm run ci`.
+
+When you add/remove i18n keys, expect the parity test to fail until all three files are updated — that automated test is the gate.
 
 ```bash
-node -e "
-const de = require('./client/src/i18n/de.json');
-const en = require('./client/src/i18n/en.json');
-const fr = require('./client/src/i18n/fr.json');
-function flat(o,p=''){const r={};for(const[k,v]of Object.entries(o)){const k2=p?p+'.'+k:k;if(typeof v==='object'&&v!==null)Object.assign(r,flat(v,k2));else r[k2]=v;}return r;}
-const d=flat(de),e=flat(en),f=flat(fr);
-const me=Object.keys(d).filter(k=>!(k in e));
-const mf=Object.keys(d).filter(k=>!(k in f));
-if(me.length||mf.length){console.error('MISSING in en:',me);console.error('MISSING in fr:',mf);process.exit(1);}
-console.log('✅ All',Object.keys(d).length,'keys present in DE, EN, FR');
-"
+cd client && npx vitest run tests/i18n-parity.test.ts
 ```
-
-This must pass before any commit touching i18n files.
 
 ## What NOT to Do
 
