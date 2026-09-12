@@ -70,6 +70,17 @@ cd server && npx prisma generate                # regenerate Prisma client after
 - **Server tests:** `server/tests/integration/` (Fastify inject, real SQLite), `server/tests/unit/` (services, no HTTP).
 - **Test isolation:** Integration tests share one SQLite DB; `fileParallelism: false` in `server/vitest.config.ts` prevents cross-suite interference. Each suite cleans up in `beforeEach`/`afterAll` using FK-safe deletion order (OrderItem → Order → Product → Waiter → Station → Event).
 - **Client tests:** `client/tests/` with jsdom + @testing-library/react.
+- **Client store mocks must be identity-stable:** build session fixtures with
+  `client/tests/helpers/session.ts` (`makeEvent`, `makeWaiter`, `makeCounterWaiter`,
+  `resetSessionState`, `useSessionStoreMock`) instead of constructing the state object
+  inside the `vi.mock` factory. A fresh object per render makes every `[event]`-keyed
+  effect re-run; because those effects `setState`, the loop outlives the test and the
+  vitest worker hangs with **no output** (exit 124) rather than failing a test. The mock
+  must be async — `vi.mock('@/stores/session', async () => ({ useSessionStore: (await
+  import('./helpers/session')).useSessionStoreMock }))` — because `vi.mock` is hoisted
+  above the file's imports.
+- **Effect deps are primitives:** key page-component effects on `event.id`, not on the
+  `event` object, so an unrelated store update cannot trigger refetch loops.
 - **E2E:** `e2e/playwright.config.ts` auto-starts both servers via `webServer`. Tests run against seeded DB.
 
 ## Pre-commit Hook
@@ -129,3 +140,4 @@ cd client && npx vitest run tests/i18n-parity.test.ts
 - Don't run `deleteMany({})` without FK-safe order (OrderItem first, Event last).
 - Don't commit `*.db`, `*.db-shm`, `*.db-wal` files (gitignored).
 - Don't add TSE, multi-tenant, or floor-plan features — they're v1 non-goals (ARCHITECTURE.md §10).
+- Don't rebuild zustand mock state inside the `vi.mock` factory (per-render identity → effect loop → silent vitest worker hang). Use `client/tests/helpers/session.ts`.
