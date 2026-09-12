@@ -130,6 +130,42 @@
 
 ---
 
+### 6. Client Test Isolation: Identity-Stable Store Mocks ✅
+
+**Decision:** A mocked zustand store must return the **same object references**
+across calls. Client tests build fixtures with `client/tests/helpers/session.ts`
+(`makeEvent` / `makeWaiter` / `makeCounterWaiter` / `resetSessionState`).
+
+**Rule:**
+```ts
+// ✅ one stable state object per test file
+vi.mock('@/stores/session', async () => {
+  const { useSessionStoreMock } = await import('./helpers/session')
+  return { useSessionStore: useSessionStoreMock }
+})
+
+// ❌ fresh object on every render
+vi.mock('@/stores/session', () => ({ useSessionStore: () => ({ event: { … } }) }))
+```
+
+**Why this works:**
+- The real store keeps references stable between updates; a mock that rebuilds
+  its state inside the factory does not. Effects keyed on `[event]` then see
+  "changed" deps on every render and re-run — and because those effects call
+  `setState`, the loop sustains itself and outlives the test.
+- Symptom of a violation: the vitest worker never becomes idle — the suite hangs
+  with **no output** (exit 124) instead of failing a test. It is worst when
+  several components rendering the same page run in one worker, which is why a
+  "split the specs into separate files" workaround existed before this decision.
+- `isLoggedIn` / `isAdminLoggedIn` are derived from the state
+  (`Boolean(token && waiter)`) so a logged-out fixture needs no extra plumbing.
+
+**Consequence:** Effect dependencies in page components should key on
+primitives (`event.id`) rather than whole objects, so an unrelated store update
+cannot trigger refetch storms. `Order.tsx` follows this.
+
+---
+
 ## Architecture Overview
 
 ```
