@@ -5,6 +5,7 @@ import { useSessionStore } from '@/stores/session'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
 import type { Order } from '@/api/types'
 import { formatPrice } from '@/lib/money'
+import { orderIdentifier, bonIsIdentifier, orderActorLabel } from '@/lib/orderIdentifier'
 
 const STATUS_COLORS: Record<string, string> = {
   open: 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200',
@@ -65,9 +66,10 @@ export default function OrdersPage({ navigate }: { navigate: (path: string) => v
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <span className="font-medium text-gray-900 dark:text-white">
-              {t('station.table')} {order.tableNumber ?? order.pickupCode}
+              {orderIdentifier(order, t)}
             </span>
-            {order.tearOffNumber && <span className="text-xs text-gray-500 dark:text-gray-400">#{order.tearOffNumber}</span>}
+            {order.waiter?.isCounter && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">{orderActorLabel(order.waiter, t)}</span>}
+            {order.tearOffNumber && !bonIsIdentifier(order) && <span className="text-xs text-gray-500 dark:text-gray-400">#{order.tearOffNumber}</span>}
           </div>
           <span className={`text-xs font-medium px-2 py-0.5 rounded ${STATUS_COLORS[order.status] ?? 'bg-gray-100 dark:bg-gray-700 dark:text-gray-300'}`}>
             {order.status}

@@ -206,6 +206,9 @@ export const api = {
     request<OpenTable[]>(`/events/${eventId}/tables/open`),
   getUnpaidByTable: (eventId: string, tableNumber: string) =>
     request<TableOrder[]>(`/events/${eventId}/tables/${encodeURIComponent(tableNumber)}/unpaid`),
+  // Counter (Theke) cashier screen: the one open Bon, or nothing.
+  getCounterUnpaid: (eventId: string) =>
+    request<TableOrder[]>(`/events/${eventId}/counter/unpaid`),
 
   // Audit & Reporting
   getAuditLogs: (eventId: string, opts?: { action?: string; entityType?: string }) => {

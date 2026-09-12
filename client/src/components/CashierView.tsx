@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSessionStore } from '@/stores/session'
 import { api } from '@/api/client'
+import { orderActorLabel } from '@/lib/orderIdentifier'
 import type { TableOrder, TableOrderItem, OpenTable } from '@/api/types'
 import TableSwitcherModal from './TableSwitcherModal'
 import CalculatorModal from './CalculatorModal'
@@ -13,9 +14,12 @@ function formatCents(cents: number): string {
 
 interface Props {
   initialTable: string | null
+  /** Counter (Theke) mode: no table/Bon selection — the screen is the open Bon. */
+  isCounterMode?: boolean
+  onCounterPaymentComplete?: () => void
 }
 
-export default function CashierView({ initialTable }: Props) {
+export default function CashierView({ initialTable, isCounterMode = false, onCounterPaymentComplete }: Props) {
   const { t } = useTranslation()
   const { event, waiter, token } = useSessionStore()
 
@@ -55,9 +59,31 @@ export default function CashierView({ initialTable }: Props) {
     }
   }, [event])
 
+  // Counter mode: this event's counter has exactly one open Bon (or none), so
+  // there is nothing to select — the screen always shows that order.
+  const fetchCounterOrders = useCallback(async () => {
+    if (!event) { setOrders([]); return }
+    setLoading(true)
+    try {
+      setOrders(await api.getCounterUnpaid(event.id))
+    } catch {
+      setOrders([])
+    } finally {
+      setLoading(false)
+    }
+  }, [event])
+
   // Initial load: fetch open tables + auto-detect table
   useEffect(() => {
     if (!event) return
+
+    // Counter mode: no table switcher, no auto-detected table.
+    if (isCounterMode) {
+      setTableNumber(null)
+      fetchCounterOrders()
+      return
+    }
+
     fetchOpenTables()
 
     if (initialTable) {
@@ -76,12 +102,12 @@ export default function CashierView({ initialTable }: Props) {
       setTableNumber(lastTable)
       if (lastTable) fetchOrders(lastTable)
     }).catch(() => {})
-  }, [event, waiter, initialTable, fetchOpenTables, fetchOrders])
+  }, [event, waiter, initialTable, isCounterMode, fetchOpenTables, fetchOrders, fetchCounterOrders])
 
-  // Re-fetch when table changes
+  // Re-fetch when table changes (table mode only)
   useEffect(() => {
-    if (tableNumber) fetchOrders(tableNumber)
-  }, [tableNumber, fetchOrders])
+    if (!isCounterMode && tableNumber) fetchOrders(tableNumber)
+  }, [isCounterMode, tableNumber, fetchOrders])
 
   // Clear selection + errors when table changes
   useEffect(() => {
@@ -98,6 +124,9 @@ export default function CashierView({ initialTable }: Props) {
   const allUnpaidIds = orders.flatMap((o) =>
     o.items.filter((i) => !i.paidAt).map((i) => i.id)
   )
+
+  // Counter mode: the Bon currently being cashed out (there is at most one).
+  const counterBon = orders[0]?.tearOffNumber ?? null
 
   // Sum of selected items
   const selectedSum = orders.reduce((sum, o) => {
@@ -135,8 +164,15 @@ export default function CashierView({ initialTable }: Props) {
       setLastPayment({ paidCount: result.paidCount, sumCents: result.sumCents })
       setPayError(false)
       setSelected(new Set())
-      if (tableNumber) fetchOrders(tableNumber)
-      fetchOpenTables()
+      if (isCounterMode) {
+        // Once the Bon is settled the counter moves back to the next order.
+        const remaining = event ? await api.getCounterUnpaid(event.id) : []
+        setOrders(remaining)
+        if (remaining.length === 0) onCounterPaymentComplete?.()
+      } else {
+        if (tableNumber) fetchOrders(tableNumber)
+        fetchOpenTables()
+      }
     } catch {
       // Failed (e.g. concurrent double-payment 409). Keep the selection and
       // surface a clear error so the cashier knows the items were NOT paid.
@@ -155,17 +191,27 @@ export default function CashierView({ initialTable }: Props) {
 
   return (
     <div className="h-full flex flex-col bg-white dark:bg-gray-800">
-      {/* Table selector header */}
+      {/* Table selector header — the counter has no tables to switch */}
       <div className="border-b dark:border-gray-700">
-        <button
-          onClick={() => setTableModalOpen(true)}
-          className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
-        >
-          <span className="font-semibold text-gray-900 dark:text-white">
-            {tableNumber ? `Tisch ${tableNumber}` : t('cashier.selectTable')}
-          </span>
-          <span className="text-gray-400 dark:text-gray-500 text-lg">▾</span>
-        </button>
+        {isCounterMode ? (
+          <div className="px-4 py-3" data-testid="counter-cashier-header">
+            <span className="font-semibold text-gray-900 dark:text-white">
+              {counterBon != null
+                ? `${t('order.counter')} · ${t('order.bonNumber')} ${counterBon}`
+                : t('cashier.noOpenBon')}
+            </span>
+          </div>
+        ) : (
+          <button
+            onClick={() => setTableModalOpen(true)}
+            className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
+          >
+            <span className="font-semibold text-gray-900 dark:text-white">
+              {tableNumber ? `Tisch ${tableNumber}` : t('cashier.selectTable')}
+            </span>
+            <span className="text-gray-400 dark:text-gray-500 text-lg">▾</span>
+          </button>
+        )}
       </div>
 
       {/* Payment error toast */}
@@ -188,11 +234,15 @@ export default function CashierView({ initialTable }: Props) {
           <div className="text-center text-gray-400 dark:text-gray-500 py-8">{t('common.loading')}</div>
         )}
 
-        {!loading && orders.length === 0 && tableNumber && (
+        {!loading && isCounterMode && orders.length === 0 && (
+          <div className="text-center text-gray-400 dark:text-gray-500 py-8">{t('cashier.noOpenBon')}</div>
+        )}
+
+        {!loading && !isCounterMode && orders.length === 0 && tableNumber && (
           <div className="text-center text-gray-400 dark:text-gray-500 py-8">{t('cashier.noOpenItems')}</div>
         )}
 
-        {!loading && !tableNumber && (
+        {!loading && !isCounterMode && !tableNumber && (
           <div className="text-center text-gray-400 dark:text-gray-500 py-8">{t('cashier.selectTable')}</div>
         )}
 
@@ -205,7 +255,7 @@ export default function CashierView({ initialTable }: Props) {
                 {/* Order header */}
                 <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 border-b dark:border-gray-700 flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    #{order.tearOffNumber ?? order.orderId.slice(0, 6)} ({order.waiterName})
+                    #{order.tearOffNumber ?? order.orderId.slice(0, 6)} ({orderActorLabel({ name: order.waiterName, isCounter: order.waiterIsCounter }, t)})
                   </span>
                 </div>
 
@@ -318,7 +368,7 @@ export default function CashierView({ initialTable }: Props) {
       )}
 
       {/* Modals */}
-      {tableModalOpen && (
+      {tableModalOpen && !isCounterMode && (
         <TableSwitcherModal
           tables={openTables}
           currentTable={tableNumber}

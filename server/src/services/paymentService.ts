@@ -244,6 +244,7 @@ export interface TableOrder {
   orderId: string
   tearOffNumber: number | null
   waiterName: string
+  waiterIsCounter: boolean
   createdAt: Date
   items: TableOrderItem[]
 }
@@ -253,7 +254,7 @@ interface UnpaidOrderRow {
   id: string
   tearOffNumber: number | null
   createdAt: Date
-  waiter: { name: string }
+  waiter: { name: string; isCounter: boolean }
   items: Array<{
     id: string
     quantity: number
@@ -271,6 +272,7 @@ function mapToTableOrders(orders: UnpaidOrderRow[]): TableOrder[] {
     orderId: order.id,
     tearOffNumber: order.tearOffNumber,
     waiterName: order.waiter.name,
+    waiterIsCounter: order.waiter.isCounter,
     createdAt: order.createdAt,
     items: order.items.map((item) => ({
       id: item.id,
@@ -311,7 +313,7 @@ export async function listUnpaidByTable(
         where: { status: { not: 'cancelled' } },
         include: { product: { select: { priceCents: true, name: true } } },
       },
-      waiter: { select: { name: true } },
+      waiter: { select: { name: true, isCounter: true } },
     },
     orderBy: { createdAt: 'asc' },
   })
@@ -348,7 +350,7 @@ export async function listUnpaidForCounter(eventId: string): Promise<TableOrder[
         where: { status: { not: 'cancelled' } },
         include: { product: { select: { priceCents: true, name: true } } },
       },
-      waiter: { select: { name: true } },
+      waiter: { select: { name: true, isCounter: true } },
     },
     orderBy: { createdAt: 'desc' },
     take: 1,

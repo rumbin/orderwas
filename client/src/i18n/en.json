@@ -18,6 +18,11 @@
   },
   "order": {
     "tableNumber": "Table number",
+    "bonNumber": "Bon",
+    "bonPlaceholder": "Bon no.",
+    "counter": "Counter",
+    "counterBlocked": "Please cash out the open bon first.",
+    "toCashier": "Go to cashier",
     "products": "Products",
     "cart": "Cart",
     "total": "Total",
@@ -96,6 +101,7 @@
     "freeTextHint": "Waiters can always add free-text comments (e.g. \"no mustard\").",
     "productColor": "Button color",
     "noColor": "No color",
+    "counterEnabled": "Counter",
     "login": "Login",
     "enterPin": "Enter PIN",
     "wrongPin": "Wrong PIN"
@@ -141,6 +147,7 @@
     "itemPaid": "paid",
     "perPerson": "per person",
     "receivedPlaceholder": "0.00",
-    "payFailed": "Payment failed"
+    "payFailed": "Payment failed",
+    "noOpenBon": "No open bon"
   }
 }

@@ -389,6 +389,7 @@ describe('Theke / counter', () => {
       expect(orders).toHaveLength(1)
       expect(orders[0].tearOffNumber).toBe(11)
       expect(orders[0].waiterName).toBe('Theke')
+      expect(orders[0].waiterIsCounter).toBe(true)
       expect(orders[0].items).toHaveLength(1)
       expect(orders[0].items[0].lineTotalCents).toBe(600)
       expect(orders[0].items[0].paidAt).toBeNull()

@@ -8,6 +8,7 @@ import ProductSection from '@/components/ProductSection'
 import CartBar from '@/components/CartBar'
 import VariantDialog from '@/components/VariantDialog'
 import CashierView from '@/components/CashierView'
+import { orderIdentifier, bonIsIdentifier, orderActorLabel } from '@/lib/orderIdentifier'
 import type { Station, Product, Order } from '@/api/types'
 import { formatPrice } from '@/lib/money'
 
@@ -25,8 +26,11 @@ function statusText(status: string, t: (key: string) => string): string {
 
 export default function OrderPage({ navigate }: { navigate: (path: string) => void }) {
   const { t } = useTranslation()
-  const { event, waiter, clear } = useSessionStore()
+  const { event, waiter, setEvent } = useSessionStore()
   const cart = useCartStore()
+  // Effects key on the event *id* (a primitive), never on the event object:
+  // a new object identity from the store must not re-trigger every fetch.
+  const eventId = event?.id ?? null
   const [stations, setStations] = useState<Station[]>([])
   const [sortedStations, setSortedStations] = useState<Station[]>([])
   const [products, setProducts] = useState<Record<string, Product[]>>({})
@@ -49,10 +53,18 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   const [myOrders, setMyOrders] = useState<Order[]>([])
   const [myOrdersLoading, setMyOrdersLoading] = useState(false)
 
+  // Counter (Theke) mode: sell against a Bon number instead of a table, and
+  // cash out the single open Bon before the next order can be started.
+  const isCounterMode = waiter?.isCounter === true
+  const [bonNumber, setBonNumber] = useState('')
+  // Primitive (not an object) so a re-fetch can never re-render in a loop.
+  const [counterOpenOrderId, setCounterOpenOrderId] = useState<string | null>(null)
+  const counterJumpedToCashier = useRef(false)
+
   useEffect(() => {
-    if (!event) return
+    if (!eventId) return
     let cancelled = false
-    api.getStations(event.id).then(async (sts) => {
+    api.getStations(eventId).then(async (sts) => {
       if (cancelled) return
       const sorted = [...sts].sort((a, b) => a.sortOrder - b.sortOrder)
       setStations(sts)
@@ -66,7 +78,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
       if (!cancelled) setProducts(productMap)
     })
     return () => { cancelled = true }
-  }, [event])
+  }, [eventId])
 
   useEffect(() => {
     if (sortedStations.length === 0) return
@@ -122,10 +134,46 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   }, [success])
 
   useEffect(() => {
-    if (tab === 'new' || !event) return
+    if (tab === 'new' || !eventId) return
     setMyOrdersLoading(true)
-    api.getOrders(event.id).then((all) => setMyOrders(all)).finally(() => setMyOrdersLoading(false))
-  }, [tab, event])
+    api.getOrders(eventId).then((all) => setMyOrders(all)).finally(() => setMyOrdersLoading(false))
+  }, [tab, eventId])
+
+  // Counter mode: pre-fill the Bon with the next tear-off number (still editable).
+  const nextBon = (event?.lastTearOffNumber ?? 0) + 1
+  useEffect(() => {
+    if (!isCounterMode) return
+    setBonNumber(String(nextBon))
+  }, [isCounterMode, nextBon])
+
+  // Counter mode: the Bon sold at the counter must be paid before the next order.
+  const refreshCounterOpenBon = useCallback(async () => {
+    if (!isCounterMode || !eventId) return
+    try {
+      const open = await api.getCounterUnpaid(eventId)
+      setCounterOpenOrderId(open[0]?.orderId ?? null)
+    } catch {
+      setCounterOpenOrderId(null)
+    }
+  }, [isCounterMode, eventId])
+
+  useEffect(() => { void refreshCounterOpenBon() }, [refreshCounterOpenBon])
+
+  // Counter mode: an open Bon means the counter belongs on the cashier screen
+  // (this also restores the right screen after a reload).
+  useEffect(() => {
+    if (!isCounterMode || !counterOpenOrderId || counterJumpedToCashier.current) return
+    counterJumpedToCashier.current = true
+    setTab('cashier')
+  }, [isCounterMode, counterOpenOrderId])
+
+  // Counter mode: the Bon is settled — back to taking the next order.
+  const handleCounterPaymentComplete = useCallback(() => {
+    setCounterOpenOrderId(null)
+    setTab('new')
+    cart.clear()
+    if (eventId) api.getEvent(eventId).then(setEvent).catch(() => {})
+  }, [eventId, setEvent, cart])
 
   const handleCancelOrder = async (orderId: string) => {
     try { await api.cancelOrder(orderId); setMyOrders((prev) => prev.filter((o) => o.id !== orderId)) }
@@ -169,21 +217,31 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   }
 
   const handleSubmit = async () => {
-    if (!tableNumber || cart.items.length === 0) return
+    const identifier = isCounterMode ? bonNumber : tableNumber
+    if (!identifier || cart.items.length === 0) return
     setSubmitting(true); setError(''); setSuccess(null)
     try {
       const order = await api.createOrder({
-        tableNumber, waiterId: waiter.id, eventId: event.id,
+        // Counter orders are sold against the Bon number instead of a table.
+        ...(isCounterMode ? { tearOffNumber: Number(bonNumber) } : { tableNumber }),
+        waiterId: waiter.id, eventId: event.id,
         items: cart.items.filter((i) => i.quantity > 0).map((item) => ({
           productId: item.product.id, quantity: item.quantity,
           comment: item.variant && item.variant !== 'Standard' ? item.variant : undefined,
           optionSelections: item.options?.map((o) => ({ extraId: o.extraId, optionId: o.optionId })),
         })),
       })
-      setSuccess({ tearOffNumber: order.tearOffNumber }); cart.clear(); setTableNumber('')
-      // Jump to cashier with the table from the submitted order
-      const submittedTable = order.tableNumber ?? null
-      setCashierTable(submittedTable)
+      setSuccess({ tearOffNumber: order.tearOffNumber }); cart.clear()
+      // Keep the Bon pre-fill moving with the event's tear-off counter.
+      api.getEvent(event.id).then(setEvent).catch(() => {})
+      if (isCounterMode) {
+        setBonNumber(String((order.tearOffNumber ?? 0) + 1))
+        setCounterOpenOrderId(order.id)
+        setCashierTable(null)
+      } else {
+        setTableNumber('')
+        setCashierTable(order.tableNumber ?? null)
+      }
       setTimeout(() => setTab('cashier'), 100)
     } catch (err) { setError((err as Error).message || 'Failed to submit order') }
     finally { setSubmitting(false) }
@@ -233,12 +291,18 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
           ))}
 
           <CartBar tableNumber={tableNumber} onTableChange={setTableNumber} error={error} submitting={submitting}
-            total={total} onSubmit={handleSubmit} onOpenVariant={openVariantDialog} t={t} />
+            total={total} onSubmit={handleSubmit} onOpenVariant={openVariantDialog} t={t}
+            isCounterMode={isCounterMode} bonNumber={bonNumber} onBonChange={setBonNumber}
+            blocked={isCounterMode && counterOpenOrderId !== null}
+            blockedHint={t('order.counterBlocked')} blockedActionLabel={t('order.toCashier')}
+            onBlockedAction={() => setTab('cashier')} />
         </>
       )}
 
       {tab === 'cashier' && (
-        <CashierView initialTable={cashierTable} />
+        isCounterMode
+          ? <CashierView initialTable={null} isCounterMode onCounterPaymentComplete={handleCounterPaymentComplete} />
+          : <CashierView initialTable={cashierTable} />
       )}
 
       {tab === 'orders' && (
@@ -264,8 +328,9 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                       <div key={order.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-gray-900 dark:text-white">{t('station.table')} {order.tableNumber ?? order.pickupCode}</span>
-                            {order.tearOffNumber && <span className="text-xs text-gray-500">#{order.tearOffNumber}</span>}
+                            <span className="font-medium text-gray-900 dark:text-white">{orderIdentifier(order, t)}</span>
+                            {order.waiter?.isCounter && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800">{orderActorLabel(order.waiter, t)}</span>}
+                            {order.tearOffNumber && !bonIsIdentifier(order) && <span className="text-xs text-gray-500">#{order.tearOffNumber}</span>}
                           </div>
                           <span className="text-xs font-medium px-2 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200">{statusText(order.status, t)}</span>
                         </div>
@@ -302,8 +367,9 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
                         <div key={order.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 opacity-70">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
-                              <span className="font-medium text-gray-900 dark:text-white">{t('station.table')} {order.tableNumber ?? order.pickupCode}</span>
-                              {order.tearOffNumber && <span className="text-xs text-gray-500">#{order.tearOffNumber}</span>}
+                              <span className="font-medium text-gray-900 dark:text-white">{orderIdentifier(order, t)}</span>
+                              {order.waiter?.isCounter && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800">{orderActorLabel(order.waiter, t)}</span>}
+                              {order.tearOffNumber && !bonIsIdentifier(order) && <span className="text-xs text-gray-500">#{order.tearOffNumber}</span>}
                             </div>
                             <span className={`text-xs font-medium px-2 py-0.5 rounded ${displayStatus === 'cancelled' ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200' : 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200'}`}>{statusText(displayStatus, t)}</span>
                           </div>

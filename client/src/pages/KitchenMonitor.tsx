@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/api/client'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import type { Order, Station } from '@/api/types'
+import { orderIdentifier, bonIsIdentifier } from '@/lib/orderIdentifier'
 
 function formatTime(seconds: number): string {
   if (seconds < 60) return `${seconds}s`
@@ -116,9 +117,9 @@ export default function KitchenMonitor({ stationId }: { stationId: string }) {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <span className="text-3xl font-bold">
-                      {order.tableNumber ? `${t('station.table')} ${order.tableNumber}` : order.pickupCode}
+                      {orderIdentifier(order, t)}
                     </span>
-                    {order.tearOffNumber && <span className="text-lg text-gray-500">#{order.tearOffNumber}</span>}
+                    {order.tearOffNumber && !bonIsIdentifier(order) && <span className="text-lg text-gray-500">#{order.tearOffNumber}</span>}
                   </div>
                   <span className={`text-xl font-mono ${waitSeconds > 300 ? 'text-red-400 font-bold' : waitSeconds > 120 ? 'text-yellow-400' : 'text-gray-500'}`}>
                     {formatTime(waitSeconds)}

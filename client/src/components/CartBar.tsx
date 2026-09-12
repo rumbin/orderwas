@@ -10,6 +10,15 @@ function formatCents(cents: number): string {
 interface Props {
   tableNumber: string
   onTableChange: (v: string) => void
+  /** Counter (Theke) mode: the identifier is a Bon number instead of a table. */
+  isCounterMode?: boolean
+  bonNumber?: string
+  onBonChange?: (v: string) => void
+  /** Counter mode only: a previous counter order is still unpaid. */
+  blocked?: boolean
+  blockedHint?: string
+  blockedActionLabel?: string
+  onBlockedAction?: () => void
   error: string
   submitting: boolean
   total: number
@@ -18,22 +27,57 @@ interface Props {
   t: (key: string) => string
 }
 
-export default function CartBar({ tableNumber, onTableChange, error, submitting, total, onSubmit, onOpenVariant, t }: Props) {
+export default function CartBar({
+  tableNumber,
+  onTableChange,
+  isCounterMode = false,
+  bonNumber = '',
+  onBonChange,
+  blocked = false,
+  blockedHint,
+  blockedActionLabel,
+  onBlockedAction,
+  error,
+  submitting,
+  total,
+  onSubmit,
+  onOpenVariant,
+  t,
+}: Props) {
   const cart = useCartStore()
+
+  // Both selling modes share one input; only the label, value and keyboard differ.
+  const identifier = isCounterMode
+    ? { value: bonNumber, onChange: onBonChange, placeholder: t('order.bonPlaceholder'), testId: 'bon-number-input' }
+    : { value: tableNumber, onChange: onTableChange, placeholder: t('order.tableNumber'), testId: 'table-number-input' }
+
+  const canSubmit =
+    !submitting && !blocked && Boolean(identifier.value) && cart.items.some((i) => i.quantity > 0)
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t dark:border-gray-700 shadow-lg p-4 z-20">
       {error && (
         <div className="mb-3 p-2 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded">{error}</div>
       )}
+      {blocked && !error && (
+        <div className="mb-3 p-2 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 text-sm rounded" data-testid="counter-blocked-hint">
+          <span>{blockedHint}</span>
+          {onBlockedAction && (
+            <button onClick={onBlockedAction} className="ml-2 font-medium underline" data-testid="counter-blocked-action">
+              {blockedActionLabel}
+            </button>
+          )}
+        </div>
+      )}
       <div className="flex items-center gap-3 max-w-2xl mx-auto">
         <input
-          type="text"
-          value={tableNumber}
-          onChange={(e) => onTableChange(e.target.value)}
-          placeholder={t('order.tableNumber')}
+          type={isCounterMode ? 'number' : 'text'}
+          inputMode={isCounterMode ? 'numeric' : undefined}
+          value={identifier.value}
+          onChange={(e) => identifier.onChange?.(e.target.value)}
+          placeholder={identifier.placeholder}
           className="flex-shrink-0 w-32 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white p-2 text-lg"
-          data-testid="table-number-input"
+          data-testid={identifier.testId}
         />
         <div className="flex-1 overflow-x-auto">
           <div className="flex gap-2">
@@ -86,7 +130,7 @@ export default function CartBar({ tableNumber, onTableChange, error, submitting,
         </div>
         <button
           onClick={onSubmit}
-          disabled={submitting || !tableNumber || cart.items.filter((i) => i.quantity > 0).length === 0}
+          disabled={!canSubmit}
           className="bg-blue-600 text-white rounded-md py-2 px-4 font-medium disabled:opacity-50 flex-shrink-0"
           data-testid="submit-order"
         >

@@ -18,6 +18,11 @@
   },
   "order": {
     "tableNumber": "Numéro de table",
+    "bonNumber": "Bon",
+    "bonPlaceholder": "N° de bon",
+    "counter": "Comptoir",
+    "counterBlocked": "Veuillez d'abord encaisser le bon ouvert.",
+    "toCashier": "Aller à l'encaissement",
     "products": "Produits",
     "cart": "Panier",
     "total": "Total",
@@ -96,6 +101,7 @@
     "freeTextHint": "Les serveurs peuvent toujours ajouter des commentaires en texte libre (ex. \"sans moutarde\").",
     "productColor": "Couleur du bouton",
     "noColor": "Pas de couleur",
+    "counterEnabled": "Comptoir",
     "login": "Connexion",
     "enterPin": "Entrer le PIN",
     "wrongPin": "PIN incorrect"
@@ -141,6 +147,7 @@
     "itemPaid": "payé",
     "perPerson": "par personne",
     "receivedPlaceholder": "0,00",
-    "payFailed": "Échec du paiement"
+    "payFailed": "Échec du paiement",
+    "noOpenBon": "Aucun bon ouvert"
   }
 }

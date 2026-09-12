@@ -4,6 +4,7 @@ import { api } from '@/api/client'
 import { useWebSocket, type OrderEventPayload } from '@/hooks/useWebSocket'
 import UserMenu from '@/components/UserMenu'
 import { PRODUCT_COLORS, PRODUCT_BG_CLASSES } from '@/lib/productColors'
+import { orderIdentifier, bonIsIdentifier } from '@/lib/orderIdentifier'
 import type { Order, Station } from '@/api/types'
 
 function formatTime(seconds: number): string {
@@ -119,12 +120,12 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
         const vKey = variant ?? '__standard__'
         const existing = productEntry.variants.get(vKey) ?? { totalQty: 0, tables: [] }
         existing.totalQty += item.quantity
-        existing.tables.push(order.tableNumber ?? order.pickupCode ?? '?')
+        existing.tables.push(orderIdentifier(order, t))
         productEntry.variants.set(vKey, existing)
       }
     }
     return Array.from(map.values()).sort((a, b) => b.totalQty - a.totalQty)
-  }, [orders, stationId])
+  }, [orders, stationId, t])
 
   // Done orders: orders where ALL items for this station are prepared/delivered/cancelled
   const [doneOrders, setDoneOrders] = useState<Order[]>([])
@@ -213,9 +214,9 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xl font-bold" data-testid="order-identifier">
-                        {order.tableNumber ? `${t('station.table')} ${order.tableNumber}` : `${order.pickupCode}`}
+                        {orderIdentifier(order, t)}
                       </span>
-                      {order.tearOffNumber && <span className="text-sm text-gray-400">#{order.tearOffNumber}</span>}
+                      {order.tearOffNumber && !bonIsIdentifier(order) && <span className="text-sm text-gray-400">#{order.tearOffNumber}</span>}
                     </div>
                     <span className={`text-sm font-mono ${waitSeconds > 300 ? 'text-red-400' : 'text-gray-400'}`}>
                       {formatTime(waitSeconds)}
@@ -306,7 +307,7 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
                     </div>
                   ) : (
                     <div className="mt-1 ml-6 text-sm text-gray-400">
-                      {t('station.table')}: {Array.from(p.variants.values())[0].tables.join(', ')}
+                      {Array.from(p.variants.values())[0].tables.join(', ')}
                     </div>
                   )}
                 </div>
@@ -330,9 +331,9 @@ export default function StationDisplay({ navigate, stationId }: { navigate: (pat
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xl font-bold">
-                        {order.tableNumber ? `${t('station.table')} ${order.tableNumber}` : `${order.pickupCode}`}
+                        {orderIdentifier(order, t)}
                       </span>
-                      {order.tearOffNumber && <span className="text-sm text-gray-400">#{order.tearOffNumber}</span>}
+                      {order.tearOffNumber && !bonIsIdentifier(order) && <span className="text-sm text-gray-400">#{order.tearOffNumber}</span>}
                     </div>
                     <span className="text-sm text-gray-500">
                       {doneAt < 60 ? `${doneAt}s` : `${Math.floor(doneAt / 60)}m`}

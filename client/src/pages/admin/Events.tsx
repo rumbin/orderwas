@@ -36,6 +36,11 @@ export function AdminEvents({ events, selectedEventId, onChanged }: {
     onChanged()
   }
 
+  const handleToggleCounter = async (event: Event) => {
+    await api.updateEvent(event.id, { counterEnabled: !event.counterEnabled } as Partial<Event>)
+    onChanged()
+  }
+
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">{t('admin.events')}</h2>
@@ -59,6 +64,7 @@ export function AdminEvents({ events, selectedEventId, onChanged }: {
             <th className="py-2">Name</th>
             <th>Status</th>
             <th>Tear-off</th>
+            <th>{t('admin.counterEnabled')}</th>
             <th></th>
           </tr>
         </thead>
@@ -110,6 +116,18 @@ export function AdminEvents({ events, selectedEventId, onChanged }: {
                     #{e.lastTearOffNumber}
                   </button>
                 )}
+              </td>
+              <td>
+                <button
+                  onClick={() => handleToggleCounter(e)}
+                  className={`px-2 py-0.5 rounded text-xs font-medium ${
+                    e.counterEnabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                  }`}
+                  data-testid={`counter-toggle-${e.id}`}
+                  title={t('admin.counterEnabled')}
+                >
+                  {e.counterEnabled ? '✓' : '—'}
+                </button>
               </td>
               <td><button onClick={() => handleDelete(e.id)} className="text-red-600 text-xs">{t('common.delete')}</button></td>
             </tr>

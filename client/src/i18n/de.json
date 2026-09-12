@@ -18,6 +18,11 @@
   },
   "order": {
     "tableNumber": "Tischnummer",
+    "bonNumber": "Bon",
+    "bonPlaceholder": "Bon-Nr.",
+    "counter": "Theke",
+    "counterBlocked": "Bitte zuerst den offenen Bon abkassieren.",
+    "toCashier": "Zum Kassieren",
     "products": "Produkte",
     "cart": "Warenkorb",
     "myOrders": "Meine Bestellungen",
@@ -98,7 +103,8 @@
     "optionsHint": "Optionen: Senf, Ketchup, Remoulade",
     "freeTextHint": "Kellner können jederzeit Freitext-Kommentare hinzufügen (z.B. \"ohne Senf\").",
     "productColor": "Button-Farbe",
-    "noColor": "Keine Farbe"
+    "noColor": "Keine Farbe",
+    "counterEnabled": "Theke"
   },
   "common": {
     "save": "Speichern",
@@ -141,6 +147,7 @@
     "itemPaid": "bezahlt",
     "perPerson": "pro Person",
     "receivedPlaceholder": "0,00",
-    "payFailed": "Zahlung fehlgeschlagen"
+    "payFailed": "Zahlung fehlgeschlagen",
+    "noOpenBon": "Kein offener Bon"
   }
 }

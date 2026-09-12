@@ -127,6 +127,7 @@ export interface TableOrder {
   orderId: string
   tearOffNumber: number | null
   waiterName: string
+  waiterIsCounter: boolean
   createdAt: string
   items: TableOrderItem[]
 }
