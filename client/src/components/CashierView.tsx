@@ -198,7 +198,7 @@ export default function CashierView({ initialTable, isCounterMode = false, onCou
             <span className="font-semibold text-gray-900 dark:text-white">
               {counterBon != null
                 ? `${t('order.counter')} · ${t('order.bonNumber')} ${counterBon}`
-                : t('cashier.noOpenBon')}
+                : t('order.counter')}
             </span>
           </div>
         ) : (
@@ -235,7 +235,7 @@ export default function CashierView({ initialTable, isCounterMode = false, onCou
         )}
 
         {!loading && isCounterMode && orders.length === 0 && (
-          <div className="text-center text-gray-400 dark:text-gray-500 py-8">{t('cashier.noOpenBon')}</div>
+          <div className="text-center text-gray-400 dark:text-gray-500 py-8" data-testid="counter-empty">{t('cashier.noOpenBon')}</div>
         )}
 
         {!loading && !isCounterMode && orders.length === 0 && tableNumber && (
