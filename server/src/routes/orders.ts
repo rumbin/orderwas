@@ -27,12 +27,16 @@ const createOrderItemSchema = z.object({
 const createOrderBody = z.object({
   tableNumber: z.string().min(1).optional(),
   pickupCode: z.string().min(1).optional(),
+  tearOffNumber: z.number().int().positive().optional(),
   waiterId: z.string().min(1),
   eventId: z.string().min(1),
   items: z.array(createOrderItemSchema).nonempty({ message: 'items must not be empty' }),
 }).refine(
-  (data) => Boolean(data.tableNumber) !== Boolean(data.pickupCode),
-  { message: 'Exactly one of tableNumber or pickupCode must be provided' },
+  // A table and a pickup code exclude each other. Neither is present for
+  // counter (Theke) orders, which are validated against the waiter in the
+  // service (only a counter login may sell them).
+  (data) => !(data.tableNumber && data.pickupCode),
+  { message: 'Exactly one of tableNumber or pickupCode may be provided' },
 )
 
 // Preparation-status PATCH. 'paid'/'cancelled' are exclusive to the dedicated

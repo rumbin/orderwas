@@ -12,6 +12,7 @@ const updateEventSchema = z.object({
   status: z.enum(['test', 'live']).optional(),
   hidePrices: z.boolean().optional(),
   tseEnabled: z.boolean().optional(),
+  counterEnabled: z.boolean().optional(),
   lastTearOffNumber: z.number().int().min(0).optional(),
 })
 

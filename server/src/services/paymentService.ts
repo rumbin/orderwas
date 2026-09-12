@@ -248,6 +248,47 @@ export interface TableOrder {
   items: TableOrderItem[]
 }
 
+/** Shape shared by the unpaid-order queries below (structural subset). */
+interface UnpaidOrderRow {
+  id: string
+  tearOffNumber: number | null
+  createdAt: Date
+  waiter: { name: string }
+  items: Array<{
+    id: string
+    quantity: number
+    status: string
+    comment: string | null
+    options: string | null
+    paidAt: Date | null
+    product: { priceCents: number; name: string }
+  }>
+}
+
+/** Maps raw orders to the cashier view model. */
+function mapToTableOrders(orders: UnpaidOrderRow[]): TableOrder[] {
+  return orders.map((order) => ({
+    orderId: order.id,
+    tearOffNumber: order.tearOffNumber,
+    waiterName: order.waiter.name,
+    createdAt: order.createdAt,
+    items: order.items.map((item) => ({
+      id: item.id,
+      productName: item.product.name,
+      quantity: item.quantity,
+      status: item.status,
+      comment: item.comment,
+      options: item.options,
+      lineTotalCents: computeLineTotalCents(
+        item.product.priceCents,
+        item.quantity,
+        item.options,
+      ),
+      paidAt: item.paidAt,
+    })),
+  }))
+}
+
 export async function listUnpaidByTable(
   eventId: string,
   tableNumber: string,
@@ -275,24 +316,43 @@ export async function listUnpaidByTable(
     orderBy: { createdAt: 'asc' },
   })
 
-  return orders.map((order) => ({
-    orderId: order.id,
-    tearOffNumber: order.tearOffNumber,
-    waiterName: order.waiter.name,
-    createdAt: order.createdAt,
-    items: order.items.map((item) => ({
-      id: item.id,
-      productName: item.product.name,
-      quantity: item.quantity,
-      status: item.status,
-      comment: item.comment,
-      options: item.options,
-      lineTotalCents: computeLineTotalCents(
-        item.product.priceCents,
-        item.quantity,
-        item.options,
-      ),
-      paidAt: item.paidAt,
-    })),
-  }))
+  return mapToTableOrders(orders)
+}
+
+/**
+ * The counter (Theke) cashes out one Bon at a time, so the cashier screen
+ * always works on the most recent unpaid counter order — no table or Bon
+ * selection. Returns an empty array when nothing is open.
+ */
+export async function listUnpaidForCounter(eventId: string): Promise<TableOrder[]> {
+  const counterWaiters = await prisma.waiter.findMany({
+    where: { eventId, isCounter: true },
+    select: { id: true },
+  })
+  if (counterWaiters.length === 0) return []
+
+  const orders = await prisma.order.findMany({
+    where: {
+      eventId,
+      waiterId: { in: counterWaiters.map((w) => w.id) },
+      status: { notIn: ['paid', 'cancelled'] },
+      items: {
+        some: {
+          paidAt: null,
+          status: { not: 'cancelled' },
+        },
+      },
+    },
+    include: {
+      items: {
+        where: { status: { not: 'cancelled' } },
+        include: { product: { select: { priceCents: true, name: true } } },
+      },
+      waiter: { select: { name: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 1,
+  })
+
+  return mapToTableOrders(orders)
 }

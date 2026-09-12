@@ -13,6 +13,11 @@ export interface OptionSelection {
 export interface CreateOrderInput {
   tableNumber?: string
   pickupCode?: string
+  /**
+   * Counter (Theke) orders only: the Bon number torn off at the counter.
+   * When omitted the next free per-event tear-off number is assigned.
+   */
+  tearOffNumber?: number
   waiterId: string
   eventId: string
   items: Array<{
@@ -64,16 +69,32 @@ function emitOrderUpdated(order: {
  * returns the created order with items.
  */
 export async function createOrder(input: CreateOrderInput) {
-  const { tableNumber, pickupCode, waiterId, eventId, items } = input
+  const { tableNumber, pickupCode, tearOffNumber, waiterId, eventId, items } = input
 
-  // Validate XOR: exactly one of tableNumber or pickupCode must be present
-  if (Boolean(tableNumber) === Boolean(pickupCode)) {
-    throw new OrderValidationError('Exactly one of tableNumber or pickupCode must be provided')
+  // A table number and a pickup code are mutually exclusive. An order with
+  // neither is a counter (Theke) order: it is sold against a Bon number.
+  if (tableNumber && pickupCode) {
+    throw new OrderValidationError('Exactly one of tableNumber or pickupCode may be provided')
   }
 
   // Validate waiter exists
-  const waiter = await prisma.waiter.findUnique({ where: { id: waiterId }, select: { id: true } })
+  const waiter = await prisma.waiter.findUnique({
+    where: { id: waiterId },
+    select: { id: true, isCounter: true },
+  })
   if (!waiter) throw new OrderValidationError('Waiter does not exist')
+
+  // Only the counter login may sell table-less orders, and only it may pin a
+  // Bon number (otherwise any waiter could dictate arbitrary tear-off numbers).
+  if (!tableNumber && !pickupCode && !waiter.isCounter) {
+    throw new OrderValidationError('Only the counter may create an order without a table')
+  }
+  if (tearOffNumber !== undefined) {
+    if (!waiter.isCounter) throw new OrderValidationError('Only the counter may set the Bon number')
+    if (!Number.isInteger(tearOffNumber) || tearOffNumber <= 0) {
+      throw new OrderValidationError('Bon number must be a positive integer')
+    }
+  }
 
   // Validate event exists
   const event = await prisma.event.findUnique({ where: { id: eventId }, select: { id: true } })
@@ -152,11 +173,55 @@ export async function createOrder(input: CreateOrderInput) {
       throw new OrderValidationError(`Insufficient stock: ${details}`, 409)
     }
 
-    const updatedEvent = await tx.event.update({
-      where: { id: eventId },
-      data: { lastTearOffNumber: { increment: 1 } },
-      select: { lastTearOffNumber: true },
-    })
+    // Theke invariant: the counter serves one Bon at a time. A new counter
+    // order is only allowed once the previous one is fully paid or cancelled.
+    if (waiter.isCounter) {
+      const openCounterOrder = await tx.order.findFirst({
+        where: {
+          eventId,
+          waiterId,
+          status: { notIn: ['paid', 'cancelled'] },
+          items: { some: { paidAt: null, status: { not: 'cancelled' } } },
+        },
+        select: { id: true, tearOffNumber: true },
+      })
+      if (openCounterOrder) {
+        const label = openCounterOrder.tearOffNumber ?? openCounterOrder.id
+        throw new OrderValidationError(`Bon ${label} is still unpaid`, 409)
+      }
+    }
+
+    // Tear-off (Bon) assignment. The counter may pin the number that was torn
+    // off at the Theke; every other order takes the next free number. Either
+    // way the event counter ends up at or above the assigned number, so the
+    // pre-filled next Bon keeps moving forward.
+    let assignedTearOffNumber: number
+    if (tearOffNumber !== undefined) {
+      const clash = await tx.order.findFirst({
+        where: { eventId, tearOffNumber },
+        select: { id: true },
+      })
+      if (clash) {
+        throw new OrderValidationError(`Bon number ${tearOffNumber} is already in use`, 409)
+      }
+
+      const current = await tx.event.findUniqueOrThrow({
+        where: { id: eventId },
+        select: { lastTearOffNumber: true },
+      })
+      await tx.event.update({
+        where: { id: eventId },
+        data: { lastTearOffNumber: Math.max(current.lastTearOffNumber, tearOffNumber) },
+      })
+      assignedTearOffNumber = tearOffNumber
+    } else {
+      const updatedEvent = await tx.event.update({
+        where: { id: eventId },
+        data: { lastTearOffNumber: { increment: 1 } },
+        select: { lastTearOffNumber: true },
+      })
+      assignedTearOffNumber = updatedEvent.lastTearOffNumber
+    }
 
     // Stock decrement happens after order creation (still inside the transaction)
     await decrementStock(tx, items)
@@ -168,7 +233,7 @@ export async function createOrder(input: CreateOrderInput) {
         waiterId,
         eventId,
         totalCents,
-        tearOffNumber: updatedEvent.lastTearOffNumber,
+        tearOffNumber: assignedTearOffNumber,
         items: {
           create: items.map((item, idx) => ({
             productId: item.productId,

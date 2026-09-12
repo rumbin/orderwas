@@ -4,6 +4,7 @@ import {
   payItems,
   listOpenTables,
   listUnpaidByTable,
+  listUnpaidForCounter,
 } from '@/services/paymentService'
 import { OrderValidationError } from '@/services/orderService'
 import type { JwtPayload } from '@/plugins/auth'
@@ -50,6 +51,15 @@ export const paymentsRoutes: FastifyPluginAsync = async (server: FastifyInstance
   server.get('/events/:eventId/tables/:tableNumber/unpaid', async (request, reply) => {
     const { eventId, tableNumber } = request.params as { eventId: string; tableNumber: string }
     const orders = await listUnpaidByTable(eventId, tableNumber)
+    return reply.status(200).send(orders)
+  })
+
+  // GET /events/:eventId/counter/unpaid — the open counter (Theke) order, if any.
+  // The counter cashes out one Bon at a time, so there is never a selection:
+  // this returns the most recent unpaid counter order (0 or 1 entries).
+  server.get('/events/:eventId/counter/unpaid', async (request, reply) => {
+    const { eventId } = request.params as { eventId: string }
+    const orders = await listUnpaidForCounter(eventId)
     return reply.status(200).send(orders)
   })
 }

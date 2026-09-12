@@ -30,6 +30,7 @@ export async function getEvent(id: string) {
  * Updates an event.
  * Special rule: switching status from "test" to "live" wipes all orders
  * and resets the tear-off counter (wiki §14 business rule).
+ * Special rule: toggling `counterEnabled` syncs the "Theke" counter waiter.
  */
 export async function updateEvent(id: string, data: Record<string, unknown>) {
   // Check for test→live transition
@@ -45,12 +46,67 @@ export async function updateEvent(id: string, data: Record<string, unknown>) {
     }
   }
 
+  // Sync the counter login identity with the counterEnabled flag.
+  const counterEnabled = data.counterEnabled
+  if (typeof counterEnabled === 'boolean') {
+    const event = await prisma.event.findUnique({ where: { id }, select: { counterEnabled: true } })
+    if (event && event.counterEnabled !== counterEnabled) {
+      await syncCounterWaiter(id, counterEnabled)
+    }
+  }
+
   try {
     return await prisma.event.update({ where: { id }, data })
   } catch (err) {
     const code = (err as { code?: string }).code
     if (code === 'P2025') return null
     throw err
+  }
+}
+
+/**
+ * The "Theke" counter is a login identity: a waiter flagged `isCounter` that
+ * sells with Bon (tear-off) numbers instead of table numbers.
+ *
+ * - enable:  revive the existing counter waiter (hidden ones included) or
+ *            create it — idempotent, so toggling twice never duplicates.
+ * - disable: delete it while it has no orders; otherwise keep the row (orders
+ *            reference it) and just hide it from the login list.
+ *
+ * Exported for tests.
+ */
+export async function syncCounterWaiter(eventId: string, enabled: boolean): Promise<void> {
+  const existing = await prisma.waiter.findMany({ where: { eventId, isCounter: true } })
+
+  if (enabled) {
+    if (existing.length > 0) {
+      await prisma.waiter.updateMany({
+        where: { eventId, isCounter: true },
+        data: { hidden: false, active: true },
+      })
+      return
+    }
+    await prisma.waiter.create({
+      data: {
+        name: 'Theke',
+        pin: '0000',
+        eventId,
+        isCounter: true,
+        canCashOut: true,
+        canCancel: true,
+        hidden: false,
+      },
+    })
+    return
+  }
+
+  for (const waiter of existing) {
+    const orderCount = await prisma.order.count({ where: { waiterId: waiter.id } })
+    if (orderCount === 0) {
+      await prisma.waiter.delete({ where: { id: waiter.id } })
+    } else {
+      await prisma.waiter.update({ where: { id: waiter.id }, data: { hidden: true } })
+    }
   }
 }
 
