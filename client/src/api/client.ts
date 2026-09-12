@@ -51,12 +51,17 @@ async function request<T>(
   path: string,
   options?: RequestInit,
 ): Promise<T> {
+  // authHeaders() carries the waiter JWT; adminAuthHeaders() carries the admin
+  // JWT.  Both set the same `Authorization` header, so spread order matters:
+  // the waiter token must always take precedence when both are present.
+  // (The admin token is only used on pages where no waiter session exists.)
+  const waiterAuth = authHeaders()
   const response = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...authHeaders(),
       ...adminAuthHeaders(),
+      ...waiterAuth,
       ...options?.headers,
     },
   })
