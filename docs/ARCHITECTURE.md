@@ -1,7 +1,7 @@
 # Orderwas — Architecture
 
 **Status:** Living document. Update when module boundaries, data flow, or deployment topology change.
-**Last updated:** 2026-08-29 (auth + payment model reconciliation after Phases 0–5)
+**Last updated:** 2026-09-12 (Theke counter mode)
 
 ---
 
@@ -87,13 +87,13 @@ SQLite via Prisma. **Money is integer cents everywhere** (`priceCents`, `totalCe
 > Full schema is the source of truth: `server/prisma/schema.prisma`. This section documents the *design intent* per entity.
 
 ### Core hierarchy
-- **Event** — one festival. `status: test|live`. Switching test→live **deletes all orders** (wiki §14 business rule, enforced in `eventService`). Owns `lastTearOffNumber` counter. `hidePrices`, `tseEnabled` (reserved, v2).
+- **Event** — one festival. `status: test|live`. Switching test→live **deletes all orders** (wiki §14 business rule, enforced in `eventService`). Owns `lastTearOffNumber` counter. `hidePrices`, `tseEnabled` (reserved, v2). `counterEnabled` gates the Theke counter (see *Counter mode* below).
 - **Station** — prep point (Bar, Küche, Kaffee). `kitchenMonitor` toggle, `copyPrint`, sortOrder. FK to primary **Printer**; **alternative printers** via join table with optional table-range/pickup-code routing (Phase 3).
 - **Product** — `priceCents Int`, `taxRateBps` (basis points, e.g. 2000 = 20.00%), `stockMode: none|tracked|composite`, `stockCount Float` (Float allows 0.5L beer; it is a stock quantity, not money), `isVoucher`, `addable`, `shortName` (for receipts).
 - **ProductComponent** *(new)* — join table for composite products: `compositeId → ingredientId, quantity Decimal`. Required for Task 34 stock management; without it `stockMode: composite` is meaningless.
-- **Waiter** — `pin` (write-only), permission flags (canCancel, canCashOut, canStatistics, canCreateWaiters, canTransfer, isStationWaiter), `printsImmediately`, `autoSammelbon`, `hidden`, optional own Printer, optional `pickupCode` (Abholkennzeichen: when set, orders skip table number and get auto tear-off numbers — Bonkasse/Abholscheine mode).
+- **Waiter** — `pin` (write-only), permission flags (canCancel, canCashOut, canStatistics, canCreateWaiters, canTransfer, isStationWaiter), `printsImmediately`, `autoSammelbon`, `hidden`, optional own Printer, optional `pickupCode` (Abholkennzeichen: when set, orders skip table number and get auto tear-off numbers — Bonkasse/Abholscheine mode). `isCounter` marks the Theke counter login (see *Counter mode* below).
 - **Printer** *(new, first-class)* — `name`, `type: network|ignore|dummy`, `ip`, `charsPerLine`, `font`, `buzzer`, `paperCut: full|partial|none`. Replaces the flat `printerIp`/`printerType` strings on Station/Waiter (those columns migrate to FKs).
-- **Order** — `tableNumber String?` (nullable: pickup orders use `pickupCode` instead), `status: open|preparing|partial|paid|cancelled`, `totalCents Int`, `tearOffNumber Int?` (atomic per-event increment), `pickupCode String?`, `sammelbonId String?` (reserved for collective receipts, Phase 6).
+- **Order** — `tableNumber String?` (nullable: pickup orders use `pickupCode` instead, counter orders use neither — see *Counter mode*), `status: open|preparing|partial|paid|cancelled`, `totalCents Int`, `tearOffNumber Int?` (atomic per-event increment; for counter orders it is the **Bon number**, optionally pinned by the counter), `pickupCode String?`, `sammelbonId String?` (reserved for collective receipts, Phase 6).
 - **OrderItem** — quantity, `status: open|prepared|delivered|cancelled`, free-text `comment`, plus `options` JSON (`[{extraName, optionName, priceDeltaCents}]`) for **structured product `ProductExtra` option groups** (radio/checkbox, optional price deltas — §17.4 of REQUIREMENTS). `paidAt` + `paidByWaiterId` stamp payment per item.
 - **Voucher** *(new)* — `code` (unique per event), `valueCents Int`, `status: active|redeemed|expired`, `redeemedOrderId?`. Backs Task 33.
 - **AppLayout** — per event (real FK to **Event**, `onDelete: Cascade`), optionally per waiter: columns, rows, `buttons` JSON `[{name, color, productId, row, col}]`.
@@ -112,6 +112,30 @@ Order-level and item-level payment are unified by a single invariant: **an order
 
 Terminal statuses are reachable **only** through these dedicated endpoints — the generic `PATCH /api/orders/:id` accepts only the preparation statuses `['open','preparing','partial','done']`.
 
+### Counter (Theke) mode
+
+An event can also sell **over the counter** instead of at tables. The counter is a
+*login identity*, not a separate module: `Event.counterEnabled` gates it, and toggling it
+creates (or revives/hides/deletes) the `Theke` waiter — `Waiter.isCounter`,
+`canCashOut`, `canCancel` — via `eventService.syncCounterWaiter`. Everything else (auth,
+cart, product grid, print dispatch, item-level payment) is the ordinary waiter flow.
+
+- **The Bon *is* the tear-off number.** A counter order carries **neither**
+  `tableNumber` nor `pickupCode`; its identifier is `tearOffNumber`, printed as
+  `Bon: <n>` instead of `Tisch:`/`Abholcode:` (same receipt otherwise). The counter UI
+  pre-fills the next number and may overwrite it with the ticket torn off at the Theke:
+  the server requires a positive integer, rejects a number already in use (409) and
+  advances `lastTearOffNumber` to at least that value so the next pre-fill moves on.
+- **Only the counter may sell table-less orders**, and only it may set `tearOffNumber`;
+  a regular waiter sending either is rejected (400). `tableNumber` and `pickupCode` stay
+  mutually exclusive.
+- **One Bon at a time.** A new counter order is refused (409) while that counter still
+  has an unpaid item, so "cash out before the next Bon" is a server invariant rather than
+  just a disabled button. A fully paid *or cancelled* Bon frees the counter again.
+- **Cashier screen.** `GET /api/events/:eventId/counter/unpaid` returns the single open
+  counter order (0 or 1) — the counter cashier has no table/Bon selection. When the last
+  unpaid item is settled, the UI returns to order taking with the next Bon pre-filled.
+
 ### Deferred entities (documented non-goals for v1)
 - **Veranstalter / User** (multi-organizer, system users) — v1 is single-organizer, single-event-lifecycle. Config export/import covers reuse. Revisit when multi-tenancy is requested.
 - **TSE fiscal module** — see §10.
@@ -122,7 +146,8 @@ Terminal statuses are reachable **only** through these dedicated endpoints — t
 
 ```
 POST /api/orders
-  → Zod parse (items non-empty, tableNumber XOR pickupCode)
+  → Zod parse (items non-empty; at most one of tableNumber/pickupCode — neither ⇒ this is
+     a counter order, validated in the service against the waiter)
   → orderService.create(tx):
       1. validate waiter/event/products exist & available
       2. stock check (tracked: count ≥ qty; composite: expand components)
@@ -180,7 +205,7 @@ Per-route `preHandler`s add permission granularity on top of the global guard (4
 | Guard | Endpoints (method + path) |
 |-------|---------------------------|
 | **Public / pre-login reads** | `POST /auth/login`, `POST /auth/admin/login`, `POST /guest/orders`; `GET /events`, `GET /events/:id`, `GET /events/:id/stations`, `GET /events/:id/waiters`, `GET /stations/:id/products`; `GET /health` |
-| **Any valid JWT (no permission gate)** | open `/api/*` GET reads (orders, events, stations, waiters, products, printers, vouchers, layouts, tables, audit-free reads) and plain `authenticate` writes: `PATCH /orders/:id`, `PATCH /order-items/:id`, `POST /vouchers/redeem`, `POST/PUT/DELETE /events/:eventId/layouts`, `PUT /layouts/:id`, `GET /auth/me` |
+| **Any valid JWT (no permission gate)** | open `/api/*` GET reads (orders, events, stations, waiters, products, printers, vouchers, layouts, tables, counter, audit-free reads) and plain `authenticate` writes: `PATCH /orders/:id`, `PATCH /order-items/:id`, `POST /vouchers/redeem`, `POST/PUT/DELETE /events/:eventId/layouts`, `PUT /layouts/:id`, `GET /auth/me` |
 | **`canCancel`** | `POST /orders/:id/cancel`, `POST /order-items/:id/cancel` |
 | **`canCashOut`** | `POST /orders/:id/pay`, `POST /orders/:id/reopen`, `POST /orders/pay-items` |
 | **`canTransfer`** | `PATCH /orders/:id/transfer` |
