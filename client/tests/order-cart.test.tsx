@@ -1,30 +1,28 @@
 /**
- * Cart increment test — isolated to avoid vitest worker hang.
- * The vitest worker hangs when two tests that both render OrderPage and
- * interact with the zustand cart store run sequentially in the same worker.
+ * Cart increment + decrement.
+ *
+ * These two cases used to live in two separate files purely because the vitest
+ * worker hung when both ran in the same worker. The real cause was the
+ * session-store mock handing out a fresh `event` object on every render, which
+ * re-triggered every `[event]`-keyed effect in OrderPage (see
+ * tests/helpers/session.ts). With an identity-stable mock both cases run
+ * together safely.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import OrderPage from '@/pages/Order'
 import { useCartStore } from '@/stores/cart'
+import { makeEvent, makeWaiter, resetSessionState } from './helpers/session'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }))
 
-vi.mock('@/stores/session', () => ({
-  useSessionStore: (selector?: any) => {
-    const state = {
-      event: { id: 'evt-1', name: 'Testfest', status: 'test', hidePrices: false, tseEnabled: false, lastTearOffNumber: 0, createdAt: '', updatedAt: '' },
-      waiter: { id: 'w-1', name: 'Alice', logo: null, eventId: 'evt-1', printerId: null, pickupCode: null, printsImmediately: true, canCancel: false, canCashOut: false, canStatistics: false, canCreateWaiters: false, canTransfer: false, isStationWaiter: false, hidden: false, autoSammelbon: false, active: true },
-      token: 'fake-token', adminToken: null,
-      setEvent: vi.fn(), setWaiter: vi.fn(), setToken: vi.fn(),
-      setAdminToken: vi.fn(), setSession: vi.fn(), clear: vi.fn(),
-      isLoggedIn: () => true, isAdminLoggedIn: () => false,
-    }
-    return selector ? selector(state) : state
-  },
-}))
+// Identity-stable store mock (see tests/helpers/session.ts).
+vi.mock('@/stores/session', async () => {
+  const { useSessionStoreMock } = await import('./helpers/session')
+  return { useSessionStore: useSessionStoreMock }
+})
 
 const mockGetStations = vi.hoisted(() => vi.fn())
 const mockGetProducts = vi.hoisted(() => vi.fn())
@@ -56,6 +54,7 @@ const mockKitchenProducts = [
 
 beforeEach(() => {
   useCartStore.getState().clear()
+  resetSessionState({ waiter: makeWaiter(), event: makeEvent() })
   mockGetStations.mockReset()
   mockGetProducts.mockReset()
   mockCreateOrder.mockReset()
@@ -87,5 +86,30 @@ describe('Cart increment', () => {
     const cartItems2 = screen.getAllByTestId('cart-item')
     expect(cartItems2.length).toBe(1)
     expect(cartItems2[0].textContent).toContain('2×')
+  })
+})
+
+describe('Cart decrement', () => {
+  it('clicking - decrements cart count and removes at zero', async () => {
+    render(<OrderPage navigate={vi.fn()} />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('product-Bier')).toBeDefined()
+    })
+
+    const incrementBtn = screen.getByTestId('increment-Bier')
+    const decrementBtn = screen.getByTestId('decrement-Bier')
+
+    fireEvent.click(incrementBtn)
+    fireEvent.click(incrementBtn)
+    let cartItems = screen.getAllByTestId('cart-item')
+    expect(cartItems[0].textContent).toContain('2×')
+
+    fireEvent.click(decrementBtn)
+    cartItems = screen.getAllByTestId('cart-item')
+    expect(cartItems[0].textContent).toContain('Bier')
+
+    fireEvent.click(decrementBtn)
+    expect(screen.queryAllByTestId('cart-item').length).toBe(0)
   })
 })

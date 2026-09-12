@@ -2,32 +2,20 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import OrderPage from '@/pages/Order'
 import { useCartStore } from '@/stores/cart'
+import { resetSessionState } from './helpers/session'
 
 // Mock i18n
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }))
 
-// Mock session store — logged in with event + waiter
-vi.mock('@/stores/session', () => ({
-  useSessionStore: (selector?: any) => {
-    const state = {
-      event: { id: 'evt-1', name: 'Testfest', status: 'test', hidePrices: false, tseEnabled: false, lastTearOffNumber: 0, createdAt: '', updatedAt: '' },
-      waiter: { id: 'w-1', name: 'Alice', logo: null, eventId: 'evt-1', printerId: null, pickupCode: null, printsImmediately: true, canCancel: false, canCashOut: false, canStatistics: false, canCreateWaiters: false, canTransfer: false, isStationWaiter: false, hidden: false, autoSammelbon: false, active: true },
-      token: 'fake-token',
-      adminToken: null,
-      setEvent: vi.fn(),
-      setWaiter: vi.fn(),
-      setToken: vi.fn(),
-      setAdminToken: vi.fn(),
-      setSession: vi.fn(),
-      clear: vi.fn(),
-      isLoggedIn: () => true,
-      isAdminLoggedIn: () => false,
-    }
-    return selector ? selector(state) : state
-  },
-}))
+// Mock session store — logged in with event + waiter.
+// Identity-stable (see tests/helpers/session.ts): a per-render object re-triggers
+// every `[event]`-keyed effect in OrderPage.
+vi.mock('@/stores/session', async () => {
+  const { useSessionStoreMock } = await import('./helpers/session')
+  return { useSessionStore: useSessionStoreMock }
+})
 
 // Use vi.hoisted to define mock functions that survive vi.mock hoisting
 const mockGetStations = vi.hoisted(() => vi.fn())
@@ -82,6 +70,7 @@ mockCancelOrder.mockResolvedValue({})
 
 beforeEach(() => {
   useCartStore.getState().clear()
+  resetSessionState()
   // Reset all mocks to clean state, then re-apply module-scope implementations.
   // Using mockReset() + re-applying is safer than mockClear() for mocks that get
   // overridden at the test level (e.g. mockGetOrders.mockResolvedValue in filtering tests).

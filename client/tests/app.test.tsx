@@ -1,24 +1,17 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import App from '@/App'
+import { resetSessionState } from './helpers/session'
 
-// Mock the session store
-vi.mock('@/stores/session', () => ({
-  useSessionStore: (selector?: any) => {
-    const state = {
-      event: { id: 'evt1', name: 'Testfest', status: 'test', hidePrices: false, tseEnabled: false, lastTearOffNumber: 0, createdAt: '', updatedAt: '' },
-      waiter: null,
-      token: null,
-      setEvent: vi.fn(),
-      setWaiter: vi.fn(),
-      setToken: vi.fn(),
-      setSession: vi.fn(),
-      clear: vi.fn(),
-      isLoggedIn: () => false,
-    }
-    return selector ? selector(state) : state
-  },
-}))
+// Identity-stable store mock, logged out (see tests/helpers/session.ts).
+vi.mock('@/stores/session', async () => {
+  const { useSessionStoreMock } = await import('./helpers/session')
+  return { useSessionStore: useSessionStoreMock }
+})
+
+beforeEach(() => {
+  resetSessionState({ waiter: null, token: null })
+})
 
 // Mock the API
 vi.mock('@/api/client', () => ({

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import CashierView from '@/components/CashierView'
+import { resetSessionState } from './helpers/session'
 
 // Mock i18n
 vi.mock('react-i18next', () => ({
@@ -22,23 +23,12 @@ vi.mock('@/api/client', () => ({
   },
 }))
 
-// Mock session store — logged in with event + token (CashierView reads event/waiter/token)
-vi.mock('@/stores/session', () => ({
-  useSessionStore: () => ({
-    event: { id: 'evt-1', name: 'Testfest', status: 'test' as const, hidePrices: false, tseEnabled: false, lastTearOffNumber: 0, createdAt: '', updatedAt: '' },
-    waiter: {
-      id: 'w-1', name: 'Alice', logo: null, eventId: 'evt-1', printerId: null, pickupCode: null,
-      printsImmediately: true, canCancel: false, canCashOut: false, canStatistics: false,
-      canCreateWaiters: false, canTransfer: false, isStationWaiter: false, hidden: false, autoSammelbon: false, active: true,
-    },
-    token: 'token-1',
-    adminToken: null,
-    setEvent: vi.fn(), setWaiter: vi.fn(), setToken: vi.fn(), setAdminToken: vi.fn(),
-    setSession: vi.fn(), clear: vi.fn(),
-    isLoggedIn: () => true,
-    isAdminLoggedIn: () => false,
-  }),
-}))
+// Mock session store — logged in with event + token (CashierView reads event/waiter/token).
+// Identity-stable (see tests/helpers/session.ts).
+vi.mock('@/stores/session', async () => {
+  const { useSessionStoreMock } = await import('./helpers/session')
+  return { useSessionStore: useSessionStoreMock }
+})
 
 // Two unpaid items for table 5: 2× Bier (600) + 1× Cola (250) = 850
 const unpaidOrders = [
@@ -60,6 +50,7 @@ const openTables = [
 ]
 
 beforeEach(() => {
+  resetSessionState()
   mockGetUnpaidByTable.mockReset()
   mockGetOpenTables.mockReset()
   mockGetOrders.mockReset()
