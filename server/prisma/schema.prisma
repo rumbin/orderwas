@@ -13,6 +13,7 @@ model Event {
   status            String   @default("test") // "test" | "live"
   hidePrices        Boolean  @default(false)
   tseEnabled        Boolean  @default(false)
+  counterEnabled    Boolean  @default(false) // Theke/Abholcounter enabled for this event
   lastTearOffNumber Int      @default(0)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -139,6 +140,7 @@ model Waiter {
   canCreateWaiters Boolean @default(false)
   canTransfer  Boolean  @default(false)
   isStationWaiter Boolean @default(false)
+  isCounter    Boolean  @default(false) // Theke/Abholcounter login identity (Bon instead of table)
   hidden       Boolean  @default(false)
   autoSammelbon Boolean @default(false)
   active       Boolean  @default(true)

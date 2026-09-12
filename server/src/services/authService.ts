@@ -32,6 +32,7 @@ const loginWaiterSelect = {
   canCreateWaiters: true,
   canTransfer: true,
   isStationWaiter: true,
+  isCounter: true,
   active: true,
 } as const
 
@@ -56,6 +57,7 @@ const meWaiterSelect = {
   canCreateWaiters: true,
   canTransfer: true,
   isStationWaiter: true,
+  isCounter: true,
   hidden: true,
   autoSammelbon: true,
   active: true,

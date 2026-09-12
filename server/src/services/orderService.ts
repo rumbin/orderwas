@@ -3,6 +3,7 @@ import { orderEvents, type OrderEventPayload } from '@/websocket'
 import { dispatchOrderPrints } from '@/printer/dispatch'
 import { checkStockAvailability, decrementStock, restoreStock } from '@/services/stockService'
 import { logAudit } from '@/services/auditService'
+import { waiterSelect } from '@/services/waiterService'
 
 export interface OptionSelection {
   extraId: string
@@ -255,6 +256,10 @@ export async function listOrdersByEvent(eventId: string) {
     where: { eventId },
     include: {
       items: { include: { product: { select: { id: true, name: true, priceCents: true, stationId: true, color: true } } } },
+      // Waiter identity is needed by the client to label counter orders as
+      // "Theke" (and to keep waiter names available in order lists). Uses the
+      // canonical waiterSelect — never leaks `pin`.
+      waiter: { select: waiterSelect },
     },
     orderBy: { createdAt: 'asc' },
   })
