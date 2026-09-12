@@ -123,13 +123,22 @@ export function formatReceipt(data: ReceiptData, config: PrinterConfig): Buffer 
     parts.push(lf())
   }
 
-  // Table / pickup code + tear-off number
+  // Table / pickup code / counter Bon + tear-off number.
+  // Counter (Theke) orders have neither a table nor a pickup code: their Bon
+  // number *is* the identifier the customer holds, so it takes that line.
   parts.push(LEFT)
   const identifier = data.tableNumber
     ? `Tisch: ${data.tableNumber}`
-    : `Abholcode: ${data.pickupCode}`
+    : data.pickupCode
+      ? `Abholcode: ${data.pickupCode}`
+      : data.tearOffNumber !== null
+        ? `Bon: ${data.tearOffNumber}`
+        : 'Ohne Zuordnung'
   parts.push(text(identifier))
-  if (data.tearOffNumber !== null) {
+
+  // The Bon number gets its own line unless it already *is* the identifier.
+  const bonIsIdentifier = !data.tableNumber && !data.pickupCode
+  if (data.tearOffNumber !== null && !bonIsIdentifier) {
     parts.push(text(`   Bon-Nr: ${data.tearOffNumber}`))
   }
   parts.push(lf(2))

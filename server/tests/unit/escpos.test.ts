@@ -150,6 +150,46 @@ describe('formatReceipt', () => {
   })
 })
 
+describe('formatReceipt — counter (Theke) orders', () => {
+  const counterReceipt: ReceiptData = {
+    stationName: 'Bar',
+    tableNumber: null,
+    pickupCode: null,
+    tearOffNumber: 7,
+    items: [{ name: 'Bier Helles', quantity: 2, priceCents: 300 }],
+    totalCents: 600,
+    isTestMode: false,
+    hidePrices: false,
+  }
+
+  it('prints the Bon as the identifier instead of a table', () => {
+    const str = formatReceipt(counterReceipt, defaultConfig).toString('latin1')
+    expect(str).toContain('Bon: 7')
+    expect(str).not.toContain('Tisch:')
+    expect(str).not.toContain('Abholcode')
+  })
+
+  it('does not repeat the Bon in a second Bon-Nr line', () => {
+    const str = formatReceipt(counterReceipt, defaultConfig).toString('latin1')
+    expect(str).not.toContain('Bon-Nr:')
+  })
+
+  it('leaves waiter receipts with Tisch + Bon-Nr', () => {
+    const str = formatReceipt(defaultReceipt, defaultConfig).toString('latin1')
+    expect(str).toContain('Tisch: 12')
+    expect(str).toContain('Bon-Nr: 5')
+  })
+
+  it('leaves pickup receipts with Abholcode + Bon-Nr', () => {
+    const str = formatReceipt(
+      { ...defaultReceipt, tableNumber: null, pickupCode: 'A7' },
+      defaultConfig,
+    ).toString('latin1')
+    expect(str).toContain('Abholcode: A7')
+    expect(str).toContain('Bon-Nr: 5')
+  })
+})
+
 describe('formatTestPage', () => {
   it('contains printer name', () => {
     const buf = formatTestPage('Bar Drucker', defaultConfig)
