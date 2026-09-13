@@ -59,7 +59,7 @@ describe('Concurrent tear-off numbers', () => {
     // hit connection-busy timeouts rather than exercising the race. Instead we
     // launch overlapping calls in small groups (staggered Promise.all) so their
     // transactions interleave. Distinctness is guaranteed by the per-transaction
-    // atomic increment on Event.lastTearOffNumber.
+    // atomic increment on Waiter.tearOffNumber.
     const N = 12
     const results: Awaited<ReturnType<typeof attempt>>[] = []
     for (let i = 0; i < N; i += 3) {

@@ -11,7 +11,6 @@ export function AdminEvents({ events, selectedEventId, onChanged }: {
   const { t } = useTranslation()
   const [newName, setNewName] = useState('')
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
-  const [editingTearOff, setEditingTearOff] = useState<string | null>(null)
 
   const handleCreate = async () => {
     if (!newName) return
@@ -63,7 +62,6 @@ export function AdminEvents({ events, selectedEventId, onChanged }: {
           <tr className="text-left border-b">
             <th className="py-2">Name</th>
             <th>Status</th>
-            <th>Tear-off</th>
             <th>{t('admin.counterEnabled')}</th>
             <th></th>
           </tr>
@@ -85,36 +83,6 @@ export function AdminEvents({ events, selectedEventId, onChanged }: {
                   <span className="ml-2 text-xs text-red-600">
                     ⚠ Alle Bestellungen werden gelöscht! <button onClick={() => handleToggleStatus(e)} className="underline font-bold">Bestätigen</button> <button onClick={() => setConfirmingId(null)}>Abbrechen</button>
                   </span>
-                )}
-              </td>
-              <td className="text-gray-500">
-                {editingTearOff === e.id ? (
-                  <input
-                    type="number"
-                    defaultValue={e.lastTearOffNumber}
-                    onBlur={async (ev) => {
-                      const val = parseInt(ev.target.value)
-                      if (!isNaN(val) && val >= 0) {
-                        await api.updateEvent(e.id, { lastTearOffNumber: val } as any)
-                        onChanged()
-                      }
-                      setEditingTearOff(null)
-                    }}
-                    onKeyDown={(ev) => {
-                      if (ev.key === 'Enter') (ev.target as HTMLInputElement).blur()
-                      if (ev.key === 'Escape') setEditingTearOff(null)
-                    }}
-                    className="w-20 rounded border border-gray-300 px-1 py-0.5 text-sm"
-                    autoFocus
-                  />
-                ) : (
-                  <button
-                    onClick={() => setEditingTearOff(e.id)}
-                    className="hover:text-blue-600 cursor-pointer"
-                    title="Klicken zum Ändern"
-                  >
-                    #{e.lastTearOffNumber}
-                  </button>
                 )}
               </td>
               <td>

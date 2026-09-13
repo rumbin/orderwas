@@ -27,6 +27,7 @@ const updateWaiterBody = z.object({
   canCancel: z.boolean().optional(),
   canCashOut: z.boolean().optional(),
   canStatistics: z.boolean().optional(),
+  tearOffNumber: z.number().int().min(0).optional(),
   active: z.boolean().optional(),
 })
 

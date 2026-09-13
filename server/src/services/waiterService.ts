@@ -17,6 +17,7 @@ export const waiterSelect = {
   canTransfer: true,
   isStationWaiter: true,
   isCounter: true,
+  tearOffNumber: true,
   hidden: true,
   autoSammelbon: true,
   active: true,

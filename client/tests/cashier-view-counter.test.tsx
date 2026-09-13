@@ -47,7 +47,7 @@ beforeEach(() => {
   counterOpen = []
   resetSessionState({
     waiter: makeCounterWaiter(),
-    event: makeEvent({ counterEnabled: true, lastTearOffNumber: 6 }),
+    event: makeEvent({ counterEnabled: true }),
   })
   mockGetCounterUnpaid.mockReset()
   mockPayItems.mockReset()

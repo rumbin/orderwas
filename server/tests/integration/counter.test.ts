@@ -174,7 +174,7 @@ describe('Theke / counter', () => {
     })
 
     it('auto-assigns the next Bon when the counter submits none', async () => {
-      await prisma.event.update({ where: { id: eventId }, data: { lastTearOffNumber: 4 } })
+      await prisma.waiter.update({ where: { id: counterId }, data: { tearOffNumber: 4 } })
 
       const res = await postOrder({
         waiterId: counterId,
@@ -186,7 +186,7 @@ describe('Theke / counter', () => {
       expect(res.json().tearOffNumber).toBe(5)
     })
 
-    it('bumps the event counter when a manually entered Bon is ahead of it', async () => {
+    it('bumps the waiter counter when a manually entered Bon is ahead of it', async () => {
       const res = await postOrder({
         tearOffNumber: 20,
         waiterId: counterId,
@@ -195,8 +195,8 @@ describe('Theke / counter', () => {
       })
       expect(res.statusCode).toBe(201)
 
-      const event = await prisma.event.findUniqueOrThrow({ where: { id: eventId } })
-      expect(event.lastTearOffNumber).toBe(20)
+      const waiter = await prisma.waiter.findUniqueOrThrow({ where: { id: counterId } })
+      expect(waiter.tearOffNumber).toBe(20)
 
       // The next auto-assigned Bon continues after the manual one.
       await prisma.orderItem.updateMany({ data: { paidAt: new Date() } })

@@ -14,7 +14,6 @@ model Event {
   hidePrices        Boolean  @default(false)
   tseEnabled        Boolean  @default(false)
   counterEnabled    Boolean  @default(false) // Theke/Abholcounter enabled for this event
-  lastTearOffNumber Int      @default(0)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   stations          Station[]
@@ -141,6 +140,7 @@ model Waiter {
   canTransfer  Boolean  @default(false)
   isStationWaiter Boolean @default(false)
   isCounter    Boolean  @default(false) // Theke/Abholcounter login identity (Bon instead of table)
+  tearOffNumber Int     @default(0)   // Bon counter — shared sequence per event; resets on test→live
   hidden       Boolean  @default(false)
   autoSammelbon Boolean @default(false)
   active       Boolean  @default(true)

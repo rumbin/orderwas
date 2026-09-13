@@ -140,7 +140,7 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   }, [tab, eventId])
 
   // Counter mode: pre-fill the Bon with the next tear-off number (still editable).
-  const nextBon = (event?.lastTearOffNumber ?? 0) + 1
+  const nextBon = (waiter?.tearOffNumber ?? 0) + 1
   useEffect(() => {
     if (!isCounterMode) return
     setBonNumber(String(nextBon))

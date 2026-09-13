@@ -232,3 +232,26 @@ describe('Waiter CRUD - PATCH /api/waiters/:id/active', () => {
     expect((res2.json() as Record<string, unknown>).active).toBe(true)
   })
 })
+
+describe('Waiter CRUD - tearOffNumber on the counter', () => {
+  it('admin can update tearOffNumber on a counter waiter', async () => {
+    const eventId = await setupEvent()
+    const created = await server.inject({
+      method: 'POST',
+      url: `/api/events/${eventId}/waiters`,
+      payload: { name: 'Theke', pin: '0000' },
+      headers: adminHeaders,
+    })
+    const id = (created.json() as { id: string }).id
+    expect((created.json() as Record<string, unknown>).tearOffNumber).toBe(0)
+
+    const res = await server.inject({
+      method: 'PUT',
+      url: `/api/waiters/${id}`,
+      payload: { tearOffNumber: 42 },
+      headers: adminHeaders,
+    })
+    expect(res.statusCode).toBe(200)
+    expect((res.json() as Record<string, unknown>).tearOffNumber).toBe(42)
+  })
+})

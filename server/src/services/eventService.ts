@@ -37,11 +37,10 @@ export async function updateEvent(id: string, data: Record<string, unknown>) {
   if (data.status === 'live') {
     const event = await prisma.event.findUnique({ where: { id }, select: { status: true } })
     if (event && event.status === 'test') {
-      // Wipe all orders for this event and reset tear-off counter
+      // Wipe all orders for this event (tear-off counter lives on the Theke waiter, not here)
       await prisma.$transaction([
         prisma.orderItem.deleteMany({ where: { order: { eventId: id } } }),
         prisma.order.deleteMany({ where: { eventId: id } }),
-        prisma.event.update({ where: { id }, data: { lastTearOffNumber: 0 } }),
       ])
     }
   }

@@ -192,9 +192,9 @@ export async function createOrder(input: CreateOrderInput) {
     }
 
     // Tear-off (Bon) assignment. The counter may pin the number that was torn
-    // off at the Theke; every other order takes the next free number. Either
-    // way the event counter ends up at or above the assigned number, so the
-    // pre-filled next Bon keeps moving forward.
+    // off at the Theke; every other order takes the next free number. The
+    // counter lives on the waiter, not the event, so each counter waiter has
+    // its own independent Bon sequence.
     let assignedTearOffNumber: number
     if (tearOffNumber !== undefined) {
       const clash = await tx.order.findFirst({
@@ -205,22 +205,22 @@ export async function createOrder(input: CreateOrderInput) {
         throw new OrderValidationError(`Bon number ${tearOffNumber} is already in use`, 409)
       }
 
-      const current = await tx.event.findUniqueOrThrow({
-        where: { id: eventId },
-        select: { lastTearOffNumber: true },
+      const current = await tx.waiter.findUniqueOrThrow({
+        where: { id: waiterId },
+        select: { tearOffNumber: true },
       })
-      await tx.event.update({
-        where: { id: eventId },
-        data: { lastTearOffNumber: Math.max(current.lastTearOffNumber, tearOffNumber) },
+      await tx.waiter.update({
+        where: { id: waiterId },
+        data: { tearOffNumber: Math.max(current.tearOffNumber, tearOffNumber) },
       })
       assignedTearOffNumber = tearOffNumber
     } else {
-      const updatedEvent = await tx.event.update({
-        where: { id: eventId },
-        data: { lastTearOffNumber: { increment: 1 } },
-        select: { lastTearOffNumber: true },
+      const updatedWaiter = await tx.waiter.update({
+        where: { id: waiterId },
+        data: { tearOffNumber: { increment: 1 } },
+        select: { tearOffNumber: true },
       })
-      assignedTearOffNumber = updatedEvent.lastTearOffNumber
+      assignedTearOffNumber = updatedWaiter.tearOffNumber
     }
 
     // Stock decrement happens after order creation (still inside the transaction)

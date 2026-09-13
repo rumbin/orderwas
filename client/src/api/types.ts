@@ -10,7 +10,6 @@ export interface Event {
   hidePrices: boolean
   tseEnabled: boolean
   counterEnabled: boolean
-  lastTearOffNumber: number
   createdAt: string
   updatedAt: string
 }
@@ -88,6 +87,7 @@ export interface Waiter {
   canTransfer: boolean
   isStationWaiter: boolean
   isCounter: boolean
+  tearOffNumber: number
   hidden: boolean
   autoSammelbon: boolean
   active: boolean

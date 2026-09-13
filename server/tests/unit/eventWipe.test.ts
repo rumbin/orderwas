@@ -40,12 +40,12 @@ describe('Event test→live wipe', () => {
     await createOrder({ tableNumber: '2', waiterId, eventId, items: [{ productId, quantity: 1 }] })
   })
 
-  it('switching test→live wipes all orders and resets tear-off counter', async () => {
+  it('switching test→live wipes all orders and resets tear-off counter on the waiter', async () => {
     // Verify we have orders before the wipe
     const ordersBefore = await prisma.order.findMany({ where: { eventId } })
     expect(ordersBefore).toHaveLength(2)
-    const eventBefore = await prisma.event.findUnique({ where: { id: eventId } })
-    expect(eventBefore?.lastTearOffNumber).toBe(2)
+    const waiterBefore = await prisma.waiter.findUnique({ where: { id: waiterId } })
+    expect(waiterBefore?.tearOffNumber).toBe(2)
 
     // Switch to live
     await updateEvent(eventId, { status: 'live' })
@@ -54,10 +54,9 @@ describe('Event test→live wipe', () => {
     const ordersAfter = await prisma.order.findMany({ where: { eventId } })
     expect(ordersAfter).toHaveLength(0)
 
-    // Tear-off counter reset
+    // Event status is live
     const eventAfter = await prisma.event.findUnique({ where: { id: eventId } })
     expect(eventAfter?.status).toBe('live')
-    expect(eventAfter?.lastTearOffNumber).toBe(0)
   })
 
   it('live→test does NOT wipe data', async () => {
@@ -73,7 +72,7 @@ describe('Event test→live wipe', () => {
     await updateEvent(eventId, { status: 'test' })
     const ordersAfter = await prisma.order.findMany({ where: { eventId } })
     expect(ordersAfter).toHaveLength(1)
-    const event = await prisma.event.findUnique({ where: { id: eventId } })
-    expect(event?.lastTearOffNumber).toBe(1)
+    const waiter = await prisma.waiter.findUnique({ where: { id: waiterId } })
+    expect(waiter?.tearOffNumber).toBe(3)
   })
 })

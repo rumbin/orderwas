@@ -11,7 +11,7 @@ vi.mock('@/api/client', () => ({
 
 import { api } from '@/api/client'
 
-const mockEvent = { id: 'evt1', name: 'Testfest', status: 'test', hidePrices: false, tseEnabled: false, lastTearOffNumber: 0, createdAt: '', updatedAt: '' }
+const mockEvent = { id: 'evt1', name: 'Testfest', status: 'test', hidePrices: false, tseEnabled: false, createdAt: '', updatedAt: '' }
 vi.mock('@/stores/session', () => ({
   useSessionStore: () => ({
     event: mockEvent,

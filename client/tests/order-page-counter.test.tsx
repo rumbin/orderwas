@@ -51,8 +51,8 @@ const openBon = [
 beforeEach(() => {
   useCartStore.getState().clear()
   resetSessionState({
-    waiter: makeCounterWaiter(),
-    event: makeEvent({ counterEnabled: true, lastTearOffNumber: 5 }),
+    waiter: makeCounterWaiter({ tearOffNumber: 5 }),
+    event: makeEvent({ counterEnabled: true }),
   })
   mockGetStations.mockReset().mockResolvedValue(stations)
   mockGetProducts.mockReset().mockResolvedValue(barProducts)
@@ -60,7 +60,7 @@ beforeEach(() => {
   mockGetOrders.mockReset().mockResolvedValue([])
   mockGetEvent.mockReset().mockResolvedValue({
     id: 'evt-1', name: 'Testfest', status: 'test', hidePrices: false, tseEnabled: false,
-    counterEnabled: true, lastTearOffNumber: 6, createdAt: '', updatedAt: '',
+    counterEnabled: true, createdAt: '', updatedAt: '',
   })
   mockCreateOrder.mockReset()
 })
