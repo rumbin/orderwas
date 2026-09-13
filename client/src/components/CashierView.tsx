@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSessionStore } from '@/stores/session'
 import { api } from '@/api/client'
@@ -120,10 +120,18 @@ export default function CashierView({ initialTable, isCounterMode = false, onCou
     if (selected.size > 0) setPayError(false)
   }, [selected])
 
-  // Collect all unpaid item ids
-  const allUnpaidIds = orders.flatMap((o) =>
-    o.items.filter((i) => !i.paidAt).map((i) => i.id)
+  // Collect all unpaid item ids (memoized to avoid re-triggering effects on every render)
+  const allUnpaidIds = useMemo(() =>
+    orders.flatMap((o) => o.items.filter((i) => !i.paidAt).map((i) => i.id)),
+    [orders]
   )
+
+  // Counter mode: pre-select all unpaid items (payment is mandatory before next order)
+  useEffect(() => {
+    if (isCounterMode && !loading && allUnpaidIds.length > 0) {
+      setSelected(new Set(allUnpaidIds))
+    }
+  }, [isCounterMode, loading, allUnpaidIds])
 
   // Counter mode: the Bon currently being cashed out (there is at most one).
   const counterBon = orders[0]?.tearOffNumber ?? null

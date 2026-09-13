@@ -74,6 +74,26 @@ describe('CashierView in counter mode', () => {
     expect(screen.getByText('Bier')).toBeDefined()
   })
 
+  it('pre-selects all items (counter payment is mandatory for next order)', async () => {
+    counterOpen = counterOrder
+    render(<CashierView initialTable={null} isCounterMode />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Bier')).toBeDefined()
+    })
+
+    // All items should be pre-selected — no manual click needed
+    expect(mockPayItems).not.toHaveBeenCalled()
+    // The pay button should be enabled (items are selected)
+    expect(screen.getByText('cashier.pay')).toBeDefined()
+    // Click pay directly — no need to select items first
+    fireEvent.click(screen.getByText('cashier.pay'))
+
+    await waitFor(() => {
+      expect(mockPayItems).toHaveBeenCalledWith(['it-1'])
+    })
+  })
+
   it('shows the empty state when the counter has no open Bon', async () => {
     render(<CashierView initialTable={null} isCounterMode />)
 
@@ -94,7 +114,7 @@ describe('CashierView in counter mode', () => {
       expect(screen.getByText('Bier')).toBeDefined()
     })
 
-    fireEvent.click(screen.getByText('Bier'))
+    // Items are pre-selected in counter mode — click pay directly
     fireEvent.click(screen.getByText('cashier.pay'))
 
     await waitFor(() => {
@@ -130,7 +150,8 @@ describe('CashierView in counter mode', () => {
       expect(screen.getByText('Cola')).toBeDefined()
     })
 
-    fireEvent.click(screen.getByText('Cola'))
+    // Items are pre-selected — deselect Bier first (toggle behavior), then pay
+    fireEvent.click(screen.getByText('Bier'))
     fireEvent.click(screen.getByText('cashier.pay'))
 
     await waitFor(() => {

@@ -74,8 +74,7 @@ test.describe('Theke (counter) flow', () => {
     await page.getByTestId('counter-blocked-action').click()
     await expect(counterHeader).toBeVisible()
 
-    // --- 6. Cash out the Bon ---
-    await page.getByText('Alle auswählen').click()
+    // --- 6. Cash out the Bon (items are pre-selected in counter mode) ---
     await page.getByRole('button', { name: 'Bezahlt', exact: true }).click()
 
     // --- 7. Back to order taking with the next Bon pre-filled.

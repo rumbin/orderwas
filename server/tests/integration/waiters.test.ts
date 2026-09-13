@@ -71,6 +71,30 @@ describe('Waiter CRUD - POST /api/events/:eventId/waiters', () => {
     expect(body.active).toBe(true) // default
   })
 
+  it('creates a waiter that can log in with its PIN', async () => {
+    const eventId = await setupEvent()
+    const createRes = await server.inject({
+      method: 'POST',
+      url: `/api/events/${eventId}/waiters`,
+      payload: { name: 'LoginTest', pin: '5678' },
+      headers: adminHeaders,
+    })
+    expect(createRes.statusCode).toBe(201)
+    const waiterId = (createRes.json() as { id: string }).id
+
+    // The created waiter can authenticate
+    const loginRes = await server.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { waiterId, pin: '5678' },
+    })
+    expect(loginRes.statusCode).toBe(200)
+    const { token, waiter } = loginRes.json() as { token: string; waiter: { id: string; name: string } }
+    expect(token).toBeDefined()
+    expect(waiter.id).toBe(waiterId)
+    expect(waiter.name).toBe('LoginTest')
+  })
+
   it('rejects creation when name is missing (400)', async () => {
     const eventId = await setupEvent()
     const res = await server.inject({
