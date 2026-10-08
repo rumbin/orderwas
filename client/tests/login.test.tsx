@@ -43,18 +43,17 @@ describe('Login page', () => {
 
   it('renders waiter buttons sorted alphabetically', async () => {
     render(<Login navigate={vi.fn()} />)
-    await waitFor(() => expect(api.getWaiters).toHaveBeenCalled())
-    const aliceBtn = screen.getByTestId('waiter-Alice')
+    // Wait for the render, not just the request: getWaiters() resolving does not
+    // mean React has committed the buttons yet (this raced under parallel load).
+    const aliceBtn = await screen.findByTestId('waiter-Alice')
     const bobBtn = screen.getByTestId('waiter-Bob')
-    expect(aliceBtn).toBeDefined()
-    expect(bobBtn).toBeDefined()
     // Alice before Bob in DOM (alphabetical)
     expect(aliceBtn.compareDocumentPosition(bobBtn) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('clicking waiter opens PIN overlay', async () => {
     render(<Login navigate={vi.fn()} />)
-    await waitFor(() => expect(api.getWaiters).toHaveBeenCalled())
+    await screen.findByTestId('waiter-Alice')
     fireEvent.click(screen.getByTestId('waiter-Alice'))
     expect(screen.getByTestId('pin-input')).toBeDefined()
     expect(screen.getByTestId('login-button')).toBeDefined()
@@ -63,7 +62,7 @@ describe('Login page', () => {
   it('shows wrong PIN error on login failure', async () => {
     vi.mocked(api.login).mockRejectedValueOnce(new Error('Invalid credentials'))
     render(<Login navigate={vi.fn()} />)
-    await waitFor(() => expect(api.getWaiters).toHaveBeenCalled())
+    await screen.findByTestId('waiter-Alice')
     fireEvent.click(screen.getByTestId('waiter-Alice'))
     fireEvent.change(screen.getByTestId('pin-input'), { target: { value: '9999' } })
     fireEvent.click(screen.getByTestId('login-button'))
@@ -79,7 +78,7 @@ describe('Login page', () => {
       waiter: mockWaiters[0] as any,
     })
     render(<Login navigate={mockNavigate} />)
-    await waitFor(() => expect(api.getWaiters).toHaveBeenCalled())
+    await screen.findByTestId('waiter-Alice')
     fireEvent.click(screen.getByTestId('waiter-Alice'))
     fireEvent.change(screen.getByTestId('pin-input'), { target: { value: '1234' } })
     fireEvent.click(screen.getByTestId('login-button'))

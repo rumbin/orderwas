@@ -66,26 +66,29 @@ describe('CashierView in counter mode', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('counter-cashier-header').textContent).toContain('order.counter')
+      expect(screen.getByText('Bier')).toBeDefined()
     })
     // Header carries the counter label + Bon number, and there is no
     // "change table" affordance at the counter.
     expect(screen.getByTestId('counter-cashier-header').textContent).toContain('7')
     expect(screen.queryByText('cashier.selectTable')).toBeNull()
-    expect(screen.getByText('Bier')).toBeDefined()
   })
 
   it('pre-selects all items (counter payment is mandatory for next order)', async () => {
     counterOpen = counterOrder
     render(<CashierView initialTable={null} isCounterMode />)
 
+    // The pay button only appears once the pre-selection effect has committed —
+    // waiting for the list alone raced with that second render.
+    // The pay button exists before the pre-selection effect commits, so wait for
+    // it to be *enabled* — clicking it while still disabled is a silent no-op.
     await waitFor(() => {
       expect(screen.getByText('Bier')).toBeDefined()
+      expect(screen.getByText('cashier.pay')).toBeEnabled()
     })
 
     // All items should be pre-selected — no manual click needed
     expect(mockPayItems).not.toHaveBeenCalled()
-    // The pay button should be enabled (items are selected)
-    expect(screen.getByText('cashier.pay')).toBeDefined()
     // Click pay directly — no need to select items first
     fireEvent.click(screen.getByText('cashier.pay'))
 
@@ -112,6 +115,7 @@ describe('CashierView in counter mode', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Bier')).toBeDefined()
+      expect(screen.getByText('cashier.pay')).toBeEnabled()
     })
 
     // Items are pre-selected in counter mode — click pay directly
@@ -148,6 +152,7 @@ describe('CashierView in counter mode', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Cola')).toBeDefined()
+      expect(screen.getByText('cashier.pay')).toBeEnabled()
     })
 
     // Items are pre-selected — deselect Bier first (toggle behavior), then pay
