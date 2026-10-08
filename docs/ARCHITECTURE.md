@@ -226,7 +226,6 @@ Docker multi-stage: build client → serve static from Fastify (`@fastify/static
 |----------|-----|---------|
 | TSE fiscal compliance | Orderwas is not a Registrierkasse; huge scope | if German users demand it |
 | Multi-organizer / multi-tenant | single-event lifecycle | on request |
-| Structured product extras | free text suffices | Phase 6+ |
 | Floor plan editor | Bierblock nice-to-have | Phase 6+ |
 | Cashless payment integration | out of scope | — |
 | Bluetooth printers | network printers only | on hardware demand |

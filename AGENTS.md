@@ -1,6 +1,7 @@
 # AGENTS.md — Orderwas
 
 > **Read first:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (binding), [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)
+> **Query Graphify FIRST:** Before investigating structure, tracing bugs, or planning features, always run `graphify explain`, `graphify query`, or `graphify path` to understand the relevant modules and their connections. Read `graphify-out/GRAPH_REPORT.md` for community hubs. The graph is rebuilt automatically via post-commit hook — check staleness with `git rev-parse HEAD` vs the hash in GRAPH_REPORT.md.
 > **Plan:** [.hermes/plans/2026-08-14_001530-orderwas-implementation.md](.hermes/plans/2026-08-14_001530-orderwas-implementation.md)
 
 ## What This Is
@@ -89,7 +90,18 @@ cd server && npx prisma generate                # regenerate Prisma client after
 
 ## Graphify (Knowledge Graph)
 
-Graphify builds a queryable knowledge graph of the codebase (`graphify-out/graph.json`). Use it to understand architecture, trace dependencies, and find cross-module connections before implementing features.
+Graphify builds a queryable knowledge graph of the codebase (`graphify-out/graph.json`). **Always query it first** when investigating project structure, tracing bugs, or planning features — it reveals module connections, call chains, and community boundaries faster than grepping.
+
+### ⚠️ Mandatory: Query Graphify before any investigation
+
+Before writing code, reading files, or tracing a bug path:
+
+1. `graphify explain "<file>.ts" .` — understand what a module does and its dependencies
+2. `graphify query "How does <feature> work?" .` — BFS traversal across the full call chain
+3. `graphify path "Source" "Target" .` — shortest path between two modules
+4. Read `graphify-out/GRAPH_REPORT.md` — god nodes, surprising connections, community structure
+
+Do NOT skip this step. Grepping and `read_file` are fallbacks for details the graph doesn't cover — the graph is the primary orientation tool.
 
 ### Before planning any implementation
 
