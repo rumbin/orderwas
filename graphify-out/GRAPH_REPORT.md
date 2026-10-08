@@ -1,16 +1,16 @@
 # Graph Report - orderwas  (2026-10-08)
 
 ## Corpus Check
-- 174 files · ~251,915 words
+- 174 files · ~251,923 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 895 nodes · 1611 edges · 57 communities (51 shown, 6 thin omitted)
+- 954 nodes · 1668 edges · 60 communities (54 shown, 6 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 16 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `fb00f863`
+- Built from commit: `619fa6f3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -48,8 +48,8 @@
 - cors.ts
 - routes/auth.ts
 - i18n-parity.test.ts
-- waiters.ts
-- useSessionStore
+- OrderWas Quality Remediation Implementation Plan
+- formatPrice
 - Orderwas
 - Orderwas — Requirements Document
 - AGENTS.md — Orderwas
@@ -63,6 +63,9 @@
 - 13. Implementation Roadmap
 - 15. Appendix
 - 9. Hardware Requirements
+- order-page.test.tsx
+- OrderWas UI Fixes: Cashier Item Display & Station Paid Orders
+- station-display.test.tsx
 - 14. Success Criteria
 - 2. Target Audience & Use Cases
 - 7. User Interface Requirements
@@ -72,8 +75,8 @@
 2. `buildServer()` - 40 edges
 3. `AppServer` - 25 edges
 4. `formatPrice()` - 20 edges
-5. `api` - 19 edges
-6. `Orderwas — Requirements Document` - 18 edges
+5. `Orderwas — Requirements Document` - 19 edges
+6. `api` - 19 edges
 7. `useSessionStore` - 18 edges
 8. `Product` - 16 edges
 9. `OrderValidationError` - 16 edges
@@ -94,11 +97,11 @@
 ## Import Cycles
 - None detected.
 
-## Communities (57 total, 6 thin omitted)
+## Communities (60 total, 6 thin omitted)
 
 ### Community 0 - "src/index.ts"
-Cohesion: 0.07
-Nodes (29): globalForPrisma, prisma, AppServer, buildServer(), corsPlugin, main(), configRoutes(), createEventSchema (+21 more)
+Cohesion: 0.06
+Nodes (40): globalForPrisma, prisma, AppServer, buildServer(), corsPlugin, main(), configRoutes(), createEventSchema (+32 more)
 
 ### Community 1 - "dependencies"
 Cohesion: 0.05
@@ -110,19 +113,19 @@ Nodes (31): dispatchOrderPrints(), DUMMY_PRINT_DIR, executePrintJob(), OrderForP
 
 ### Community 3 - "orderService.ts"
 Cohesion: 0.07
-Nodes (51): AdminJwtPayload, authPlugin(), fastify, FastifyInstance, JwtPayload, createOrderBody, createOrderItemSchema, ordersRoutes() (+43 more)
+Nodes (52): AdminJwtPayload, authPlugin(), fastify, FastifyInstance, JwtPayload, createOrderBody, createOrderItemSchema, ordersRoutes() (+44 more)
 
 ### Community 4 - "types.ts"
-Cohesion: 0.11
-Nodes (23): adminAuthHeaders(), authHeaders(), request(), AppLayout, AuditLogEntry, OpenTable, Order, OrderItem (+15 more)
+Cohesion: 0.16
+Nodes (15): adminAuthHeaders(), authHeaders(), request(), AppLayout, AuditLogEntry, Order, OrderItem, ProductConsumption (+7 more)
 
 ### Community 5 - "5.2 Advanced Features (Should-Have)"
 Cohesion: 0.10
 Nodes (21): 5.1.1 Order Taking, 5.1.2 Station Management, 5.1.3 Kitchen Monitor, 5.1.4 Printer Support, 5.1.5 Voucher System (Gutscheine), 5.1.6 Settlement & Reporting, 5.1.7 User & Role Management, 5.1 Core Features (Must-Have) (+13 more)
 
 ### Community 6 - "App.tsx"
-Cohesion: 0.15
-Nodes (12): App(), AppInner(), formatCents(), GuestOrder(), matchRoute(), parseHash(), Route, useRouter() (+4 more)
+Cohesion: 0.10
+Nodes (24): App(), AppInner(), LanguagePicker(), LANGUAGES, ThemeSwitcher(), UserMenu(), Admin(), Landing() (+16 more)
 
 ### Community 7 - "scripts"
 Cohesion: 0.07
@@ -161,20 +164,20 @@ Cohesion: 0.32
 Nodes (10): createLayoutSchema, layoutsRoutes(), updateLayoutSchema, createLayout(), CreateLayoutData, deleteLayout(), getWaiterLayout(), layoutSelect (+2 more)
 
 ### Community 16 - "AdminProducts.tsx"
-Cohesion: 0.20
-Nodes (9): AdminProducts(), ProductEditModal(), mockCreateProduct, mockDeleteProduct, mockGetProducts, mockProducts, mockReorderProducts, mockStations (+1 more)
+Cohesion: 0.19
+Nodes (10): Station, AdminProducts(), ProductEditModal(), mockCreateProduct, mockDeleteProduct, mockGetProducts, mockProducts, mockReorderProducts (+2 more)
 
 ### Community 17 - "auditService.ts"
 Cohesion: 0.45
 Nodes (10): auditRoutes(), AuditLogEntry, getPeakTimes(), getProductConsumption(), getProductEventId(), getStationRevenue(), getStockHistory(), getWaiterSummary() (+2 more)
 
 ### Community 18 - "StationDisplay.tsx"
-Cohesion: 0.15
-Nodes (12): OrderEventPayload, useWebSocket(), PRODUCT_BG_CLASSES, PRODUCT_BORDER_CLASSES, PRODUCT_COLORS, formatTime(), KitchenMonitor(), formatTime() (+4 more)
+Cohesion: 0.42
+Nodes (6): OrderEventPayload, useWebSocket(), formatTime(), KitchenMonitor(), formatTime(), StationDisplay()
 
 ### Community 19 - "Order.tsx"
-Cohesion: 0.11
-Nodes (27): Product, CartBar(), formatCents(), Props, formatCents(), ProductSection(), Props, Props (+19 more)
+Cohesion: 0.17
+Nodes (18): Product, CartBar(), formatCents(), Props, formatCents(), ProductSection(), Props, Props (+10 more)
 
 ### Community 20 - "4.2 Entity Definitions"
 Cohesion: 0.15
@@ -204,25 +207,25 @@ Nodes (9): adminLoginSchema, authRoutes(), loginSchema, findWaiterForLogin(), ge
 Cohesion: 0.40
 Nodes (3): DE, EN, FR
 
-### Community 39 - "waiters.ts"
-Cohesion: 0.27
-Nodes (12): createWaiterBody, toggleActiveBody, updateWaiterBody, waitersRoutes(), createWaiter(), CreateWaiterData, deleteWaiter(), getWaiter() (+4 more)
+### Community 39 - "OrderWas Quality Remediation Implementation Plan"
+Cohesion: 0.04
+Nodes (45): OrderWas Quality Remediation Implementation Plan, PHASE 0 — CI is red: fix E2E auth breakage (blocking everything), PHASE 1 — CRITICAL security fixes (auth closure), PHASE 2 — Payment model unification (HIGH, money correctness), PHASE 3 — Correctness fixes (HIGH), PHASE 4 — DRY / cleanliness refactors (MEDIUM), PHASE 5 — Test backfill for untested features (HIGH for convention compliance), PHASE 6 — Documentation reconciliation (MEDIUM) (+37 more)
 
-### Community 40 - "useSessionStore"
-Cohesion: 0.17
-Nodes (17): Event, Waiter, LanguagePicker(), LANGUAGES, ThemeSwitcher(), UserMenu(), Admin(), Landing() (+9 more)
+### Community 40 - "formatPrice"
+Cohesion: 0.21
+Nodes (12): OpenTable, TableOrderItem, CashierView(), formatCents(), Props, formatCents(), Props, TableSwitcherModal() (+4 more)
 
 ### Community 41 - "Orderwas"
 Cohesion: 0.05
 Nodes (43): Abholscheine Mode (Pickup Slips), Acknowledgments, Advanced Features, Architecture, Bonkasse Mode (Voucher Cashier), Comparison with Bierblock, Comparison with Orderjutsu, Contributing (+35 more)
 
 ### Community 42 - "Orderwas — Requirements Document"
-Cohesion: 0.29
-Nodes (7): 11. Version History Analysis (Orderjutsu), 12. User Testimonials (from YouTube), 16. Next Steps, 1. Executive Summary, Key Value Proposition (from Orderjutsu's own marketing), Orderwas — Requirements Document, What Orderjutsu Is (and Isn't)
+Cohesion: 0.25
+Nodes (8): 11. Version History Analysis (Orderjutsu), 12. User Testimonials (from YouTube), 16. Next Steps, 18. Requirements — Theke / Abholcounter (2026-09-12), 1. Executive Summary, Key Value Proposition (from Orderjutsu's own marketing), Orderwas — Requirements Document, What Orderjutsu Is (and Isn't)
 
 ### Community 43 - "AGENTS.md — Orderwas"
 Cohesion: 0.05
-Nodes (35): After commits, AGENTS.md — Orderwas, Architecture Rules (binding — see ARCHITECTURE.md §3), Before planning any implementation, Commands, Database, Graph staleness, Graphify (Knowledge Graph) (+27 more)
+Nodes (37): After commits, AGENTS.md — Orderwas, Architecture Rules (binding — see ARCHITECTURE.md §3), Before planning any implementation, Commands, Database, Graph staleness, Graphify (Knowledge Graph) (+29 more)
 
 ### Community 44 - "3.4 Philipp's Specific Requirements"
 Cohesion: 0.20
@@ -238,7 +241,7 @@ Nodes (7): 8.1 Performance, 8.2 Reliability, 8.3 Security, 8.4 Compatibility, 8.
 
 ### Community 47 - "Admin.tsx"
 Cohesion: 0.17
-Nodes (12): api, Printer, Station, AdminExport(), AdminSettings(), AdminTab, AdminEvents(), AdminPrinters() (+4 more)
+Nodes (14): api, Event, Printer, Waiter, AdminExport(), AdminSettings(), AdminTab, AdminEvents() (+6 more)
 
 ### Community 48 - "17. Requirements from Live Review (2026-08-17)"
 Cohesion: 0.33
@@ -264,6 +267,18 @@ Nodes (5): 15.1 Glossary, 15.2 Reference Links, 15.3 YouTube Videos Analyzed, 15
 Cohesion: 0.40
 Nodes (5): 9.1 Server (Base Station), 9.2 Printer Station, 9.3 Input Devices, 9.4 Total Hardware Cost, 9. Hardware Requirements
 
+### Community 54 - "order-page.test.tsx"
+Cohesion: 0.18
+Nodes (10): mockBarProducts, mockCancelOrder, mockCreateOrder, mockGetOrders, mockGetProducts, mockGetStations, mockKitchenProducts, mockOutOfStockProduct (+2 more)
+
+### Community 55 - "OrderWas UI Fixes: Cashier Item Display & Station Paid Orders"
+Cohesion: 0.20
+Nodes (9): Files Changed, Issue 1: Cashier View Individual Item Display, Issue 2: Station Display Paid Orders Visibility, Notes, OrderWas UI Fixes: Cashier Item Display & Station Paid Orders, Task 1: Flatten item display in CashierView, Task 2: Remove paid status filter from StationDisplay, Task 3: Run full CI (+1 more)
+
+### Community 56 - "station-display.test.tsx"
+Cohesion: 0.29
+Nodes (3): mockGetOrders, mockGetStation, station
+
 ### Community 58 - "14. Success Criteria"
 Cohesion: 0.50
 Nodes (4): 14. Success Criteria, Community Requirements, Functional Requirements, Non-Functional Requirements
@@ -277,7 +292,7 @@ Cohesion: 0.50
 Nodes (4): 7.1 Waiter App (Mobile), 7.2 Admin Interface (Web), 7.3 Kitchen Monitor, 7. User Interface Requirements
 
 ## Knowledge Gaps
-- **395 isolated node(s):** `mockGetCounterUnpaid`, `mockPayItems`, `counterOrder`, `counterOpen`, `mockEvent` (+390 more)
+- **440 isolated node(s):** `Task 0.1: E2E helper `adminLogin` for specs`, `Task 0.2: Verify `npm run ci` is green end-to-end`, `Task 1.1: Global auth hook — implement what ARCHITECTURE.md §8 documents`, `Task 1.2: Close the `PATCH /orders/:id` permission bypass`, `Task 1.3: Permission gates on the 8 ungated route files` (+435 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -285,16 +300,16 @@ Nodes (4): 7.1 Waiter App (Mobile), 7.2 Admin Interface (Web), 7.3 Kitchen Monit
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Orderwas — Requirements Document` connect `Orderwas — Requirements Document` to `5.2 Advanced Features (Should-Have)`, `AGENTS.md — Orderwas`, `3.4 Philipp's Specific Requirements`, `6. Workflow Descriptions`, `8. Technical Requirements`, `17. Requirements from Live Review (2026-08-17)`, `10. Competitive Analysis`, `13. Implementation Roadmap`, `15. Appendix`, `4.2 Entity Definitions`, `9. Hardware Requirements`, `14. Success Criteria`, `2. Target Audience & Use Cases`, `7. User Interface Requirements`?**
-  _High betweenness centrality (0.031) - this node is a cross-community bridge._
-- **Why does `prisma` connect `src/index.ts` to `escpos.ts`, `orderService.ts`, `routes/auth.ts`, `waiters.ts`, `products.ts`, `vouchers.ts`, `layouts.ts`, `auditService.ts`, `stations.ts`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+  _High betweenness centrality (0.028) - this node is a cross-community bridge._
+- **Why does `prisma` connect `src/index.ts` to `escpos.ts`, `orderService.ts`, `routes/auth.ts`, `products.ts`, `vouchers.ts`, `layouts.ts`, `auditService.ts`, `stations.ts`?**
+  _High betweenness centrality (0.018) - this node is a cross-community bridge._
 - **Why does `Orderwas` connect `Orderwas` to `AGENTS.md — Orderwas`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
 - **Are the 14 inferred relationships involving `buildServer()` (e.g. with `authPlugin()` and `auditRoutes()`) actually correct?**
   _`buildServer()` has 14 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `mockGetCounterUnpaid`, `mockPayItems`, `counterOrder` to the rest of the system?**
-  _395 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `Task 0.1: E2E helper `adminLogin` for specs`, `Task 0.2: Verify `npm run ci` is green end-to-end`, `Task 1.1: Global auth hook — implement what ARCHITECTURE.md §8 documents` to the rest of the system?**
+  _440 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `src/index.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.06848425835767608 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.059096459096459095 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.045454545454545456 - nodes in this community are weakly interconnected._

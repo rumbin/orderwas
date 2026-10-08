@@ -30,6 +30,19 @@
       "source_location": "L80"
     },
     {
+      "id": "server_src_services_waiterservice_createwaiterdata",
+      "label": "CreateWaiterData",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "createwaiterdata",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L26"
+    },
+    {
       "id": "server_tests_helpers_setup_testdata",
       "label": "TestData",
       "_callable": true,
@@ -119,6 +132,19 @@
       "norm_label": "createlayoutdata",
       "source_file": "server/src/services/layoutService.ts",
       "source_location": "L15"
+    },
+    {
+      "id": "client_src_api_types_station",
+      "label": "Station",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "AdminProducts.tsx",
+      "file_type": "code",
+      "norm_label": "station",
+      "source_file": "client/src/api/types.ts",
+      "source_location": "L29"
     },
     {
       "id": "server_src_services_auditservice_auditlogentry",
@@ -576,19 +602,6 @@
       "source_location": "L35"
     },
     {
-      "id": "server_src_services_waiterservice_createwaiterdata",
-      "label": "CreateWaiterData",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "createwaiterdata",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L26"
-    },
-    {
       "id": "client_src_api_types_applayout",
       "label": "AppLayout",
       "_callable": true,
@@ -613,19 +626,6 @@
       "norm_label": "auditlogentry",
       "source_file": "client/src/api/types.ts",
       "source_location": "L171"
-    },
-    {
-      "id": "client_src_api_types_opentable",
-      "label": "OpenTable",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "opentable",
-      "source_file": "client/src/api/types.ts",
-      "source_location": "L107"
     },
     {
       "id": "client_src_api_types_order",
@@ -706,19 +706,6 @@
       "source_location": "L124"
     },
     {
-      "id": "client_src_api_types_tableorderitem",
-      "label": "TableOrderItem",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "tableorderitem",
-      "source_file": "client/src/api/types.ts",
-      "source_location": "L113"
-    },
-    {
       "id": "client_src_api_types_voucher",
       "label": "Voucher",
       "_callable": true,
@@ -745,32 +732,6 @@
       "source_location": "L185"
     },
     {
-      "id": "client_src_components_cashierview_props",
-      "label": "Props",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "client/src/components/CashierView.tsx",
-      "source_location": "L14"
-    },
-    {
-      "id": "client_src_components_tableswitchermodal_props",
-      "label": "Props",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "client/src/components/TableSwitcherModal.tsx",
-      "source_location": "L11"
-    },
-    {
       "id": "client_src_pages_admin_applayout_buttonconfig",
       "label": "ButtonConfig",
       "_callable": true,
@@ -784,43 +745,69 @@
       "source_location": "L6"
     },
     {
+      "id": "client_src_api_types_opentable",
+      "label": "OpenTable",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "formatPrice",
+      "file_type": "code",
+      "norm_label": "opentable",
+      "source_file": "client/src/api/types.ts",
+      "source_location": "L107"
+    },
+    {
+      "id": "client_src_api_types_tableorderitem",
+      "label": "TableOrderItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "formatPrice",
+      "file_type": "code",
+      "norm_label": "tableorderitem",
+      "source_file": "client/src/api/types.ts",
+      "source_location": "L113"
+    },
+    {
+      "id": "client_src_components_cashierview_props",
+      "label": "Props",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "formatPrice",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "client/src/components/CashierView.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "client_src_components_tableswitchermodal_props",
+      "label": "Props",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "formatPrice",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "client/src/components/TableSwitcherModal.tsx",
+      "source_location": "L11"
+    },
+    {
       "id": "client_src_api_types_event",
       "label": "Event",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
+      "community": 47,
+      "community_name": "Admin.tsx",
       "file_type": "code",
       "norm_label": "event",
       "source_file": "client/src/api/types.ts",
       "source_location": "L6"
-    },
-    {
-      "id": "client_src_api_types_waiter",
-      "label": "Waiter",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "waiter",
-      "source_file": "client/src/api/types.ts",
-      "source_location": "L75"
-    },
-    {
-      "id": "client_src_stores_session_sessionstate",
-      "label": "SessionState",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "sessionstate",
-      "source_file": "client/src/stores/session.ts",
-      "source_location": "L5"
     },
     {
       "id": "client_src_api_types_printer",
@@ -836,17 +823,17 @@
       "source_location": "L17"
     },
     {
-      "id": "client_src_api_types_station",
-      "label": "Station",
+      "id": "client_src_api_types_waiter",
+      "label": "Waiter",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 47,
       "community_name": "Admin.tsx",
       "file_type": "code",
-      "norm_label": "station",
+      "norm_label": "waiter",
       "source_file": "client/src/api/types.ts",
-      "source_location": "L29"
+      "source_location": "L75"
     },
     {
       "id": "client_src_pages_admin_admintab",
@@ -860,6 +847,19 @@
       "norm_label": "admintab",
       "source_file": "client/src/pages/Admin.tsx",
       "source_location": "L14"
+    },
+    {
+      "id": "client_src_stores_session_sessionstate",
+      "label": "SessionState",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "Admin.tsx",
+      "file_type": "code",
+      "norm_label": "sessionstate",
+      "source_file": "client/src/stores/session.ts",
+      "source_location": "L5"
     },
     {
       "id": "client_src_router_route",
@@ -934,6 +934,18 @@
       "norm_label": "eventroutes()",
       "source_file": "server/src/routes/events.ts",
       "source_location": "L18"
+    },
+    {
+      "id": "server_src_routes_waiters_waitersroutes",
+      "label": "waitersRoutes()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "waitersroutes()",
+      "source_file": "server/src/routes/waiters.ts",
+      "source_location": "L37"
     },
     {
       "id": "server_src_services_configservice_exportevent",
@@ -1018,6 +1030,78 @@
       "norm_label": "updateevent()",
       "source_file": "server/src/services/eventService.ts",
       "source_location": "L34"
+    },
+    {
+      "id": "server_src_services_waiterservice_createwaiter",
+      "label": "createWaiter()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "createwaiter()",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L40"
+    },
+    {
+      "id": "server_src_services_waiterservice_deletewaiter",
+      "label": "deleteWaiter()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "deletewaiter()",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L76"
+    },
+    {
+      "id": "server_src_services_waiterservice_getwaiter",
+      "label": "getWaiter()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "getwaiter()",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L61"
+    },
+    {
+      "id": "server_src_services_waiterservice_listwaitersbyevent",
+      "label": "listWaitersByEvent()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "listwaitersbyevent()",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L54"
+    },
+    {
+      "id": "server_src_services_waiterservice_togglewaiteractive",
+      "label": "toggleWaiterActive()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "togglewaiteractive()",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L84"
+    },
+    {
+      "id": "server_src_services_waiterservice_updatewaiter",
+      "label": "updateWaiter()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "updatewaiter()",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L69"
     },
     {
       "id": "server_src_websocket_index_attachwebsocket",
@@ -1848,42 +1932,6 @@
       "source_location": "L18"
     },
     {
-      "id": "client_tests_station_display_test_makeitem",
-      "label": "makeItem()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "StationDisplay.tsx",
-      "file_type": "code",
-      "norm_label": "makeitem()",
-      "source_file": "client/tests/station-display.test.tsx",
-      "source_location": "L45"
-    },
-    {
-      "id": "client_tests_station_display_test_makeorder",
-      "label": "makeOrder()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "StationDisplay.tsx",
-      "file_type": "code",
-      "norm_label": "makeorder()",
-      "source_file": "client/tests/station-display.test.tsx",
-      "source_location": "L31"
-    },
-    {
-      "id": "client_tests_station_display_test_renderdisplay",
-      "label": "renderDisplay()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "StationDisplay.tsx",
-      "file_type": "code",
-      "norm_label": "renderdisplay()",
-      "source_file": "client/tests/station-display.test.tsx",
-      "source_location": "L65"
-    },
-    {
       "id": "client_src_components_cartbar_cartbar",
       "label": "CartBar()",
       "_callable": true,
@@ -1942,30 +1990,6 @@
       "norm_label": "variantdialog()",
       "source_file": "client/src/components/VariantDialog.tsx",
       "source_location": "L15"
-    },
-    {
-      "id": "client_src_lib_money_formatprice",
-      "label": "formatPrice()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "formatprice()",
-      "source_file": "client/src/lib/money.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "client_src_pages_order_formatcents",
-      "label": "formatCents()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "formatcents()",
-      "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L14"
     },
     {
       "id": "client_src_pages_order_orderpage",
@@ -2832,90 +2856,6 @@
       "source_location": "L6"
     },
     {
-      "id": "server_src_routes_waiters_waitersroutes",
-      "label": "waitersRoutes()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "waitersroutes()",
-      "source_file": "server/src/routes/waiters.ts",
-      "source_location": "L37"
-    },
-    {
-      "id": "server_src_services_waiterservice_createwaiter",
-      "label": "createWaiter()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "createwaiter()",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L40"
-    },
-    {
-      "id": "server_src_services_waiterservice_deletewaiter",
-      "label": "deleteWaiter()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "deletewaiter()",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L76"
-    },
-    {
-      "id": "server_src_services_waiterservice_getwaiter",
-      "label": "getWaiter()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "getwaiter()",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L61"
-    },
-    {
-      "id": "server_src_services_waiterservice_listwaitersbyevent",
-      "label": "listWaitersByEvent()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "listwaitersbyevent()",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L54"
-    },
-    {
-      "id": "server_src_services_waiterservice_togglewaiteractive",
-      "label": "toggleWaiterActive()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "togglewaiteractive()",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L84"
-    },
-    {
-      "id": "server_src_services_waiterservice_updatewaiter",
-      "label": "updateWaiter()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "updatewaiter()",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L69"
-    },
-    {
       "id": "client_src_api_client_adminauthheaders",
       "label": "adminAuthHeaders()",
       "_callable": true,
@@ -2952,54 +2892,6 @@
       "source_location": "L50"
     },
     {
-      "id": "client_src_components_cashierview_cashierview",
-      "label": "CashierView()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "cashierview()",
-      "source_file": "client/src/components/CashierView.tsx",
-      "source_location": "L18"
-    },
-    {
-      "id": "client_src_components_cashierview_formatcents",
-      "label": "formatCents()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "formatcents()",
-      "source_file": "client/src/components/CashierView.tsx",
-      "source_location": "L10"
-    },
-    {
-      "id": "client_src_components_tableswitchermodal_formatcents",
-      "label": "formatCents()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "formatcents()",
-      "source_file": "client/src/components/TableSwitcherModal.tsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "client_src_components_tableswitchermodal_tableswitchermodal",
-      "label": "TableSwitcherModal()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "tableswitchermodal()",
-      "source_file": "client/src/components/TableSwitcherModal.tsx",
-      "source_location": "L18"
-    },
-    {
       "id": "client_src_pages_admin_applayout_adminapplayout",
       "label": "AdminAppLayout()",
       "_callable": true,
@@ -3024,112 +2916,100 @@
       "source_location": "L41"
     },
     {
-      "id": "client_src_components_languagepicker_languagepicker",
-      "label": "LanguagePicker()",
+      "id": "client_src_components_cashierview_cashierview",
+      "label": "CashierView()",
       "_callable": true,
       "_origin": "ast",
       "community": 40,
-      "community_name": "useSessionStore",
+      "community_name": "formatPrice",
       "file_type": "code",
-      "norm_label": "languagepicker()",
-      "source_file": "client/src/components/LanguagePicker.tsx",
-      "source_location": "L9"
+      "norm_label": "cashierview()",
+      "source_file": "client/src/components/CashierView.tsx",
+      "source_location": "L18"
     },
     {
-      "id": "client_src_components_themeswitcher_themeswitcher",
-      "label": "ThemeSwitcher()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "themeswitcher()",
-      "source_file": "client/src/components/ThemeSwitcher.tsx",
-      "source_location": "L4"
-    },
-    {
-      "id": "client_src_components_usermenu_usermenu",
-      "label": "UserMenu()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "usermenu()",
-      "source_file": "client/src/components/UserMenu.tsx",
-      "source_location": "L8"
-    },
-    {
-      "id": "client_src_pages_admin_admin",
-      "label": "Admin()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "admin()",
-      "source_file": "client/src/pages/Admin.tsx",
-      "source_location": "L16"
-    },
-    {
-      "id": "client_src_pages_landing_landing",
-      "label": "Landing()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "landing()",
-      "source_file": "client/src/pages/Landing.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "client_src_pages_login_login",
-      "label": "Login()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "login()",
-      "source_file": "client/src/pages/Login.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "client_src_pages_orders_formatcents",
+      "id": "client_src_components_cashierview_formatcents",
       "label": "formatCents()",
       "_callable": true,
       "_origin": "ast",
       "community": 40,
-      "community_name": "useSessionStore",
+      "community_name": "formatPrice",
       "file_type": "code",
       "norm_label": "formatcents()",
-      "source_file": "client/src/pages/Orders.tsx",
-      "source_location": "L17"
+      "source_file": "client/src/components/CashierView.tsx",
+      "source_location": "L10"
     },
     {
-      "id": "client_src_pages_orders_orderspage",
-      "label": "OrdersPage()",
+      "id": "client_src_components_tableswitchermodal_formatcents",
+      "label": "formatCents()",
       "_callable": true,
       "_origin": "ast",
       "community": 40,
-      "community_name": "useSessionStore",
+      "community_name": "formatPrice",
       "file_type": "code",
-      "norm_label": "orderspage()",
-      "source_file": "client/src/pages/Orders.tsx",
-      "source_location": "L21"
+      "norm_label": "formatcents()",
+      "source_file": "client/src/components/TableSwitcherModal.tsx",
+      "source_location": "L7"
     },
     {
-      "id": "client_src_stores_theme_usethemestore",
-      "label": "useThemeStore()",
+      "id": "client_src_components_tableswitchermodal_tableswitchermodal",
+      "label": "TableSwitcherModal()",
       "_callable": true,
       "_origin": "ast",
       "community": 40,
-      "community_name": "useSessionStore",
+      "community_name": "formatPrice",
       "file_type": "code",
-      "norm_label": "usethemestore()",
-      "source_file": "client/src/stores/theme.tsx",
-      "source_location": "L37"
+      "norm_label": "tableswitchermodal()",
+      "source_file": "client/src/components/TableSwitcherModal.tsx",
+      "source_location": "L18"
+    },
+    {
+      "id": "client_src_lib_money_formatprice",
+      "label": "formatPrice()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "formatPrice",
+      "file_type": "code",
+      "norm_label": "formatprice()",
+      "source_file": "client/src/lib/money.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "client_src_pages_guestorder_formatcents",
+      "label": "formatCents()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "formatPrice",
+      "file_type": "code",
+      "norm_label": "formatcents()",
+      "source_file": "client/src/pages/GuestOrder.tsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "client_src_pages_guestorder_guestorder",
+      "label": "GuestOrder()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "formatPrice",
+      "file_type": "code",
+      "norm_label": "guestorder()",
+      "source_file": "client/src/pages/GuestOrder.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "client_src_pages_order_formatcents",
+      "label": "formatCents()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "formatPrice",
+      "file_type": "code",
+      "norm_label": "formatcents()",
+      "source_file": "client/src/pages/Order.tsx",
+      "source_location": "L14"
     },
     {
       "id": "client_src_pages_admin_adminexport_adminexport",
@@ -3204,6 +3084,42 @@
       "source_location": "L6"
     },
     {
+      "id": "client_tests_station_display_test_makeitem",
+      "label": "makeItem()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "station-display.test.tsx",
+      "file_type": "code",
+      "norm_label": "makeitem()",
+      "source_file": "client/tests/station-display.test.tsx",
+      "source_location": "L45"
+    },
+    {
+      "id": "client_tests_station_display_test_makeorder",
+      "label": "makeOrder()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "station-display.test.tsx",
+      "file_type": "code",
+      "norm_label": "makeorder()",
+      "source_file": "client/tests/station-display.test.tsx",
+      "source_location": "L31"
+    },
+    {
+      "id": "client_tests_station_display_test_renderdisplay",
+      "label": "renderDisplay()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "station-display.test.tsx",
+      "file_type": "code",
+      "norm_label": "renderdisplay()",
+      "source_file": "client/tests/station-display.test.tsx",
+      "source_location": "L65"
+    },
+    {
       "id": "client_src_app_app",
       "label": "App()",
       "_callable": true,
@@ -3228,7 +3144,79 @@
       "source_location": "L13"
     },
     {
-      "id": "client_src_pages_guestorder_formatcents",
+      "id": "client_src_components_languagepicker_languagepicker",
+      "label": "LanguagePicker()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "languagepicker()",
+      "source_file": "client/src/components/LanguagePicker.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "client_src_components_themeswitcher_themeswitcher",
+      "label": "ThemeSwitcher()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "themeswitcher()",
+      "source_file": "client/src/components/ThemeSwitcher.tsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "client_src_components_usermenu_usermenu",
+      "label": "UserMenu()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "usermenu()",
+      "source_file": "client/src/components/UserMenu.tsx",
+      "source_location": "L8"
+    },
+    {
+      "id": "client_src_pages_admin_admin",
+      "label": "Admin()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "admin()",
+      "source_file": "client/src/pages/Admin.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "client_src_pages_landing_landing",
+      "label": "Landing()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "landing()",
+      "source_file": "client/src/pages/Landing.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "client_src_pages_login_login",
+      "label": "Login()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "login()",
+      "source_file": "client/src/pages/Login.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "client_src_pages_orders_formatcents",
       "label": "formatCents()",
       "_callable": true,
       "_origin": "ast",
@@ -3236,20 +3224,20 @@
       "community_name": "App.tsx",
       "file_type": "code",
       "norm_label": "formatcents()",
-      "source_file": "client/src/pages/GuestOrder.tsx",
-      "source_location": "L7"
+      "source_file": "client/src/pages/Orders.tsx",
+      "source_location": "L17"
     },
     {
-      "id": "client_src_pages_guestorder_guestorder",
-      "label": "GuestOrder()",
+      "id": "client_src_pages_orders_orderspage",
+      "label": "OrdersPage()",
       "_callable": true,
       "_origin": "ast",
       "community": 6,
       "community_name": "App.tsx",
       "file_type": "code",
-      "norm_label": "guestorder()",
-      "source_file": "client/src/pages/GuestOrder.tsx",
-      "source_location": "L16"
+      "norm_label": "orderspage()",
+      "source_file": "client/src/pages/Orders.tsx",
+      "source_location": "L21"
     },
     {
       "id": "client_src_router_matchroute",
@@ -3310,6 +3298,18 @@
       "norm_label": "themeprovider()",
       "source_file": "client/src/stores/theme.tsx",
       "source_location": "L18"
+    },
+    {
+      "id": "client_src_stores_theme_usethemestore",
+      "label": "useThemeStore()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "usethemestore()",
+      "source_file": "client/src/stores/theme.tsx",
+      "source_location": "L37"
     },
     {
       "id": "client_tests_setup_disconnect",
@@ -3447,6 +3447,50 @@
       "source_location": "L10"
     },
     {
+      "id": "server_src_routes_waiters",
+      "label": "waiters.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "waiters.ts",
+      "source_file": "server/src/routes/waiters.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_routes_waiters_createwaiterbody",
+      "label": "createWaiterBody",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "createwaiterbody",
+      "source_file": "server/src/routes/waiters.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "server_src_routes_waiters_toggleactivebody",
+      "label": "toggleActiveBody",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "toggleactivebody",
+      "source_file": "server/src/routes/waiters.ts",
+      "source_location": "L33"
+    },
+    {
+      "id": "server_src_routes_waiters_updatewaiterbody",
+      "label": "updateWaiterBody",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "updatewaiterbody",
+      "source_file": "server/src/routes/waiters.ts",
+      "source_location": "L22"
+    },
+    {
       "id": "server_src_services_configservice",
       "label": "configService.ts",
       "_origin": "ast",
@@ -3467,6 +3511,28 @@
       "norm_label": "eventservice.ts",
       "source_file": "server/src/services/eventService.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "server_src_services_waiterservice",
+      "label": "waiterService.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "waiterservice.ts",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_services_waiterservice_waiterselect",
+      "label": "waiterSelect",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "waiterselect",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L5"
     },
     {
       "id": "server_tests_helpers_seed",
@@ -3687,28 +3753,6 @@
       "norm_label": "payments.test.ts",
       "source_file": "server/tests/integration/payments.test.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "server_tests_integration_printdispatch_test",
-      "label": "printDispatch.test.ts",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "src/index.ts",
-      "file_type": "code",
-      "norm_label": "printdispatch.test.ts",
-      "source_file": "server/tests/integration/printDispatch.test.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_tests_integration_printdispatch_test_print_dir",
-      "label": "PRINT_DIR",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "src/index.ts",
-      "file_type": "code",
-      "norm_label": "print_dir",
-      "source_file": "server/tests/integration/printDispatch.test.ts",
-      "source_location": "L7"
     },
     {
       "id": "server_tests_integration_printers_test",
@@ -5218,50 +5262,6 @@
       "source_location": "L1"
     },
     {
-      "id": "client_src_lib_productcolors",
-      "label": "productColors.ts",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "StationDisplay.tsx",
-      "file_type": "code",
-      "norm_label": "productcolors.ts",
-      "source_file": "client/src/lib/productColors.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "client_src_lib_productcolors_product_bg_classes",
-      "label": "PRODUCT_BG_CLASSES",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "StationDisplay.tsx",
-      "file_type": "code",
-      "norm_label": "product_bg_classes",
-      "source_file": "client/src/lib/productColors.ts",
-      "source_location": "L22"
-    },
-    {
-      "id": "client_src_lib_productcolors_product_border_classes",
-      "label": "PRODUCT_BORDER_CLASSES",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "StationDisplay.tsx",
-      "file_type": "code",
-      "norm_label": "product_border_classes",
-      "source_file": "client/src/lib/productColors.ts",
-      "source_location": "L42"
-    },
-    {
-      "id": "client_src_lib_productcolors_product_colors",
-      "label": "PRODUCT_COLORS",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "StationDisplay.tsx",
-      "file_type": "code",
-      "norm_label": "product_colors",
-      "source_file": "client/src/lib/productColors.ts",
-      "source_location": "L2"
-    },
-    {
       "id": "client_src_pages_kitchenmonitor",
       "label": "KitchenMonitor.tsx",
       "_origin": "ast",
@@ -5282,50 +5282,6 @@
       "norm_label": "stationdisplay.tsx",
       "source_file": "client/src/pages/StationDisplay.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "client_tests_station_display_test",
-      "label": "station-display.test.tsx",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "StationDisplay.tsx",
-      "file_type": "code",
-      "norm_label": "station-display.test.tsx",
-      "source_file": "client/tests/station-display.test.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "client_tests_station_display_test_mockgetorders",
-      "label": "mockGetOrders",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "StationDisplay.tsx",
-      "file_type": "code",
-      "norm_label": "mockgetorders",
-      "source_file": "client/tests/station-display.test.tsx",
-      "source_location": "L11"
-    },
-    {
-      "id": "client_tests_station_display_test_mockgetstation",
-      "label": "mockGetStation",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "StationDisplay.tsx",
-      "file_type": "code",
-      "norm_label": "mockgetstation",
-      "source_file": "client/tests/station-display.test.tsx",
-      "source_location": "L10"
-    },
-    {
-      "id": "client_tests_station_display_test_station",
-      "label": "station",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "StationDisplay.tsx",
-      "file_type": "code",
-      "norm_label": "station",
-      "source_file": "client/tests/station-display.test.tsx",
-      "source_location": "L29"
     },
     {
       "id": "client_src_components_cartbar",
@@ -5361,15 +5317,48 @@
       "source_location": "L1"
     },
     {
-      "id": "client_src_lib_money",
-      "label": "money.ts",
+      "id": "client_src_lib_productcolors",
+      "label": "productColors.ts",
       "_origin": "ast",
       "community": 19,
       "community_name": "Order.tsx",
       "file_type": "code",
-      "norm_label": "money.ts",
-      "source_file": "client/src/lib/money.ts",
+      "norm_label": "productcolors.ts",
+      "source_file": "client/src/lib/productColors.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "client_src_lib_productcolors_product_bg_classes",
+      "label": "PRODUCT_BG_CLASSES",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "Order.tsx",
+      "file_type": "code",
+      "norm_label": "product_bg_classes",
+      "source_file": "client/src/lib/productColors.ts",
+      "source_location": "L22"
+    },
+    {
+      "id": "client_src_lib_productcolors_product_border_classes",
+      "label": "PRODUCT_BORDER_CLASSES",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "Order.tsx",
+      "file_type": "code",
+      "norm_label": "product_border_classes",
+      "source_file": "client/src/lib/productColors.ts",
+      "source_location": "L42"
+    },
+    {
+      "id": "client_src_lib_productcolors_product_colors",
+      "label": "PRODUCT_COLORS",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "Order.tsx",
+      "file_type": "code",
+      "norm_label": "product_colors",
+      "source_file": "client/src/lib/productColors.ts",
+      "source_location": "L2"
     },
     {
       "id": "client_src_pages_order",
@@ -5414,138 +5403,6 @@
       "norm_label": "usecartstore",
       "source_file": "client/src/stores/cart.ts",
       "source_location": "L33"
-    },
-    {
-      "id": "client_tests_money_test",
-      "label": "money.test.ts",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "money.test.ts",
-      "source_file": "client/tests/money.test.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "client_tests_order_page_test",
-      "label": "order-page.test.tsx",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "order-page.test.tsx",
-      "source_file": "client/tests/order-page.test.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "client_tests_order_page_test_mockbarproducts",
-      "label": "mockBarProducts",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "mockbarproducts",
-      "source_file": "client/tests/order-page.test.tsx",
-      "source_location": "L57"
-    },
-    {
-      "id": "client_tests_order_page_test_mockcancelorder",
-      "label": "mockCancelOrder",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "mockcancelorder",
-      "source_file": "client/tests/order-page.test.tsx",
-      "source_location": "L37"
-    },
-    {
-      "id": "client_tests_order_page_test_mockcreateorder",
-      "label": "mockCreateOrder",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "mockcreateorder",
-      "source_file": "client/tests/order-page.test.tsx",
-      "source_location": "L35"
-    },
-    {
-      "id": "client_tests_order_page_test_mockgetorders",
-      "label": "mockGetOrders",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "mockgetorders",
-      "source_file": "client/tests/order-page.test.tsx",
-      "source_location": "L36"
-    },
-    {
-      "id": "client_tests_order_page_test_mockgetproducts",
-      "label": "mockGetProducts",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "mockgetproducts",
-      "source_file": "client/tests/order-page.test.tsx",
-      "source_location": "L34"
-    },
-    {
-      "id": "client_tests_order_page_test_mockgetstations",
-      "label": "mockGetStations",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "mockgetstations",
-      "source_file": "client/tests/order-page.test.tsx",
-      "source_location": "L33"
-    },
-    {
-      "id": "client_tests_order_page_test_mockkitchenproducts",
-      "label": "mockKitchenProducts",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "mockkitchenproducts",
-      "source_file": "client/tests/order-page.test.tsx",
-      "source_location": "L62"
-    },
-    {
-      "id": "client_tests_order_page_test_mockoutofstockproduct",
-      "label": "mockOutOfStockProduct",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "mockoutofstockproduct",
-      "source_file": "client/tests/order-page.test.tsx",
-      "source_location": "L66"
-    },
-    {
-      "id": "client_tests_order_page_test_mockstations",
-      "label": "mockStations",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "mockstations",
-      "source_file": "client/tests/order-page.test.tsx",
-      "source_location": "L52"
-    },
-    {
-      "id": "client_tests_order_page_test_rationale_70",
-      "label": "IMPORTANT: mock implementations are set in beforeEach (not at module scope).",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "rationale",
-      "norm_label": "important: mock implementations are set in beforeeach (not at module scope).",
-      "source_file": "client/tests/order-page.test.tsx",
-      "source_location": "L70"
     },
     {
       "id": "server_src_printer_dispatch",
@@ -6539,6 +6396,28 @@
       "source_location": "L9"
     },
     {
+      "id": "server_tests_integration_printdispatch_test",
+      "label": "printDispatch.test.ts",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "orderService.ts",
+      "file_type": "code",
+      "norm_label": "printdispatch.test.ts",
+      "source_file": "server/tests/integration/printDispatch.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_tests_integration_printdispatch_test_print_dir",
+      "label": "PRINT_DIR",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "orderService.ts",
+      "file_type": "code",
+      "norm_label": "print_dir",
+      "source_file": "server/tests/integration/printDispatch.test.ts",
+      "source_location": "L7"
+    },
+    {
       "id": "server_src_plugins_cors",
       "label": "cors.ts",
       "_origin": "ast",
@@ -6737,70 +6616,556 @@
       "source_location": "L18"
     },
     {
-      "id": "server_src_routes_waiters",
-      "label": "waiters.ts",
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation",
+      "label": "2026-08-28_230923-orderwas-quality-remediation.md",
       "_origin": "ast",
       "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "waiters.ts",
-      "source_file": "server/src/routes/waiters.ts",
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": "2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
       "source_location": "L1"
     },
     {
-      "id": "server_src_routes_waiters_createwaiterbody",
-      "label": "createWaiterBody",
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_orderwas_quality_remediation_implementation_plan",
+      "label": "OrderWas Quality Remediation Implementation Plan",
       "_origin": "ast",
       "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "createwaiterbody",
-      "source_file": "server/src/routes/waiters.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "server_src_routes_waiters_toggleactivebody",
-      "label": "toggleActiveBody",
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "toggleactivebody",
-      "source_file": "server/src/routes/waiters.ts",
-      "source_location": "L33"
-    },
-    {
-      "id": "server_src_routes_waiters_updatewaiterbody",
-      "label": "updateWaiterBody",
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "updatewaiterbody",
-      "source_file": "server/src/routes/waiters.ts",
-      "source_location": "L22"
-    },
-    {
-      "id": "server_src_services_waiterservice",
-      "label": "waiterService.ts",
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "waiterservice.ts",
-      "source_file": "server/src/services/waiterService.ts",
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "orderwas quality remediation implementation plan",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
       "source_location": "L1"
     },
     {
-      "id": "server_src_services_waiterservice_waiterselect",
-      "label": "waiterSelect",
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_0_ci_is_red_fix_e2e_auth_breakage_blocking_everything",
+      "label": "PHASE 0 \u2014 CI is red: fix E2E auth breakage (blocking everything)",
       "_origin": "ast",
       "community": 39,
-      "community_name": "waiters.ts",
-      "file_type": "code",
-      "norm_label": "waiterselect",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L5"
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "phase 0 \u2014 ci is red: fix e2e auth breakage (blocking everything)",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L15"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_1_critical_security_fixes_auth_closure",
+      "label": "PHASE 1 \u2014 CRITICAL security fixes (auth closure)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "phase 1 \u2014 critical security fixes (auth closure)",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L61"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_2_payment_model_unification_high_money_correctness",
+      "label": "PHASE 2 \u2014 Payment model unification (HIGH, money correctness)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "phase 2 \u2014 payment model unification (high, money correctness)",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L172"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_3_correctness_fixes_high",
+      "label": "PHASE 3 \u2014 Correctness fixes (HIGH)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "phase 3 \u2014 correctness fixes (high)",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L290"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_4_dry_cleanliness_refactors_medium",
+      "label": "PHASE 4 \u2014 DRY / cleanliness refactors (MEDIUM)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "phase 4 \u2014 dry / cleanliness refactors (medium)",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L368"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_5_test_backfill_for_untested_features_high_for_convention_compliance",
+      "label": "PHASE 5 \u2014 Test backfill for untested features (HIGH for convention compliance)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "phase 5 \u2014 test backfill for untested features (high for convention compliance)",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L412"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_6_documentation_reconciliation_medium",
+      "label": "PHASE 6 \u2014 Documentation reconciliation (MEDIUM)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "phase 6 \u2014 documentation reconciliation (medium)",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L448"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_risks_trade_offs_open_questions",
+      "label": "Risks / Trade-offs / Open Questions",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "risks / trade-offs / open questions",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L491"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_0_1_e2e_helper_adminlogin_for_specs",
+      "label": "Task 0.1: E2E helper `adminLogin` for specs",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 0.1: e2e helper `adminlogin` for specs",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L19"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_0_2_verify_npm_run_ci_is_green_end_to_end",
+      "label": "Task 0.2: Verify `npm run ci` is green end-to-end",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 0.2: verify `npm run ci` is green end-to-end",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L54"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_1_1_global_auth_hook_implement_what_architecture_md_8_documents",
+      "label": "Task 1.1: Global auth hook \u2014 implement what ARCHITECTURE.md \u00a78 documents",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 1.1: global auth hook \u2014 implement what architecture.md \u00a78 documents",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L65"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_1_2_close_the_patch_orders_id_permission_bypass",
+      "label": "Task 1.2: Close the `PATCH /orders/:id` permission bypass",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 1.2: close the `patch /orders/:id` permission bypass",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L99"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_1_3_permission_gates_on_the_8_ungated_route_files",
+      "label": "Task 1.3: Permission gates on the 8 ungated route files",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 1.3: permission gates on the 8 ungated route files",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L124"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_1_4_websocket_auth",
+      "label": "Task 1.4: WebSocket auth",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 1.4: websocket auth",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L150"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_1_5_fail_fast_on_missing_jwt_secret_in_production",
+      "label": "Task 1.5: Fail fast on missing JWT_SECRET in production",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 1.5: fail fast on missing jwt_secret in production",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L163"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_2_1_markpaid_sets_item_level_payment_state_audit_log",
+      "label": "Task 2.1: `markPaid` sets item-level payment state + audit log",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 2.1: `markpaid` sets item-level payment state + audit log",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L176"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_2_2_payitems_event_ownership_race_safe_validation",
+      "label": "Task 2.2: `payItems` \u2014 event ownership + race-safe validation",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 2.2: `payitems` \u2014 event ownership + race-safe validation",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L208"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_2_3_audit_logs_for_money_relevant_actions",
+      "label": "Task 2.3: Audit logs for money-relevant actions",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 2.3: audit logs for money-relevant actions",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L247"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_2_4_dry_extract_emitorderupdated_shared_selects",
+      "label": "Task 2.4: DRY \u2014 extract `emitOrderUpdated` + shared selects",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 2.4: dry \u2014 extract `emitorderupdated` + shared selects",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L255"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_2_5_payments_route_cleanup",
+      "label": "Task 2.5: payments route cleanup",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 2.5: payments route cleanup",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L280"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_3_1_stock_check_inside_the_order_transaction",
+      "label": "Task 3.1: Stock check inside the order transaction",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 3.1: stock check inside the order transaction",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L292"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_3_2_expandcomponents_uses_the_transaction_client",
+      "label": "Task 3.2: `expandComponents` uses the transaction client",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 3.2: `expandcomponents` uses the transaction client",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L301"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_3_3_voucher_redemption_race_createvoucher_uniqueness",
+      "label": "Task 3.3: Voucher redemption race + createVoucher uniqueness",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 3.3: voucher redemption race + createvoucher uniqueness",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L310"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_3_4_schema_hardening_hot_path_indexes_cascade",
+      "label": "Task 3.4: Schema hardening \u2014 hot-path indexes + cascade",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 3.4: schema hardening \u2014 hot-path indexes + cascade",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L328"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_3_5_qr_guest_order_route_hardening",
+      "label": "Task 3.5: QR guest order route hardening",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 3.5: qr guest order route hardening",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L358"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_4_1_shared_money_formatter_client",
+      "label": "Task 4.1: Shared money formatter (client)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 4.1: shared money formatter (client)",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L370"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_4_2_split_admin_tsx_823_lines_5_modules",
+      "label": "Task 4.2: Split Admin.tsx (823 lines \u2192 5 modules)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 4.2: split admin.tsx (823 lines \u2192 5 modules)",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L379"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_4_3_route_layer_thinning_rule_1_no_prisma_in_routes",
+      "label": "Task 4.3: Route layer thinning (rule #1: no Prisma in routes)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 4.3: route layer thinning (rule #1: no prisma in routes)",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L388"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_4_4_api_client_cleanup",
+      "label": "Task 4.4: API client cleanup",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 4.4: api client cleanup",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L395"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_4_5_remove_dead_unused_things",
+      "label": "Task 4.5: Remove dead/unused things",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 4.5: remove dead/unused things",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L402"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_1_payments_integration_suite_if_not_already_covered_by_phase_2_tasks",
+      "label": "Task 5.1: payments integration suite (if not already covered by Phase 2 tasks)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 5.1: payments integration suite (if not already covered by phase 2 tasks)",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L416"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_2_audit_reports_integration_suite",
+      "label": "Task 5.2: audit + reports integration suite",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 5.2: audit + reports integration suite",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L419"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_3_qr_guest_ordering_suite_covered_in_task_3_5_tests_verify_extend_for_stock_refusal_and_print_behavior",
+      "label": "Task 5.3: QR guest ordering suite (covered in Task 3.5 tests; verify + extend for stock refusal and print behavior).",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 5.3: qr guest ordering suite (covered in task 3.5 tests; verify + extend for stock refusal and print behavior).",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L422"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_4_reorder_endpoints",
+      "label": "Task 5.4: Reorder endpoints",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 5.4: reorder endpoints",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L424"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_5_replace_fake_admin_replica_test_with_real_component_tests",
+      "label": "Task 5.5: Replace fake Admin replica test with real component tests",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 5.5: replace fake admin replica test with real component tests",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L427"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_6_client_tests_for_cashierview_guestorder",
+      "label": "Task 5.6: Client tests for CashierView + GuestOrder",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 5.6: client tests for cashierview + guestorder",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L432"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_7_e2e_journeys_highest_value_gaps",
+      "label": "Task 5.7: E2E journeys (highest-value gaps)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 5.7: e2e journeys (highest-value gaps)",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L437"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_8_race_condition_regression_tests_concurrent_payitems_covered_in_2_2_add_concurrent_order_creation_tear_off_uniqueness_concurrent_voucher_redemption_from_3_3_assert_unique_tearoffnumbers_under_promise_all_burst",
+      "label": "Task 5.8: Race-condition regression tests (concurrent payItems covered in 2.2; add concurrent order creation tear-off uniqueness + concurrent voucher redemption from 3.3) \u2014 assert unique tearOffNumbers under `Promise.all` burst.",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 5.8: race-condition regression tests (concurrent payitems covered in 2.2; add concurrent order creation tear-off uniqueness + concurrent voucher redemption from 3.3) \u2014 assert unique tearoffnumbers under `promise.all` burst.",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L444"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_6_1_architecture_md",
+      "label": "Task 6.1: ARCHITECTURE.md",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 6.1: architecture.md",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L450"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_6_2_requirements_md",
+      "label": "Task 6.2: REQUIREMENTS.md",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 6.2: requirements.md",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L456"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_6_3_readme_md",
+      "label": "Task 6.3: README.md",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 6.3: readme.md",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L460"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_6_4_agents_md",
+      "label": "Task 6.4: AGENTS.md",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 6.4: agents.md",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L463"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_6_5_skills_orderwas_development_skill_md",
+      "label": "Task 6.5: skills/orderwas/development/SKILL.md",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 6.5: skills/orderwas/development/skill.md",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L468"
+    },
+    {
+      "id": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_verification_per_phase_per_user_convention",
+      "label": "Verification (per phase, per user convention)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "OrderWas Quality Remediation Implementation Plan",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "verification (per phase, per user convention)",
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L473"
     },
     {
       "id": "client_src_api_client",
@@ -6822,28 +7187,6 @@
       "file_type": "code",
       "norm_label": "types.ts",
       "source_file": "client/src/api/types.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "client_src_components_cashierview",
-      "label": "CashierView.tsx",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "cashierview.tsx",
-      "source_file": "client/src/components/CashierView.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "client_src_components_tableswitchermodal",
-      "label": "TableSwitcherModal.tsx",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "tableswitchermodal.tsx",
-      "source_file": "client/src/components/TableSwitcherModal.tsx",
       "source_location": "L1"
     },
     {
@@ -6880,147 +7223,59 @@
       "source_location": "L1"
     },
     {
-      "id": "client_src_components_languagepicker",
-      "label": "LanguagePicker.tsx",
+      "id": "client_src_components_cashierview",
+      "label": "CashierView.tsx",
       "_origin": "ast",
       "community": 40,
-      "community_name": "useSessionStore",
+      "community_name": "formatPrice",
       "file_type": "code",
-      "norm_label": "languagepicker.tsx",
-      "source_file": "client/src/components/LanguagePicker.tsx",
+      "norm_label": "cashierview.tsx",
+      "source_file": "client/src/components/CashierView.tsx",
       "source_location": "L1"
     },
     {
-      "id": "client_src_components_languagepicker_languages",
-      "label": "LANGUAGES",
+      "id": "client_src_components_tableswitchermodal",
+      "label": "TableSwitcherModal.tsx",
       "_origin": "ast",
       "community": 40,
-      "community_name": "useSessionStore",
+      "community_name": "formatPrice",
       "file_type": "code",
-      "norm_label": "languages",
-      "source_file": "client/src/components/LanguagePicker.tsx",
-      "source_location": "L3"
-    },
-    {
-      "id": "client_src_components_themeswitcher",
-      "label": "ThemeSwitcher.tsx",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "themeswitcher.tsx",
-      "source_file": "client/src/components/ThemeSwitcher.tsx",
+      "norm_label": "tableswitchermodal.tsx",
+      "source_file": "client/src/components/TableSwitcherModal.tsx",
       "source_location": "L1"
     },
     {
-      "id": "client_src_components_usermenu",
-      "label": "UserMenu.tsx",
+      "id": "client_src_lib_money",
+      "label": "money.ts",
       "_origin": "ast",
       "community": 40,
-      "community_name": "useSessionStore",
+      "community_name": "formatPrice",
       "file_type": "code",
-      "norm_label": "usermenu.tsx",
-      "source_file": "client/src/components/UserMenu.tsx",
+      "norm_label": "money.ts",
+      "source_file": "client/src/lib/money.ts",
       "source_location": "L1"
     },
     {
-      "id": "client_src_pages_landing",
-      "label": "Landing.tsx",
+      "id": "client_src_pages_guestorder",
+      "label": "GuestOrder.tsx",
       "_origin": "ast",
       "community": 40,
-      "community_name": "useSessionStore",
+      "community_name": "formatPrice",
       "file_type": "code",
-      "norm_label": "landing.tsx",
-      "source_file": "client/src/pages/Landing.tsx",
+      "norm_label": "guestorder.tsx",
+      "source_file": "client/src/pages/GuestOrder.tsx",
       "source_location": "L1"
     },
     {
-      "id": "client_src_pages_login",
-      "label": "Login.tsx",
+      "id": "client_tests_money_test",
+      "label": "money.test.ts",
       "_origin": "ast",
       "community": 40,
-      "community_name": "useSessionStore",
+      "community_name": "formatPrice",
       "file_type": "code",
-      "norm_label": "login.tsx",
-      "source_file": "client/src/pages/Login.tsx",
+      "norm_label": "money.test.ts",
+      "source_file": "client/tests/money.test.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "client_src_pages_orders",
-      "label": "Orders.tsx",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "orders.tsx",
-      "source_file": "client/src/pages/Orders.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "client_src_pages_orders_status_colors",
-      "label": "STATUS_COLORS",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "status_colors",
-      "source_file": "client/src/pages/Orders.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "client_src_stores_session",
-      "label": "session.ts",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "session.ts",
-      "source_file": "client/src/stores/session.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "client_src_stores_session_usesessionstore",
-      "label": "useSessionStore",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "usesessionstore",
-      "source_file": "client/src/stores/session.ts",
-      "source_location": "L20"
-    },
-    {
-      "id": "client_tests_login_flow_test",
-      "label": "login-flow.test.tsx",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "login-flow.test.tsx",
-      "source_file": "client/tests/login-flow.test.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "client_tests_login_flow_test_mockevent",
-      "label": "mockEvent",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "mockevent",
-      "source_file": "client/tests/login-flow.test.tsx",
-      "source_location": "L20"
-    },
-    {
-      "id": "client_tests_login_flow_test_mockwaiters",
-      "label": "mockWaiters",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "useSessionStore",
-      "file_type": "code",
-      "norm_label": "mockwaiters",
-      "source_file": "client/tests/login-flow.test.tsx",
-      "source_location": "L21"
     },
     {
       "id": "readme_abholscheine_mode_pickup_slips",
@@ -7575,6 +7830,18 @@
       "source_location": "L858"
     },
     {
+      "id": "docs_requirements_18_requirements_theke_abholcounter_2026_09_12",
+      "label": "18. Requirements \u2014 Theke / Abholcounter (2026-09-12)",
+      "_origin": "ast",
+      "community": 42,
+      "community_name": "Orderwas \u2014 Requirements Document",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "18. requirements \u2014 theke / abholcounter (2026-09-12)",
+      "source_file": "docs/REQUIREMENTS.md",
+      "source_location": "L903"
+    },
+    {
       "id": "docs_requirements_1_executive_summary",
       "label": "1. Executive Summary",
       "_origin": "ast",
@@ -7644,7 +7911,7 @@
       "node_kind": "heading",
       "norm_label": "after commits",
       "source_file": "AGENTS.md",
-      "source_location": "L95"
+      "source_location": "L118"
     },
     {
       "id": "agents_agents_md_orderwas",
@@ -7668,7 +7935,7 @@
       "node_kind": "heading",
       "norm_label": "architecture rules (binding \u2014 see architecture.md \u00a73)",
       "source_file": "AGENTS.md",
-      "source_location": "L29"
+      "source_location": "L30"
     },
     {
       "id": "agents_before_planning_any_implementation",
@@ -7680,7 +7947,7 @@
       "node_kind": "heading",
       "norm_label": "before planning any implementation",
       "source_file": "AGENTS.md",
-      "source_location": "L83"
+      "source_location": "L106"
     },
     {
       "id": "agents_commands",
@@ -7692,7 +7959,7 @@
       "node_kind": "heading",
       "norm_label": "commands",
       "source_file": "AGENTS.md",
-      "source_location": "L37"
+      "source_location": "L38"
     },
     {
       "id": "agents_database",
@@ -7704,7 +7971,7 @@
       "node_kind": "heading",
       "norm_label": "database",
       "source_file": "AGENTS.md",
-      "source_location": "L60"
+      "source_location": "L61"
     },
     {
       "id": "agents_graph_staleness",
@@ -7716,7 +7983,7 @@
       "node_kind": "heading",
       "norm_label": "graph staleness",
       "source_file": "AGENTS.md",
-      "source_location": "L106"
+      "source_location": "L129"
     },
     {
       "id": "agents_graphify_knowledge_graph",
@@ -7728,7 +7995,7 @@
       "node_kind": "heading",
       "norm_label": "graphify (knowledge graph)",
       "source_file": "AGENTS.md",
-      "source_location": "L79"
+      "source_location": "L91"
     },
     {
       "id": "agents_i18n",
@@ -7740,7 +8007,7 @@
       "node_kind": "heading",
       "norm_label": "i18n",
       "source_file": "AGENTS.md",
-      "source_location": "L110"
+      "source_location": "L133"
     },
     {
       "id": "agents_mandatory_all_3_languages_must_have_identical_key_sets_bidirectional",
@@ -7752,7 +8019,19 @@
       "node_kind": "heading",
       "norm_label": "\u26a0\ufe0f mandatory: all 3 languages must have identical key sets (bidirectional)",
       "source_file": "AGENTS.md",
-      "source_location": "L114"
+      "source_location": "L137"
+    },
+    {
+      "id": "agents_mandatory_query_graphify_before_any_investigation",
+      "label": "\u26a0\ufe0f Mandatory: Query Graphify before any investigation",
+      "_origin": "ast",
+      "community": 43,
+      "community_name": "AGENTS.md \u2014 Orderwas",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "\u26a0\ufe0f mandatory: query graphify before any investigation",
+      "source_file": "AGENTS.md",
+      "source_location": "L95"
     },
     {
       "id": "agents_pre_commit_hook",
@@ -7764,7 +8043,7 @@
       "node_kind": "heading",
       "norm_label": "pre-commit hook",
       "source_file": "AGENTS.md",
-      "source_location": "L75"
+      "source_location": "L87"
     },
     {
       "id": "agents_repository_layout",
@@ -7776,7 +8055,7 @@
       "node_kind": "heading",
       "norm_label": "repository layout",
       "source_file": "AGENTS.md",
-      "source_location": "L17"
+      "source_location": "L18"
     },
     {
       "id": "agents_tech_stack",
@@ -7788,7 +8067,7 @@
       "node_kind": "heading",
       "norm_label": "tech stack",
       "source_file": "AGENTS.md",
-      "source_location": "L10"
+      "source_location": "L11"
     },
     {
       "id": "agents_testing_conventions",
@@ -7800,7 +8079,7 @@
       "node_kind": "heading",
       "norm_label": "testing conventions",
       "source_file": "AGENTS.md",
-      "source_location": "L67"
+      "source_location": "L68"
     },
     {
       "id": "agents_what_not_to_do",
@@ -7812,7 +8091,7 @@
       "node_kind": "heading",
       "norm_label": "what not to do",
       "source_file": "AGENTS.md",
-      "source_location": "L124"
+      "source_location": "L147"
     },
     {
       "id": "agents_what_this_is",
@@ -7824,7 +8103,7 @@
       "node_kind": "heading",
       "norm_label": "what this is",
       "source_file": "AGENTS.md",
-      "source_location": "L6"
+      "source_location": "L7"
     },
     {
       "id": "docs_architecture",
@@ -7848,7 +8127,7 @@
       "node_kind": "heading",
       "norm_label": "10. non-goals (v1, explicit)",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L198"
+      "source_location": "L223"
     },
     {
       "id": "docs_architecture_11_tech_decisions_final",
@@ -7860,7 +8139,7 @@
       "node_kind": "heading",
       "norm_label": "11. tech decisions (final)",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L211"
+      "source_location": "L235"
     },
     {
       "id": "docs_architecture_1_system_overview",
@@ -7920,7 +8199,7 @@
       "node_kind": "heading",
       "norm_label": "5. request lifecycle \u2014 order creation (the critical path)",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L121"
+      "source_location": "L145"
     },
     {
       "id": "docs_architecture_6_real_time",
@@ -7932,7 +8211,7 @@
       "node_kind": "heading",
       "norm_label": "6. real-time",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L145"
+      "source_location": "L170"
     },
     {
       "id": "docs_architecture_7_offline_strategy",
@@ -7944,7 +8223,7 @@
       "node_kind": "heading",
       "norm_label": "7. offline strategy",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L151"
+      "source_location": "L176"
     },
     {
       "id": "docs_architecture_8_security_auth",
@@ -7956,7 +8235,7 @@
       "node_kind": "heading",
       "norm_label": "8. security / auth",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L158"
+      "source_location": "L183"
     },
     {
       "id": "docs_architecture_9_deployment",
@@ -7968,7 +8247,7 @@
       "node_kind": "heading",
       "norm_label": "9. deployment",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L192"
+      "source_location": "L217"
     },
     {
       "id": "docs_architecture_core_hierarchy",
@@ -7983,6 +8262,18 @@
       "source_location": "L89"
     },
     {
+      "id": "docs_architecture_counter_theke_mode",
+      "label": "Counter (Theke) mode",
+      "_origin": "ast",
+      "community": 43,
+      "community_name": "AGENTS.md \u2014 Orderwas",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "counter (theke) mode",
+      "source_file": "docs/ARCHITECTURE.md",
+      "source_location": "L115"
+    },
+    {
       "id": "docs_architecture_deferred_entities_documented_non_goals_for_v1",
       "label": "Deferred entities (documented non-goals for v1)",
       "_origin": "ast",
@@ -7992,7 +8283,7 @@
       "node_kind": "heading",
       "norm_label": "deferred entities (documented non-goals for v1)",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L115"
+      "source_location": "L139"
     },
     {
       "id": "docs_architecture_endpoint_permission_matrix",
@@ -8004,7 +8295,7 @@
       "node_kind": "heading",
       "norm_label": "endpoint \u2192 permission matrix",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L176"
+      "source_location": "L201"
     },
     {
       "id": "docs_architecture_enforcement_global_guard",
@@ -8016,7 +8307,7 @@
       "node_kind": "heading",
       "norm_label": "enforcement (global guard)",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L164"
+      "source_location": "L189"
     },
     {
       "id": "docs_architecture_hot_path_indexes_added_phase_5",
@@ -8040,7 +8331,7 @@
       "node_kind": "heading",
       "norm_label": "login & tokens",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L160"
+      "source_location": "L185"
     },
     {
       "id": "docs_architecture_orderwas_architecture",
@@ -8431,37 +8722,48 @@
       "source_location": "L1"
     },
     {
-      "id": "client_tests_login_test",
-      "label": "login.test.tsx",
+      "id": "client_src_stores_session",
+      "label": "session.ts",
       "_origin": "ast",
       "community": 47,
       "community_name": "Admin.tsx",
       "file_type": "code",
-      "norm_label": "login.test.tsx",
-      "source_file": "client/tests/login.test.tsx",
+      "norm_label": "session.ts",
+      "source_file": "client/src/stores/session.ts",
       "source_location": "L1"
     },
     {
-      "id": "client_tests_login_test_mockevent",
+      "id": "client_tests_login_flow_test",
+      "label": "login-flow.test.tsx",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "Admin.tsx",
+      "file_type": "code",
+      "norm_label": "login-flow.test.tsx",
+      "source_file": "client/tests/login-flow.test.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "client_tests_login_flow_test_mockevent",
       "label": "mockEvent",
       "_origin": "ast",
       "community": 47,
       "community_name": "Admin.tsx",
       "file_type": "code",
       "norm_label": "mockevent",
-      "source_file": "client/tests/login.test.tsx",
-      "source_location": "L14"
+      "source_file": "client/tests/login-flow.test.tsx",
+      "source_location": "L20"
     },
     {
-      "id": "client_tests_login_test_mockwaiters",
+      "id": "client_tests_login_flow_test_mockwaiters",
       "label": "mockWaiters",
       "_origin": "ast",
       "community": 47,
       "community_name": "Admin.tsx",
       "file_type": "code",
       "norm_label": "mockwaiters",
-      "source_file": "client/tests/login.test.tsx",
-      "source_location": "L33"
+      "source_file": "client/tests/login-flow.test.tsx",
+      "source_location": "L21"
     },
     {
       "id": "docs_requirements_17_1_station_display_real_time",
@@ -9083,6 +9385,291 @@
       "source_location": "L549"
     },
     {
+      "id": "client_tests_order_page_test",
+      "label": "order-page.test.tsx",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "order-page.test.tsx",
+      "file_type": "code",
+      "norm_label": "order-page.test.tsx",
+      "source_file": "client/tests/order-page.test.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "client_tests_order_page_test_mockbarproducts",
+      "label": "mockBarProducts",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "order-page.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockbarproducts",
+      "source_file": "client/tests/order-page.test.tsx",
+      "source_location": "L57"
+    },
+    {
+      "id": "client_tests_order_page_test_mockcancelorder",
+      "label": "mockCancelOrder",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "order-page.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockcancelorder",
+      "source_file": "client/tests/order-page.test.tsx",
+      "source_location": "L37"
+    },
+    {
+      "id": "client_tests_order_page_test_mockcreateorder",
+      "label": "mockCreateOrder",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "order-page.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockcreateorder",
+      "source_file": "client/tests/order-page.test.tsx",
+      "source_location": "L35"
+    },
+    {
+      "id": "client_tests_order_page_test_mockgetorders",
+      "label": "mockGetOrders",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "order-page.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetorders",
+      "source_file": "client/tests/order-page.test.tsx",
+      "source_location": "L36"
+    },
+    {
+      "id": "client_tests_order_page_test_mockgetproducts",
+      "label": "mockGetProducts",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "order-page.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetproducts",
+      "source_file": "client/tests/order-page.test.tsx",
+      "source_location": "L34"
+    },
+    {
+      "id": "client_tests_order_page_test_mockgetstations",
+      "label": "mockGetStations",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "order-page.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetstations",
+      "source_file": "client/tests/order-page.test.tsx",
+      "source_location": "L33"
+    },
+    {
+      "id": "client_tests_order_page_test_mockkitchenproducts",
+      "label": "mockKitchenProducts",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "order-page.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockkitchenproducts",
+      "source_file": "client/tests/order-page.test.tsx",
+      "source_location": "L62"
+    },
+    {
+      "id": "client_tests_order_page_test_mockoutofstockproduct",
+      "label": "mockOutOfStockProduct",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "order-page.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockoutofstockproduct",
+      "source_file": "client/tests/order-page.test.tsx",
+      "source_location": "L66"
+    },
+    {
+      "id": "client_tests_order_page_test_mockstations",
+      "label": "mockStations",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "order-page.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockstations",
+      "source_file": "client/tests/order-page.test.tsx",
+      "source_location": "L52"
+    },
+    {
+      "id": "client_tests_order_page_test_rationale_70",
+      "label": "IMPORTANT: mock implementations are set in beforeEach (not at module scope).",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "order-page.test.tsx",
+      "file_type": "rationale",
+      "norm_label": "important: mock implementations are set in beforeeach (not at module scope).",
+      "source_file": "client/tests/order-page.test.tsx",
+      "source_location": "L70"
+    },
+    {
+      "id": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes",
+      "label": "2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "OrderWas UI Fixes: Cashier Item Display & Station Paid Orders",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": "2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_files_changed",
+      "label": "Files Changed",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "OrderWas UI Fixes: Cashier Item Display & Station Paid Orders",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "files changed",
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L189"
+    },
+    {
+      "id": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_issue_1_cashier_view_individual_item_display",
+      "label": "Issue 1: Cashier View Individual Item Display",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "OrderWas UI Fixes: Cashier Item Display & Station Paid Orders",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "issue 1: cashier view individual item display",
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L15"
+    },
+    {
+      "id": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_issue_2_station_display_paid_orders_visibility",
+      "label": "Issue 2: Station Display Paid Orders Visibility",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "OrderWas UI Fixes: Cashier Item Display & Station Paid Orders",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "issue 2: station display paid orders visibility",
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L126"
+    },
+    {
+      "id": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_notes",
+      "label": "Notes",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "OrderWas UI Fixes: Cashier Item Display & Station Paid Orders",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "notes",
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L194"
+    },
+    {
+      "id": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_orderwas_ui_fixes_cashier_item_display_station_paid_orders",
+      "label": "OrderWas UI Fixes: Cashier Item Display & Station Paid Orders",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "OrderWas UI Fixes: Cashier Item Display & Station Paid Orders",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "orderwas ui fixes: cashier item display & station paid orders",
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_task_1_flatten_item_display_in_cashierview",
+      "label": "Task 1: Flatten item display in CashierView",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "OrderWas UI Fixes: Cashier Item Display & Station Paid Orders",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 1: flatten item display in cashierview",
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L17"
+    },
+    {
+      "id": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_task_2_remove_paid_status_filter_from_stationdisplay",
+      "label": "Task 2: Remove paid status filter from StationDisplay",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "OrderWas UI Fixes: Cashier Item Display & Station Paid Orders",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 2: remove paid status filter from stationdisplay",
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L128"
+    },
+    {
+      "id": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_task_3_run_full_ci",
+      "label": "Task 3: Run full CI",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "OrderWas UI Fixes: Cashier Item Display & Station Paid Orders",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 3: run full ci",
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L170"
+    },
+    {
+      "id": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_verification",
+      "label": "Verification",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "OrderWas UI Fixes: Cashier Item Display & Station Paid Orders",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "verification",
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L168"
+    },
+    {
+      "id": "client_tests_station_display_test",
+      "label": "station-display.test.tsx",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "station-display.test.tsx",
+      "file_type": "code",
+      "norm_label": "station-display.test.tsx",
+      "source_file": "client/tests/station-display.test.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "client_tests_station_display_test_mockgetorders",
+      "label": "mockGetOrders",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "station-display.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetorders",
+      "source_file": "client/tests/station-display.test.tsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "client_tests_station_display_test_mockgetstation",
+      "label": "mockGetStation",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "station-display.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetstation",
+      "source_file": "client/tests/station-display.test.tsx",
+      "source_location": "L10"
+    },
+    {
+      "id": "client_tests_station_display_test_station",
+      "label": "station",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "station-display.test.tsx",
+      "file_type": "code",
+      "norm_label": "station",
+      "source_file": "client/tests/station-display.test.tsx",
+      "source_location": "L29"
+    },
+    {
       "id": "docs_requirements_14_success_criteria",
       "label": "14. Success Criteria",
       "_origin": "ast",
@@ -9190,6 +9777,50 @@
       "source_location": "L1"
     },
     {
+      "id": "client_src_components_languagepicker",
+      "label": "LanguagePicker.tsx",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "languagepicker.tsx",
+      "source_file": "client/src/components/LanguagePicker.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "client_src_components_languagepicker_languages",
+      "label": "LANGUAGES",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "languages",
+      "source_file": "client/src/components/LanguagePicker.tsx",
+      "source_location": "L3"
+    },
+    {
+      "id": "client_src_components_themeswitcher",
+      "label": "ThemeSwitcher.tsx",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "themeswitcher.tsx",
+      "source_file": "client/src/components/ThemeSwitcher.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "client_src_components_usermenu",
+      "label": "UserMenu.tsx",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "usermenu.tsx",
+      "source_file": "client/src/components/UserMenu.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "client_src_i18n_index",
       "label": "i18n/index.ts",
       "_origin": "ast",
@@ -9212,15 +9843,48 @@
       "source_location": "L1"
     },
     {
-      "id": "client_src_pages_guestorder",
-      "label": "GuestOrder.tsx",
+      "id": "client_src_pages_landing",
+      "label": "Landing.tsx",
       "_origin": "ast",
       "community": 6,
       "community_name": "App.tsx",
       "file_type": "code",
-      "norm_label": "guestorder.tsx",
-      "source_file": "client/src/pages/GuestOrder.tsx",
+      "norm_label": "landing.tsx",
+      "source_file": "client/src/pages/Landing.tsx",
       "source_location": "L1"
+    },
+    {
+      "id": "client_src_pages_login",
+      "label": "Login.tsx",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "login.tsx",
+      "source_file": "client/src/pages/Login.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "client_src_pages_orders",
+      "label": "Orders.tsx",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "orders.tsx",
+      "source_file": "client/src/pages/Orders.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "client_src_pages_orders_status_colors",
+      "label": "STATUS_COLORS",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "status_colors",
+      "source_file": "client/src/pages/Orders.tsx",
+      "source_location": "L9"
     },
     {
       "id": "client_src_router",
@@ -9232,6 +9896,17 @@
       "norm_label": "router.tsx",
       "source_file": "client/src/router.tsx",
       "source_location": "L1"
+    },
+    {
+      "id": "client_src_stores_session_usesessionstore",
+      "label": "useSessionStore",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "usesessionstore",
+      "source_file": "client/src/stores/session.ts",
+      "source_location": "L20"
     },
     {
       "id": "client_src_stores_theme",
@@ -9276,6 +9951,39 @@
       "norm_label": "app.test.tsx",
       "source_file": "client/tests/app.test.tsx",
       "source_location": "L1"
+    },
+    {
+      "id": "client_tests_login_test",
+      "label": "login.test.tsx",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "login.test.tsx",
+      "source_file": "client/tests/login.test.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "client_tests_login_test_mockevent",
+      "label": "mockEvent",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "mockevent",
+      "source_file": "client/tests/login.test.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "client_tests_login_test_mockwaiters",
+      "label": "mockWaiters",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "mockwaiters",
+      "source_file": "client/tests/login.test.tsx",
+      "source_location": "L33"
     },
     {
       "id": "client_tests_router_test",
@@ -21138,7 +21846,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L10",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -21149,7 +21857,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L110",
+      "source_location": "L133",
       "weight": 1.0
     },
     {
@@ -21160,7 +21868,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L124",
+      "source_location": "L147",
       "weight": 1.0
     },
     {
@@ -21171,7 +21879,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L17",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -21182,7 +21890,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0
     },
     {
@@ -21193,18 +21901,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L37",
-      "weight": 1.0
-    },
-    {
-      "source": "agents_agents_md_orderwas",
-      "target": "agents_what_this_is",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": "L6",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -21215,7 +21912,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L60",
+      "source_location": "L61",
       "weight": 1.0
     },
     {
@@ -21226,7 +21923,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L67",
+      "source_location": "L68",
+      "weight": 1.0
+    },
+    {
+      "source": "agents_agents_md_orderwas",
+      "target": "agents_what_this_is",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "AGENTS.md",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -21237,7 +21945,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L75",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -21248,18 +21956,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L79",
-      "weight": 1.0
-    },
-    {
-      "source": "agents_graphify_knowledge_graph",
-      "target": "agents_graph_staleness",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": "L106",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -21270,12 +21967,34 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L83",
+      "source_location": "L106",
       "weight": 1.0
     },
     {
       "source": "agents_graphify_knowledge_graph",
       "target": "agents_after_commits",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "AGENTS.md",
+      "source_location": "L118",
+      "weight": 1.0
+    },
+    {
+      "source": "agents_graphify_knowledge_graph",
+      "target": "agents_graph_staleness",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "AGENTS.md",
+      "source_location": "L129",
+      "weight": 1.0
+    },
+    {
+      "source": "agents_graphify_knowledge_graph",
+      "target": "agents_mandatory_query_graphify_before_any_investigation",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -21292,7 +22011,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L114",
+      "source_location": "L137",
       "weight": 1.0
     },
     {
@@ -23453,13 +24172,24 @@
     },
     {
       "source": "docs_architecture_4_data_model",
-      "target": "docs_architecture_deferred_entities_documented_non_goals_for_v1",
+      "target": "docs_architecture_counter_theke_mode",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
       "source_location": "L115",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_architecture_4_data_model",
+      "target": "docs_architecture_deferred_entities_documented_non_goals_for_v1",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/ARCHITECTURE.md",
+      "source_location": "L139",
       "weight": 1.0
     },
     {
@@ -23481,7 +24211,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L160",
+      "source_location": "L185",
       "weight": 1.0
     },
     {
@@ -23492,7 +24222,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L164",
+      "source_location": "L189",
       "weight": 1.0
     },
     {
@@ -23503,7 +24233,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L176",
+      "source_location": "L201",
       "weight": 1.0
     },
     {
@@ -23514,7 +24244,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L121",
+      "source_location": "L145",
       "weight": 1.0
     },
     {
@@ -23525,7 +24255,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L145",
+      "source_location": "L170",
       "weight": 1.0
     },
     {
@@ -23536,7 +24266,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L151",
+      "source_location": "L176",
       "weight": 1.0
     },
     {
@@ -23547,7 +24277,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L158",
+      "source_location": "L183",
       "weight": 1.0
     },
     {
@@ -23558,7 +24288,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L192",
+      "source_location": "L217",
       "weight": 1.0
     },
     {
@@ -23569,7 +24299,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L198",
+      "source_location": "L223",
       "weight": 1.0
     },
     {
@@ -23580,7 +24310,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L211",
+      "source_location": "L235",
       "weight": 1.0
     },
     {
@@ -24728,6 +25458,17 @@
       "weight": 1.0
     },
     {
+      "source": "docs_requirements_orderwas_requirements_document",
+      "target": "docs_requirements_18_requirements_theke_abholcounter_2026_09_12",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/REQUIREMENTS.md",
+      "source_location": "L903",
+      "weight": 1.0
+    },
+    {
       "source": "e2e_helpers_auth",
       "target": "e2e_helpers_auth_waiterheaders",
       "relation": "contains",
@@ -25077,6 +25818,600 @@
       "confidence_score": 1.0,
       "source_file": ".hermes/plans/2026-08-28_123802-payment-lifecycle.md",
       "source_location": "L294",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_orderwas_quality_remediation_implementation_plan",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_orderwas_quality_remediation_implementation_plan",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_0_ci_is_red_fix_e2e_auth_breakage_blocking_everything",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_orderwas_quality_remediation_implementation_plan",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_2_payment_model_unification_high_money_correctness",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L172",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_orderwas_quality_remediation_implementation_plan",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_3_correctness_fixes_high",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L290",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_orderwas_quality_remediation_implementation_plan",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_4_dry_cleanliness_refactors_medium",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L368",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_orderwas_quality_remediation_implementation_plan",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_5_test_backfill_for_untested_features_high_for_convention_compliance",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L412",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_orderwas_quality_remediation_implementation_plan",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_6_documentation_reconciliation_medium",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L448",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_orderwas_quality_remediation_implementation_plan",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_verification_per_phase_per_user_convention",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L473",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_orderwas_quality_remediation_implementation_plan",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_risks_trade_offs_open_questions",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L491",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_orderwas_quality_remediation_implementation_plan",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_1_critical_security_fixes_auth_closure",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L61",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_0_ci_is_red_fix_e2e_auth_breakage_blocking_everything",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_0_1_e2e_helper_adminlogin_for_specs",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_0_ci_is_red_fix_e2e_auth_breakage_blocking_everything",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_0_2_verify_npm_run_ci_is_green_end_to_end",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_1_critical_security_fixes_auth_closure",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_1_3_permission_gates_on_the_8_ungated_route_files",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L124",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_1_critical_security_fixes_auth_closure",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_1_4_websocket_auth",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L150",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_1_critical_security_fixes_auth_closure",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_1_5_fail_fast_on_missing_jwt_secret_in_production",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L163",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_1_critical_security_fixes_auth_closure",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_1_1_global_auth_hook_implement_what_architecture_md_8_documents",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L65",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_1_critical_security_fixes_auth_closure",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_1_2_close_the_patch_orders_id_permission_bypass",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L99",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_2_payment_model_unification_high_money_correctness",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_2_1_markpaid_sets_item_level_payment_state_audit_log",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L176",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_2_payment_model_unification_high_money_correctness",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_2_2_payitems_event_ownership_race_safe_validation",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L208",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_2_payment_model_unification_high_money_correctness",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_2_3_audit_logs_for_money_relevant_actions",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L247",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_2_payment_model_unification_high_money_correctness",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_2_4_dry_extract_emitorderupdated_shared_selects",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L255",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_2_payment_model_unification_high_money_correctness",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_2_5_payments_route_cleanup",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L280",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_3_correctness_fixes_high",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_3_1_stock_check_inside_the_order_transaction",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L292",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_3_correctness_fixes_high",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_3_2_expandcomponents_uses_the_transaction_client",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L301",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_3_correctness_fixes_high",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_3_3_voucher_redemption_race_createvoucher_uniqueness",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L310",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_3_correctness_fixes_high",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_3_4_schema_hardening_hot_path_indexes_cascade",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L328",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_3_correctness_fixes_high",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_3_5_qr_guest_order_route_hardening",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L358",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_4_dry_cleanliness_refactors_medium",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_4_1_shared_money_formatter_client",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L370",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_4_dry_cleanliness_refactors_medium",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_4_2_split_admin_tsx_823_lines_5_modules",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L379",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_4_dry_cleanliness_refactors_medium",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_4_3_route_layer_thinning_rule_1_no_prisma_in_routes",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L388",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_4_dry_cleanliness_refactors_medium",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_4_4_api_client_cleanup",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L395",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_4_dry_cleanliness_refactors_medium",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_4_5_remove_dead_unused_things",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L402",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_5_test_backfill_for_untested_features_high_for_convention_compliance",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_1_payments_integration_suite_if_not_already_covered_by_phase_2_tasks",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L416",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_5_test_backfill_for_untested_features_high_for_convention_compliance",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_2_audit_reports_integration_suite",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L419",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_5_test_backfill_for_untested_features_high_for_convention_compliance",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_3_qr_guest_ordering_suite_covered_in_task_3_5_tests_verify_extend_for_stock_refusal_and_print_behavior",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L422",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_5_test_backfill_for_untested_features_high_for_convention_compliance",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_4_reorder_endpoints",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L424",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_5_test_backfill_for_untested_features_high_for_convention_compliance",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_5_replace_fake_admin_replica_test_with_real_component_tests",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L427",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_5_test_backfill_for_untested_features_high_for_convention_compliance",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_6_client_tests_for_cashierview_guestorder",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L432",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_5_test_backfill_for_untested_features_high_for_convention_compliance",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_7_e2e_journeys_highest_value_gaps",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L437",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_5_test_backfill_for_untested_features_high_for_convention_compliance",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_5_8_race_condition_regression_tests_concurrent_payitems_covered_in_2_2_add_concurrent_order_creation_tear_off_uniqueness_concurrent_voucher_redemption_from_3_3_assert_unique_tearoffnumbers_under_promise_all_burst",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L444",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_6_documentation_reconciliation_medium",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_6_1_architecture_md",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L450",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_6_documentation_reconciliation_medium",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_6_2_requirements_md",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L456",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_6_documentation_reconciliation_medium",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_6_3_readme_md",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L460",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_6_documentation_reconciliation_medium",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_6_4_agents_md",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L463",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_phase_6_documentation_reconciliation_medium",
+      "target": "hermes_plans_2026_08_28_230923_orderwas_quality_remediation_task_6_5_skills_orderwas_development_skill_md",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-28_230923-orderwas-quality-remediation.md",
+      "source_location": "L468",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes",
+      "target": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_orderwas_ui_fixes_cashier_item_display_station_paid_orders",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_issue_1_cashier_view_individual_item_display",
+      "target": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_task_1_flatten_item_display_in_cashierview",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_issue_2_station_display_paid_orders_visibility",
+      "target": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_task_2_remove_paid_status_filter_from_stationdisplay",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L128",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_orderwas_ui_fixes_cashier_item_display_station_paid_orders",
+      "target": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_issue_2_station_display_paid_orders_visibility",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L126",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_orderwas_ui_fixes_cashier_item_display_station_paid_orders",
+      "target": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_issue_1_cashier_view_individual_item_display",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_orderwas_ui_fixes_cashier_item_display_station_paid_orders",
+      "target": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_verification",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L168",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_orderwas_ui_fixes_cashier_item_display_station_paid_orders",
+      "target": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_files_changed",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L189",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_orderwas_ui_fixes_cashier_item_display_station_paid_orders",
+      "target": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_notes",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L194",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_verification",
+      "target": "hermes_plans_2026_08_29_120000_orderwas_cashier_station_fixes_task_3_run_full_ci",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-08-29_120000-orderwas-cashier-station-fixes.md",
+      "source_location": "L170",
       "weight": 1.0
     },
     {
@@ -29053,5 +30388,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "fb00f8637f8eb6cb5658ad7cc5c90e59a1599e43"
+  "built_at_commit": "619fa6f3fecb89112b319a8b947d2a6f00c70ed5"
 }
