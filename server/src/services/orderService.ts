@@ -1,3 +1,4 @@
+import type { Prisma } from '@prisma/client'
 import { prisma } from '@/db/client'
 import { orderEvents, type OrderEventPayload } from '@/websocket'
 import { dispatchOrderPrints } from '@/printer/dispatch'
@@ -191,29 +192,22 @@ export async function createOrder(input: CreateOrderInput) {
       }
     }
 
-    // Tear-off (Bon) assignment. The counter may pin the number that was torn
-    // off at the Theke; every other order takes the next free number. The
-    // counter lives on the waiter, not the event, so each counter waiter has
-    // its own independent Bon sequence.
+    // Tear-off (Bon) assignment.
+    //
+    //   Counter (Theke): numbering is per counter and overridable per order —
+    //   the operator types the number torn off the physical block. A fresh
+    //   block starts at 1 again, so repeats are legitimate and nothing is
+    //   checked against other orders. What comes next is always derived from
+    //   the last order registered at this counter, never from a stored max
+    //   (which a new block would keep pushing upwards).
+    //
+    //   Everyone else: the waiter's own sequence, incremented atomically.
     let assignedTearOffNumber: number
     if (tearOffNumber !== undefined) {
-      const clash = await tx.order.findFirst({
-        where: { eventId, tearOffNumber },
-        select: { id: true },
-      })
-      if (clash) {
-        throw new OrderValidationError(`Bon number ${tearOffNumber} is already in use`, 409)
-      }
-
-      const current = await tx.waiter.findUniqueOrThrow({
-        where: { id: waiterId },
-        select: { tearOffNumber: true },
-      })
-      await tx.waiter.update({
-        where: { id: waiterId },
-        data: { tearOffNumber: Math.max(current.tearOffNumber, tearOffNumber) },
-      })
+      // Counter only — non-counter waiters are rejected further up.
       assignedTearOffNumber = tearOffNumber
+    } else if (waiter.isCounter) {
+      assignedTearOffNumber = await nextBonAfterLastOrder([waiterId], tx)
     } else {
       const updatedWaiter = await tx.waiter.update({
         where: { id: waiterId },
@@ -311,6 +305,39 @@ export async function createOrder(input: CreateOrderInput) {
   }).catch((err) => console.error('[audit] log error:', err))
 
   return order
+}
+
+/**
+ * The Bon that follows the last order registered at the given counter(s).
+ *
+ * Derived from the orders themselves, deliberately NOT from a stored
+ * high-water mark (`Waiter.tearOffNumber`): the operator tears numbers off a
+ * physical block and, once it is exhausted, starts the next block at 1 again —
+ * a max() would keep counting upwards across blocks and pre-fill a number that
+ * does not exist on the roll in front of them.
+ */
+async function nextBonAfterLastOrder(
+  waiterIds: string[],
+  db: Pick<Prisma.TransactionClient, 'order'> = prisma,
+): Promise<number> {
+  const last = await db.order.findFirst({
+    where: { waiterId: { in: waiterIds } },
+    orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    select: { tearOffNumber: true },
+  })
+  return last?.tearOffNumber != null ? last.tearOffNumber + 1 : 1
+}
+
+/**
+ * Next Bon for an event's counter (Theke) — what the order page pre-fills.
+ */
+export async function nextCounterBon(eventId: string): Promise<number> {
+  const counters = await prisma.waiter.findMany({
+    where: { eventId, isCounter: true },
+    select: { id: true },
+  })
+  if (counters.length === 0) return 1
+  return nextBonAfterLastOrder(counters.map((c) => c.id))
 }
 
 /**

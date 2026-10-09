@@ -19,6 +19,7 @@ const mockGetProducts = vi.hoisted(() => vi.fn())
 const mockCreateOrder = vi.hoisted(() => vi.fn())
 const mockGetOrders = vi.hoisted(() => vi.fn())
 const mockGetCounterUnpaid = vi.hoisted(() => vi.fn())
+const mockGetNextCounterBon = vi.hoisted(() => vi.fn())
 const mockGetEvent = vi.hoisted(() => vi.fn())
 
 vi.mock('@/api/client', () => ({
@@ -28,6 +29,7 @@ vi.mock('@/api/client', () => ({
     createOrder: mockCreateOrder,
     getOrders: mockGetOrders,
     getCounterUnpaid: mockGetCounterUnpaid,
+    getNextCounterBon: mockGetNextCounterBon,
     getEvent: mockGetEvent,
     cancelOrder: vi.fn(),
     getUnpaidByTable: vi.fn(),
@@ -51,12 +53,15 @@ const openBon = [
 beforeEach(() => {
   useCartStore.getState().clear()
   resetSessionState({
-    waiter: makeCounterWaiter({ tearOffNumber: 5 }),
+    // Deliberately no tearOffNumber on the waiter: the pre-fill must come from
+    // the server's next-bon endpoint, not from a counter stored on the waiter.
+    waiter: makeCounterWaiter(),
     event: makeEvent({ counterEnabled: true }),
   })
   mockGetStations.mockReset().mockResolvedValue(stations)
   mockGetProducts.mockReset().mockResolvedValue(barProducts)
   mockGetCounterUnpaid.mockReset().mockResolvedValue([])
+  mockGetNextCounterBon.mockReset().mockResolvedValue({ nextBon: 6 })
   mockGetOrders.mockReset().mockResolvedValue([])
   mockGetEvent.mockReset().mockResolvedValue({
     id: 'evt-1', name: 'Testfest', status: 'test', hidePrices: false, tseEnabled: false,
@@ -68,12 +73,13 @@ beforeEach(() => {
 describe('OrderPage in counter mode', () => {
   const navigate = vi.fn()
 
-  it('pre-fills the Bon input with the next tear-off number', async () => {
+  it('pre-fills the Bon with the next number reported by the counter endpoint', async () => {
     render(<OrderPage navigate={navigate} />)
 
     await waitFor(() => {
       expect((screen.getByTestId('bon-number-input') as HTMLInputElement).value).toBe('6')
     })
+    expect(mockGetNextCounterBon).toHaveBeenCalledWith('evt-1')
     // The counter never sees a table number field.
     expect(screen.queryByTestId('table-number-input')).toBeNull()
   })

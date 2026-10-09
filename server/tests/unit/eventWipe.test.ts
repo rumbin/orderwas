@@ -1,7 +1,7 @@
 import { describe, it, expect, afterAll, beforeEach } from 'vitest'
 import { prisma } from '@/db/client'
 import { updateEvent } from '@/services/eventService'
-import { createOrder } from '@/services/orderService'
+import { createOrder, nextCounterBon } from '@/services/orderService'
 
 describe('Event test→live wipe', () => {
   let eventId: string
@@ -40,7 +40,7 @@ describe('Event test→live wipe', () => {
     await createOrder({ tableNumber: '2', waiterId, eventId, items: [{ productId, quantity: 1 }] })
   })
 
-  it('switching test→live wipes all orders and resets tear-off counter on the waiter', async () => {
+  it('switching test→live wipes all orders (the Theke restarts at Bon 1)', async () => {
     // Verify we have orders before the wipe
     const ordersBefore = await prisma.order.findMany({ where: { eventId } })
     expect(ordersBefore).toHaveLength(2)
@@ -57,6 +57,18 @@ describe('Event test→live wipe', () => {
     // Event status is live
     const eventAfter = await prisma.event.findUnique({ where: { id: eventId } })
     expect(eventAfter?.status).toBe('live')
+
+    // Bon numbering follows the orders registered at the counter, so wiping
+    // them restarts the Theke at Bon 1 without an explicit counter reset.
+    const counter = await prisma.waiter.create({
+      data: { name: 'Theke', pin: '0000', eventId, isCounter: true },
+    })
+    await prisma.order.create({
+      data: { eventId, waiterId: counter.id, status: 'open', totalCents: 0, tearOffNumber: 1 },
+    })
+    expect(await nextCounterBon(eventId)).toBe(2)
+    await prisma.order.deleteMany({ where: { eventId } })
+    expect(await nextCounterBon(eventId)).toBe(1)
   })
 
   it('live→test does NOT wipe data', async () => {

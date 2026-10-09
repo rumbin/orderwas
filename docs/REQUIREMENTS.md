@@ -905,8 +905,8 @@ Feedback from Philipp's first live sandbox review of the running system.
 Counter sales, separated from table service. **Implemented** (see [docs/ARCHITECTURE.md](ARCHITECTURE.md) §4 *Counter mode*).
 
 - **Configured per event** (boolean, admin UI). At most one counter per event for now; typically zero or one.
-- **The order page is the waiter page**, except that the table number is replaced by a **Bon** (tear-off) number: an integer field, pre-filled with the incrementing number and editable for the ticket torn off at the counter.
-- **Orders are labelled "Theke"** instead of a waiter name, and carry the Bon instead of a table number — on screen and on the receipt (`Bon: <n>` in place of `Tisch:`/`Abholcode:`; otherwise the receipt is unchanged). **Bon numbers reset per event.**
+- **The order page is the waiter page**, except that the table number is replaced by a **Bon** (tear-off) number: an integer field, pre-filled with the number following the last Bon sold at that counter, and editable for the ticket torn off at the counter.
+- **Orders are labelled "Theke"** instead of a waiter name, and carry the Bon instead of a table number — on screen and on the receipt (`Bon: <n>` in place of `Tisch:`/`Abholcode:`; otherwise the receipt is unchanged). **Bon numbers are unique per counter, not per event:** they follow the numbered block in the operator's hand, so a new block legitimately repeats numbers, and the next pre-filled Bon is always *the last Bon sold at that counter + 1* (never a stored maximum).
 - **Same products as the waiters** for now. Station-specific counters (per-station product ranges) are a later step.
 - **After submitting** the counter proceeds to *Kassieren* immediately. That screen is always about the most recent order only — there are no tables or Bon numbers to select.
 - **No new order while a Bon is unpaid.** The screen returns to *Neue Bestellung* only after the full payment is confirmed; the backend refuses a second unpaid counter order (409), so the rule holds even if the UI is bypassed.

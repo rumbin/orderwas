@@ -25,6 +25,7 @@ const mockGetProducts = vi.hoisted(() => vi.fn())
 const mockCreateOrder = vi.hoisted(() => vi.fn())
 const mockGetOrders = vi.hoisted(() => vi.fn())
 const mockGetCounterUnpaid = vi.hoisted(() => vi.fn())
+const mockGetNextCounterBon = vi.hoisted(() => vi.fn())
 const mockGetEvent = vi.hoisted(() => vi.fn())
 
 vi.mock('@/api/client', () => ({
@@ -34,6 +35,7 @@ vi.mock('@/api/client', () => ({
     createOrder: mockCreateOrder,
     getOrders: mockGetOrders,
     getCounterUnpaid: mockGetCounterUnpaid,
+    getNextCounterBon: mockGetNextCounterBon,
     getEvent: mockGetEvent,
     cancelOrder: vi.fn(),
     getUnpaidByTable: vi.fn(),
@@ -53,12 +55,13 @@ const barProducts = [
 beforeEach(() => {
   useCartStore.getState().clear()
   resetSessionState({
-    waiter: makeCounterWaiter({ tearOffNumber: 5 }),
+    waiter: makeCounterWaiter(),
     event: makeEvent({ counterEnabled: true }),
   })
   mockGetStations.mockReset().mockResolvedValue(stations)
   mockGetProducts.mockReset().mockResolvedValue(barProducts)
   mockGetCounterUnpaid.mockReset().mockResolvedValue([])
+  mockGetNextCounterBon.mockReset().mockResolvedValue({ nextBon: 6 })
   mockGetOrders.mockReset().mockResolvedValue([])
   mockGetEvent.mockReset().mockResolvedValue({
     id: 'evt-1', name: 'Testfest', status: 'test', hidePrices: false, tseEnabled: false,

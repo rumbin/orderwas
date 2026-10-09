@@ -140,11 +140,15 @@ export default function OrderPage({ navigate }: { navigate: (path: string) => vo
   }, [tab, eventId])
 
   // Counter mode: pre-fill the Bon with the next tear-off number (still editable).
-  const nextBon = (waiter?.tearOffNumber ?? 0) + 1
+  // The server derives it from the last order sold at this counter, so a fresh
+  // tear-off block — which the operator starts at 1 again — is picked up
+  // correctly. A stored "high-water mark" would keep counting upwards instead.
   useEffect(() => {
-    if (!isCounterMode) return
-    setBonNumber(String(nextBon))
-  }, [isCounterMode, nextBon])
+    if (!isCounterMode || !eventId) return
+    api.getNextCounterBon(eventId)
+      .then((r) => setBonNumber(String(r.nextBon)))
+      .catch(() => {})
+  }, [isCounterMode, eventId])
 
   // Counter mode: the Bon sold at the counter must be paid before the next order.
   const refreshCounterOpenBon = useCallback(async () => {

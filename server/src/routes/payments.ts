@@ -6,7 +6,7 @@ import {
   listUnpaidByTable,
   listUnpaidForCounter,
 } from '@/services/paymentService'
-import { OrderValidationError } from '@/services/orderService'
+import { OrderValidationError, nextCounterBon } from '@/services/orderService'
 import type { JwtPayload } from '@/plugins/auth'
 
 const payItemsBody = z.object({
@@ -61,5 +61,14 @@ export const paymentsRoutes: FastifyPluginAsync = async (server: FastifyInstance
     const { eventId } = request.params as { eventId: string }
     const orders = await listUnpaidForCounter(eventId)
     return reply.status(200).send(orders)
+  })
+
+  // GET /events/:eventId/counter/next-bon — the number to pre-fill on the order page.
+  // The next Bon is whatever follows the last order registered at this counter
+  // (never a stored max: a fresh tear-off block starts at 1 again, and the
+  // operator may override the pre-filled number per order).
+  server.get('/events/:eventId/counter/next-bon', async (request, reply) => {
+    const { eventId } = request.params as { eventId: string }
+    return reply.status(200).send({ nextBon: await nextCounterBon(eventId) })
   })
 }

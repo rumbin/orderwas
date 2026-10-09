@@ -209,6 +209,10 @@ export const api = {
   // Counter (Theke) cashier screen: the one open Bon, or nothing.
   getCounterUnpaid: (eventId: string) =>
     request<TableOrder[]>(`/events/${eventId}/counter/unpaid`),
+  // Counter (Theke) order page: the Bon to pre-fill — the number after the last
+  // order sold at this counter (editable; a new tear-off block restarts at 1).
+  getNextCounterBon: (eventId: string) =>
+    request<{ nextBon: number }>(`/events/${eventId}/counter/next-bon`),
 
   // Audit & Reporting
   getAuditLogs: (eventId: string, opts?: { action?: string; entityType?: string }) => {

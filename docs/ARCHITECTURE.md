@@ -87,13 +87,13 @@ SQLite via Prisma. **Money is integer cents everywhere** (`priceCents`, `totalCe
 > Full schema is the source of truth: `server/prisma/schema.prisma`. This section documents the *design intent* per entity.
 
 ### Core hierarchy
-- **Event** — one festival. `status: test|live`. Switching test→live **deletes all orders** (wiki §14 business rule, enforced in `eventService`). Owns `lastTearOffNumber` counter. `hidePrices`, `tseEnabled` (reserved, v2). `counterEnabled` gates the Theke counter (see *Counter mode* below).
+- **Event** — one festival. `status: test|live`. Switching test→live **deletes all orders** (wiki §14 business rule, enforced in `eventService`); because the Theke's Bon numbering follows the orders registered at that counter, wiping also restarts it at 1. `hidePrices`, `tseEnabled` (reserved, v2). `counterEnabled` gates the Theke counter (see *Counter mode* below).
 - **Station** — prep point (Bar, Küche, Kaffee). `kitchenMonitor` toggle, `copyPrint`, sortOrder. FK to primary **Printer**; **alternative printers** via join table with optional table-range/pickup-code routing (Phase 3).
 - **Product** — `priceCents Int`, `taxRateBps` (basis points, e.g. 2000 = 20.00%), `stockMode: none|tracked|composite`, `stockCount Float` (Float allows 0.5L beer; it is a stock quantity, not money), `isVoucher`, `addable`, `shortName` (for receipts).
 - **ProductComponent** *(new)* — join table for composite products: `compositeId → ingredientId, quantity Decimal`. Required for Task 34 stock management; without it `stockMode: composite` is meaningless.
-- **Waiter** — `pin` (write-only), permission flags (canCancel, canCashOut, canStatistics, canCreateWaiters, canTransfer, isStationWaiter), `printsImmediately`, `autoSammelbon`, `hidden`, optional own Printer, optional `pickupCode` (Abholkennzeichen: when set, orders skip table number and get auto tear-off numbers — Bonkasse/Abholscheine mode). `isCounter` marks the Theke counter login (see *Counter mode* below).
+- **Waiter** — `pin` (write-only), permission flags (canCancel, canCashOut, canStatistics, canCreateWaiters, canTransfer, isStationWaiter), `printsImmediately`, `autoSammelbon`, `hidden`, optional own Printer, optional `pickupCode` (Abholkennzeichen: when set, orders skip table number and get auto tear-off numbers — Bonkasse/Abholscheine mode). `tearOffNumber` is **that waiter's own** tear-off sequence counter (atomic increment, admin-resettable) — it does **not** drive the Theke's Bon numbering. `isCounter` marks the Theke counter login (see *Counter mode* below).
 - **Printer** *(new, first-class)* — `name`, `type: network|ignore|dummy`, `ip`, `charsPerLine`, `font`, `buzzer`, `paperCut: full|partial|none`. Replaces the flat `printerIp`/`printerType` strings on Station/Waiter (those columns migrate to FKs).
-- **Order** — `tableNumber String?` (nullable: pickup orders use `pickupCode` instead, counter orders use neither — see *Counter mode*), `status: open|preparing|partial|paid|cancelled`, `totalCents Int`, `tearOffNumber Int?` (atomic per-event increment; for counter orders it is the **Bon number**, optionally pinned by the counter), `pickupCode String?`, `sammelbonId String?` (reserved for collective receipts, Phase 6).
+- **Order** — `tableNumber String?` (nullable: pickup orders use `pickupCode` instead, counter orders use neither — see *Counter mode*), `status: open|preparing|partial|paid|cancelled`, `totalCents Int`, `tearOffNumber Int?` (for table/pickup orders the waiter's own sequence, incremented atomically; for counter orders it is the **Bon number**, entered at the Theke — see *Counter mode*), `pickupCode String?`, `sammelbonId String?` (reserved for collective receipts, Phase 6).
 - **OrderItem** — quantity, `status: open|prepared|delivered|cancelled`, free-text `comment`, plus `options` JSON (`[{extraName, optionName, priceDeltaCents}]`) for **structured product `ProductExtra` option groups** (radio/checkbox, optional price deltas — §17.4 of REQUIREMENTS). `paidAt` + `paidByWaiterId` stamp payment per item.
 - **Voucher** *(new)* — `code` (unique per event), `valueCents Int`, `status: active|redeemed|expired`, `redeemedOrderId?`. Backs Task 33.
 - **AppLayout** — per event (real FK to **Event**, `onDelete: Cascade`), optionally per waiter: columns, rows, `buttons` JSON `[{name, color, productId, row, col}]`.
@@ -122,10 +122,16 @@ cart, product grid, print dispatch, item-level payment) is the ordinary waiter f
 
 - **The Bon *is* the tear-off number.** A counter order carries **neither**
   `tableNumber` nor `pickupCode`; its identifier is `tearOffNumber`, printed as
-  `Bon: <n>` instead of `Tisch:`/`Abholcode:` (same receipt otherwise). The counter UI
-  pre-fills the next number and may overwrite it with the ticket torn off at the Theke:
-  the server requires a positive integer, rejects a number already in use (409) and
-  advances `lastTearOffNumber` to at least that value so the next pre-fill moves on.
+  `Bon: <n>` instead of `Tisch:`/`Abholcode:` (same receipt otherwise).
+- **Numbering is per counter and overridable per order.** The UI pre-fills the next
+  Bon (`GET /api/events/:eventId/counter/next-bon`) and the operator may type over it
+  with the number actually torn off at the Theke — the server accepts it as given
+  (positive integer only). The next Bon is always **the last order registered at that
+  counter + 1**, never a stored high-water mark: the numbers come off a physical block,
+  and when it is exhausted the next block starts at 1 again — a `max()` would keep
+  counting upwards across blocks and pre-fill a number that is not on the roll in front
+  of the operator. Consequently repeats are legitimate (409-on-duplicate does **not**
+  apply at the counter), and other waiters' orders never influence the sequence.
 - **Only the counter may sell table-less orders**, and only it may set `tearOffNumber`;
   a regular waiter sending either is rejected (400). `tableNumber` and `pickupCode` stay
   mutually exclusive.
@@ -152,7 +158,8 @@ POST /api/orders
       1. validate waiter/event/products exist & available
       2. stock check (tracked: count ≥ qty; composite: expand components)
       3. totalCents = Σ priceCents × qty          (integer math)
-      4. tearOffNumber = atomic event counter++    (in-transaction increment)
+      4. tearOffNumber = counter Bon as entered, or the last counter
+         order + 1 at a Theke; otherwise the waiter's own sequence++
       5. persist Order + OrderItems
       6. decrement stock
     commit

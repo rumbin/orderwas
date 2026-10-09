@@ -44,6 +44,15 @@ describe('Theke / counter', () => {
   const getCounterUnpaid = () =>
     server.inject({ method: 'GET', url: `/api/events/${eventId}/counter/unpaid` })
 
+  const getNextBon = () =>
+    server.inject({ method: 'GET', url: `/api/events/${eventId}/counter/next-bon` })
+
+  /** Settle every open order so the next one may be sold at the counter. */
+  const markAllPaid = async () => {
+    await prisma.orderItem.updateMany({ data: { paidAt: new Date() } })
+    await prisma.order.updateMany({ data: { status: 'paid' } })
+  }
+
   beforeAll(async () => {
     server = buildServer()
     await server.listen({ port: 0, host: '127.0.0.1' })
@@ -173,8 +182,16 @@ describe('Theke / counter', () => {
       expect(body.waiterId).toBe(counterId)
     })
 
-    it('auto-assigns the next Bon when the counter submits none', async () => {
-      await prisma.waiter.update({ where: { id: counterId }, data: { tearOffNumber: 4 } })
+    it('auto-assigns the Bon that follows the last order sold at the counter', async () => {
+      // The operator enters 4 by hand (the block started before the system saw it).
+      const first = await postOrder({
+        tearOffNumber: 4,
+        waiterId: counterId,
+        eventId,
+        items: [{ productId: beerId, quantity: 1 }],
+      })
+      expect(first.statusCode).toBe(201)
+      await markAllPaid()
 
       const res = await postOrder({
         waiterId: counterId,
@@ -186,26 +203,33 @@ describe('Theke / counter', () => {
       expect(res.json().tearOffNumber).toBe(5)
     })
 
-    it('bumps the waiter counter when a manually entered Bon is ahead of it', async () => {
-      const res = await postOrder({
-        tearOffNumber: 20,
-        waiterId: counterId,
-        eventId,
-        items: [{ productId: beerId, quantity: 1 }],
-      })
-      expect(res.statusCode).toBe(201)
+    it('derives the next Bon from the last order, not from a stored counter', async () => {
+      // A stale high-water mark on the waiter row must NOT drive the pre-fill:
+      // the operator tears numbers off a physical block, and when it runs out a
+      // new block starts at 1 again. Only the orders registered at this counter
+      // say what comes next.
+      await prisma.waiter.update({ where: { id: counterId }, data: { tearOffNumber: 999 } })
 
-      const waiter = await prisma.waiter.findUniqueOrThrow({ where: { id: counterId } })
-      expect(waiter.tearOffNumber).toBe(20)
+      const block1 = await postOrder({ tearOffNumber: 7, waiterId: counterId, eventId, items: [{ productId: beerId, quantity: 1 }] })
+      expect(block1.statusCode).toBe(201)
+      await markAllPaid()
+      const block2 = await postOrder({ tearOffNumber: 8, waiterId: counterId, eventId, items: [{ productId: beerId, quantity: 1 }] })
+      expect(block2.statusCode).toBe(201)
+      await markAllPaid()
 
-      // The next auto-assigned Bon continues after the manual one.
-      await prisma.orderItem.updateMany({ data: { paidAt: new Date() } })
-      await prisma.order.updateMany({ data: { status: 'paid' } })
+      // Tear-off block exhausted -> the new one starts over at 1.
+      const newBlock = await postOrder({ tearOffNumber: 1, waiterId: counterId, eventId, items: [{ productId: beerId, quantity: 1 }] })
+      expect(newBlock.statusCode).toBe(201)
+      expect(newBlock.json().tearOffNumber).toBe(1)
+      await markAllPaid()
+
+      // Next Bon follows the last order (1 -> 2), not the stored 999/8 max.
       const next = await postOrder({ waiterId: counterId, eventId, items: [{ productId: beerId, quantity: 1 }] })
-      expect(next.json().tearOffNumber).toBe(21)
+      expect(next.statusCode).toBe(201)
+      expect(next.json().tearOffNumber).toBe(2)
     })
 
-    it('rejects a Bon number that is already in use', async () => {
+    it('accepts a repeated Bon number — a new tear-off block restarts the sequence', async () => {
       const first = await postOrder({
         tearOffNumber: 3,
         waiterId: counterId,
@@ -213,18 +237,16 @@ describe('Theke / counter', () => {
         items: [{ productId: beerId, quantity: 1 }],
       })
       expect(first.statusCode).toBe(201)
+      await markAllPaid()
 
-      // Pay the first order so only the duplicate-Bon rule can reject the second.
-      await prisma.orderItem.updateMany({ data: { paidAt: new Date() } })
-      await prisma.order.updateMany({ data: { status: 'paid' } })
-
-      const duplicate = await postOrder({
+      const repeated = await postOrder({
         tearOffNumber: 3,
         waiterId: counterId,
         eventId,
         items: [{ productId: beerId, quantity: 1 }],
       })
-      expect(duplicate.statusCode).toBe(409)
+      expect(repeated.statusCode).toBe(201)
+      expect(repeated.json().tearOffNumber).toBe(3)
     })
 
     it('rejects a Bon number that is not a positive integer', async () => {
@@ -425,6 +447,45 @@ describe('Theke / counter', () => {
 
       const res = await getCounterUnpaid()
       expect(res.json()).toEqual([])
+    })
+  })
+
+  // --- next Bon for the order-page pre-fill -------------------------------
+
+  describe('GET /events/:eventId/counter/next-bon', () => {
+    it('offers Bon 1 before the counter has sold anything', async () => {
+      const res = await getNextBon()
+      expect(res.statusCode).toBe(200)
+      expect(res.json()).toEqual({ nextBon: 1 })
+    })
+
+    it('offers the number after the last Bon sold at the counter', async () => {
+      await postOrder({ tearOffNumber: 23, waiterId: counterId, eventId, items: [{ productId: beerId, quantity: 1 }] })
+
+      const res = await getNextBon()
+      expect(res.json()).toEqual({ nextBon: 24 })
+    })
+
+    it('follows the last order when a new tear-off block restarted at 1', async () => {
+      await postOrder({ tearOffNumber: 30, waiterId: counterId, eventId, items: [{ productId: beerId, quantity: 1 }] })
+      await markAllPaid()
+      await postOrder({ tearOffNumber: 1, waiterId: counterId, eventId, items: [{ productId: beerId, quantity: 1 }] })
+      await markAllPaid()
+
+      const res = await getNextBon()
+      expect(res.json()).toEqual({ nextBon: 2 })
+    })
+
+    it('ignores orders of other waiters — numbering is per counter', async () => {
+      // Alice's own sequence starts at 1 and must not disturb the Theke.
+      const tableOrder = await postOrder({ tableNumber: '9', waiterId, eventId, items: [{ productId: beerId, quantity: 1 }] })
+      expect(tableOrder.statusCode).toBe(201)
+      expect(tableOrder.json().tearOffNumber).toBe(1)
+
+      await postOrder({ tearOffNumber: 5, waiterId: counterId, eventId, items: [{ productId: beerId, quantity: 1 }] })
+
+      const res = await getNextBon()
+      expect(res.json()).toEqual({ nextBon: 6 })
     })
   })
 })

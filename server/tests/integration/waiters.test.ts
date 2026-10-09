@@ -233,13 +233,17 @@ describe('Waiter CRUD - PATCH /api/waiters/:id/active', () => {
   })
 })
 
-describe('Waiter CRUD - tearOffNumber on the counter', () => {
-  it('admin can update tearOffNumber on a counter waiter', async () => {
+// `Waiter.tearOffNumber` is a waiter's own tear-off sequence counter. The
+// Theke's Bon numbering does NOT use it (it follows the last order registered
+// at that counter, see counter.test.ts) — the field stays admin-resettable for
+// regular waiters.
+describe('Waiter CRUD - tearOffNumber', () => {
+  it('admin can reset a waiter’s own tear-off sequence counter', async () => {
     const eventId = await setupEvent()
     const created = await server.inject({
       method: 'POST',
       url: `/api/events/${eventId}/waiters`,
-      payload: { name: 'Theke', pin: '0000' },
+      payload: { name: 'Alice', pin: '0000' },
       headers: adminHeaders,
     })
     const id = (created.json() as { id: string }).id

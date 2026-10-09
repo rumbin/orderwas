@@ -29,7 +29,9 @@ export async function getEvent(id: string) {
 /**
  * Updates an event.
  * Special rule: switching status from "test" to "live" wipes all orders
- * and resets the tear-off counter (wiki §14 business rule).
+ * (wiki §14 business rule). The Theke's Bon numbering follows the orders
+ * registered at that counter, so wiping restarts it at 1 automatically —
+ * there is no separate counter to reset.
  * Special rule: toggling `counterEnabled` syncs the "Theke" counter waiter.
  */
 export async function updateEvent(id: string, data: Record<string, unknown>) {
@@ -37,7 +39,9 @@ export async function updateEvent(id: string, data: Record<string, unknown>) {
   if (data.status === 'live') {
     const event = await prisma.event.findUnique({ where: { id }, select: { status: true } })
     if (event && event.status === 'test') {
-      // Wipe all orders for this event (tear-off counter lives on the Theke waiter, not here)
+      // Wipe all orders for this event. Tear-off/Bon numbering is derived from
+      // the orders themselves (last order at the counter + 1), so the Theke
+      // restarts at Bon 1 with no explicit counter reset.
       await prisma.$transaction([
         prisma.orderItem.deleteMany({ where: { order: { eventId: id } } }),
         prisma.order.deleteMany({ where: { eventId: id } }),
