@@ -30,17 +30,17 @@
       "source_location": "L80"
     },
     {
-      "id": "server_src_services_waiterservice_createwaiterdata",
-      "label": "CreateWaiterData",
+      "id": "server_src_services_layoutservice_createlayoutdata",
+      "label": "CreateLayoutData",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "createwaiterdata",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L26"
+      "norm_label": "createlayoutdata",
+      "source_file": "server/src/services/layoutService.ts",
+      "source_location": "L15"
     },
     {
       "id": "server_tests_helpers_setup_testdata",
@@ -121,17 +121,17 @@
       "source_location": "L4"
     },
     {
-      "id": "server_src_services_layoutservice_createlayoutdata",
-      "label": "CreateLayoutData",
+      "id": "server_src_services_waiterservice_createwaiterdata",
+      "label": "CreateWaiterData",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "layouts.ts",
+      "community_name": "waiters.ts",
       "file_type": "code",
-      "norm_label": "createlayoutdata",
-      "source_file": "server/src/services/layoutService.ts",
-      "source_location": "L15"
+      "norm_label": "createwaiterdata",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L26"
     },
     {
       "id": "client_src_api_types_station",
@@ -482,7 +482,7 @@
       "file_type": "code",
       "norm_label": "createorderinput",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L12"
+      "source_location": "L14"
     },
     {
       "id": "server_src_services_orderservice_optionselection",
@@ -495,7 +495,7 @@
       "file_type": "code",
       "norm_label": "optionselection",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L7"
+      "source_location": "L9"
     },
     {
       "id": "server_src_services_orderservice_orderstatus",
@@ -508,7 +508,7 @@
       "file_type": "code",
       "norm_label": "orderstatus",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L276"
+      "source_location": "L373"
     },
     {
       "id": "server_src_services_orderservice_ordervalidationerror",
@@ -521,7 +521,7 @@
       "file_type": "code",
       "norm_label": "ordervalidationerror",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L25"
+      "source_location": "L32"
     },
     {
       "id": "server_src_services_paymentservice_opentable",
@@ -751,7 +751,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 40,
-      "community_name": "formatPrice",
+      "community_name": "CashierView.tsx",
       "file_type": "code",
       "norm_label": "opentable",
       "source_file": "client/src/api/types.ts",
@@ -764,7 +764,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 40,
-      "community_name": "formatPrice",
+      "community_name": "CashierView.tsx",
       "file_type": "code",
       "norm_label": "tableorderitem",
       "source_file": "client/src/api/types.ts",
@@ -777,7 +777,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 40,
-      "community_name": "formatPrice",
+      "community_name": "CashierView.tsx",
       "file_type": "code",
       "norm_label": "props",
       "source_file": "client/src/components/CashierView.tsx",
@@ -790,7 +790,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 40,
-      "community_name": "formatPrice",
+      "community_name": "CashierView.tsx",
       "file_type": "code",
       "norm_label": "props",
       "source_file": "client/src/components/TableSwitcherModal.tsx",
@@ -924,28 +924,28 @@
       "source_location": "L4"
     },
     {
-      "id": "server_src_routes_events_eventroutes",
-      "label": "eventRoutes()",
+      "id": "server_src_routes_layouts_layoutsroutes",
+      "label": "layoutsRoutes()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "eventroutes()",
-      "source_file": "server/src/routes/events.ts",
-      "source_location": "L18"
+      "norm_label": "layoutsroutes()",
+      "source_file": "server/src/routes/layouts.ts",
+      "source_location": "L24"
     },
     {
-      "id": "server_src_routes_waiters_waitersroutes",
-      "label": "waitersRoutes()",
+      "id": "server_src_routes_qr_qrroutes",
+      "label": "qrRoutes()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "waitersroutes()",
-      "source_file": "server/src/routes/waiters.ts",
-      "source_location": "L37"
+      "norm_label": "qrroutes()",
+      "source_file": "server/src/routes/qr.ts",
+      "source_location": "L13"
     },
     {
       "id": "server_src_services_configservice_exportevent",
@@ -972,136 +972,64 @@
       "source_location": "L139"
     },
     {
-      "id": "server_src_services_eventservice_createevent",
-      "label": "createEvent()",
+      "id": "server_src_services_layoutservice_createlayout",
+      "label": "createLayout()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "createevent()",
-      "source_file": "server/src/services/eventService.ts",
-      "source_location": "L6"
+      "norm_label": "createlayout()",
+      "source_file": "server/src/services/layoutService.ts",
+      "source_location": "L36"
     },
     {
-      "id": "server_src_services_eventservice_deleteevent",
-      "label": "deleteEvent()",
+      "id": "server_src_services_layoutservice_deletelayout",
+      "label": "deleteLayout()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "deleteevent()",
-      "source_file": "server/src/services/eventService.ts",
-      "source_location": "L60"
+      "norm_label": "deletelayout()",
+      "source_file": "server/src/services/layoutService.ts",
+      "source_location": "L63"
     },
     {
-      "id": "server_src_services_eventservice_getevent",
-      "label": "getEvent()",
+      "id": "server_src_services_layoutservice_getwaiterlayout",
+      "label": "getWaiterLayout()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "getevent()",
-      "source_file": "server/src/services/eventService.ts",
-      "source_location": "L25"
+      "norm_label": "getwaiterlayout()",
+      "source_file": "server/src/services/layoutService.ts",
+      "source_location": "L75"
     },
     {
-      "id": "server_src_services_eventservice_listevents",
-      "label": "listEvents()",
+      "id": "server_src_services_layoutservice_listlayoutsbyevent",
+      "label": "listLayoutsByEvent()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "listevents()",
-      "source_file": "server/src/services/eventService.ts",
-      "source_location": "L18"
+      "norm_label": "listlayoutsbyevent()",
+      "source_file": "server/src/services/layoutService.ts",
+      "source_location": "L26"
     },
     {
-      "id": "server_src_services_eventservice_updateevent",
-      "label": "updateEvent()",
+      "id": "server_src_services_layoutservice_updatelayout",
+      "label": "updateLayout()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "updateevent()",
-      "source_file": "server/src/services/eventService.ts",
-      "source_location": "L34"
-    },
-    {
-      "id": "server_src_services_waiterservice_createwaiter",
-      "label": "createWaiter()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "src/index.ts",
-      "file_type": "code",
-      "norm_label": "createwaiter()",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L40"
-    },
-    {
-      "id": "server_src_services_waiterservice_deletewaiter",
-      "label": "deleteWaiter()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "src/index.ts",
-      "file_type": "code",
-      "norm_label": "deletewaiter()",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L76"
-    },
-    {
-      "id": "server_src_services_waiterservice_getwaiter",
-      "label": "getWaiter()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "src/index.ts",
-      "file_type": "code",
-      "norm_label": "getwaiter()",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L61"
-    },
-    {
-      "id": "server_src_services_waiterservice_listwaitersbyevent",
-      "label": "listWaitersByEvent()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "src/index.ts",
-      "file_type": "code",
-      "norm_label": "listwaitersbyevent()",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L54"
-    },
-    {
-      "id": "server_src_services_waiterservice_togglewaiteractive",
-      "label": "toggleWaiterActive()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "src/index.ts",
-      "file_type": "code",
-      "norm_label": "togglewaiteractive()",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L84"
-    },
-    {
-      "id": "server_src_services_waiterservice_updatewaiter",
-      "label": "updateWaiter()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "src/index.ts",
-      "file_type": "code",
-      "norm_label": "updatewaiter()",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L69"
+      "norm_label": "updatelayout()",
+      "source_file": "server/src/services/layoutService.ts",
+      "source_location": "L56"
     },
     {
       "id": "server_src_websocket_index_attachwebsocket",
@@ -1656,76 +1584,88 @@
       "source_location": "L6"
     },
     {
-      "id": "server_src_routes_layouts_layoutsroutes",
-      "label": "layoutsRoutes()",
+      "id": "server_src_routes_waiters_waitersroutes",
+      "label": "waitersRoutes()",
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "layouts.ts",
+      "community_name": "waiters.ts",
       "file_type": "code",
-      "norm_label": "layoutsroutes()",
-      "source_file": "server/src/routes/layouts.ts",
-      "source_location": "L24"
+      "norm_label": "waitersroutes()",
+      "source_file": "server/src/routes/waiters.ts",
+      "source_location": "L37"
     },
     {
-      "id": "server_src_services_layoutservice_createlayout",
-      "label": "createLayout()",
+      "id": "server_src_services_waiterservice_createwaiter",
+      "label": "createWaiter()",
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "layouts.ts",
+      "community_name": "waiters.ts",
       "file_type": "code",
-      "norm_label": "createlayout()",
-      "source_file": "server/src/services/layoutService.ts",
-      "source_location": "L36"
+      "norm_label": "createwaiter()",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L40"
     },
     {
-      "id": "server_src_services_layoutservice_deletelayout",
-      "label": "deleteLayout()",
+      "id": "server_src_services_waiterservice_deletewaiter",
+      "label": "deleteWaiter()",
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "layouts.ts",
+      "community_name": "waiters.ts",
       "file_type": "code",
-      "norm_label": "deletelayout()",
-      "source_file": "server/src/services/layoutService.ts",
-      "source_location": "L63"
+      "norm_label": "deletewaiter()",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L76"
     },
     {
-      "id": "server_src_services_layoutservice_getwaiterlayout",
-      "label": "getWaiterLayout()",
+      "id": "server_src_services_waiterservice_getwaiter",
+      "label": "getWaiter()",
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "layouts.ts",
+      "community_name": "waiters.ts",
       "file_type": "code",
-      "norm_label": "getwaiterlayout()",
-      "source_file": "server/src/services/layoutService.ts",
-      "source_location": "L75"
+      "norm_label": "getwaiter()",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L61"
     },
     {
-      "id": "server_src_services_layoutservice_listlayoutsbyevent",
-      "label": "listLayoutsByEvent()",
+      "id": "server_src_services_waiterservice_listwaitersbyevent",
+      "label": "listWaitersByEvent()",
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "layouts.ts",
+      "community_name": "waiters.ts",
       "file_type": "code",
-      "norm_label": "listlayoutsbyevent()",
-      "source_file": "server/src/services/layoutService.ts",
-      "source_location": "L26"
+      "norm_label": "listwaitersbyevent()",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L54"
     },
     {
-      "id": "server_src_services_layoutservice_updatelayout",
-      "label": "updateLayout()",
+      "id": "server_src_services_waiterservice_togglewaiteractive",
+      "label": "toggleWaiterActive()",
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "layouts.ts",
+      "community_name": "waiters.ts",
       "file_type": "code",
-      "norm_label": "updatelayout()",
-      "source_file": "server/src/services/layoutService.ts",
-      "source_location": "L56"
+      "norm_label": "togglewaiteractive()",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L84"
+    },
+    {
+      "id": "server_src_services_waiterservice_updatewaiter",
+      "label": "updateWaiter()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "waiters.ts",
+      "file_type": "code",
+      "norm_label": "updatewaiter()",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L69"
     },
     {
       "id": "client_src_pages_admin_adminproducts_adminproducts",
@@ -1992,6 +1932,54 @@
       "source_location": "L15"
     },
     {
+      "id": "client_src_lib_money_formatprice",
+      "label": "formatPrice()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "Order.tsx",
+      "file_type": "code",
+      "norm_label": "formatprice()",
+      "source_file": "client/src/lib/money.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "client_src_pages_guestorder_formatcents",
+      "label": "formatCents()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "Order.tsx",
+      "file_type": "code",
+      "norm_label": "formatcents()",
+      "source_file": "client/src/pages/GuestOrder.tsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "client_src_pages_guestorder_guestorder",
+      "label": "GuestOrder()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "Order.tsx",
+      "file_type": "code",
+      "norm_label": "guestorder()",
+      "source_file": "client/src/pages/GuestOrder.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "client_src_pages_order_formatcents",
+      "label": "formatCents()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "Order.tsx",
+      "file_type": "code",
+      "norm_label": "formatcents()",
+      "source_file": "client/src/pages/Order.tsx",
+      "source_location": "L15"
+    },
+    {
       "id": "client_src_pages_order_orderpage",
       "label": "OrderPage()",
       "_callable": true,
@@ -2001,7 +1989,7 @@
       "file_type": "code",
       "norm_label": "orderpage()",
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L26"
+      "source_location": "L27"
     },
     {
       "id": "client_src_pages_order_statustext",
@@ -2013,19 +2001,7 @@
       "file_type": "code",
       "norm_label": "statustext()",
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L22"
-    },
-    {
-      "id": "server_src_printer_dispatch_dispatchorderprints",
-      "label": "dispatchOrderPrints()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "escpos.ts",
-      "file_type": "code",
-      "norm_label": "dispatchorderprints()",
-      "source_file": "server/src/printer/dispatch.ts",
-      "source_location": "L46"
+      "source_location": "L23"
     },
     {
       "id": "server_src_printer_dispatch_executeprintjob",
@@ -2472,6 +2448,18 @@
       "source_location": "L54"
     },
     {
+      "id": "server_src_printer_dispatch_dispatchorderprints",
+      "label": "dispatchOrderPrints()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "orderService.ts",
+      "file_type": "code",
+      "norm_label": "dispatchorderprints()",
+      "source_file": "server/src/printer/dispatch.ts",
+      "source_location": "L46"
+    },
+    {
       "id": "server_src_routes_orders_ordersroutes",
       "label": "ordersRoutes()",
       "_callable": true,
@@ -2493,19 +2481,7 @@
       "file_type": "code",
       "norm_label": "paymentsroutes()",
       "source_file": "server/src/routes/payments.ts",
-      "source_location": "L15"
-    },
-    {
-      "id": "server_src_routes_qr_qrroutes",
-      "label": "qrRoutes()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "orderService.ts",
-      "file_type": "code",
-      "norm_label": "qrroutes()",
-      "source_file": "server/src/routes/qr.ts",
-      "source_location": "L13"
+      "source_location": "L16"
     },
     {
       "id": "server_src_services_auditservice_logaudit",
@@ -2589,7 +2565,7 @@
       "file_type": "code",
       "norm_label": "cancelorder()",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L328"
+      "source_location": "L425"
     },
     {
       "id": "server_src_services_orderservice_createorder",
@@ -2601,7 +2577,7 @@
       "file_type": "code",
       "norm_label": "createorder()",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L65"
+      "source_location": "L72"
     },
     {
       "id": "server_src_services_orderservice_emitorderupdated",
@@ -2613,7 +2589,7 @@
       "file_type": "code",
       "norm_label": "emitorderupdated()",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L37"
+      "source_location": "L44"
     },
     {
       "id": "server_src_services_orderservice_getorder",
@@ -2625,7 +2601,7 @@
       "file_type": "code",
       "norm_label": "getorder()",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L266"
+      "source_location": "L363"
     },
     {
       "id": "server_src_services_orderservice_listordersbyevent",
@@ -2637,7 +2613,7 @@
       "file_type": "code",
       "norm_label": "listordersbyevent()",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L253"
+      "source_location": "L346"
     },
     {
       "id": "server_src_services_orderservice_markpaid",
@@ -2649,7 +2625,31 @@
       "file_type": "code",
       "norm_label": "markpaid()",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L378"
+      "source_location": "L475"
+    },
+    {
+      "id": "server_src_services_orderservice_nextbonafterlastorder",
+      "label": "nextBonAfterLastOrder()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "orderService.ts",
+      "file_type": "code",
+      "norm_label": "nextbonafterlastorder()",
+      "source_file": "server/src/services/orderService.ts",
+      "source_location": "L319"
+    },
+    {
+      "id": "server_src_services_orderservice_nextcounterbon",
+      "label": "nextCounterBon()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "orderService.ts",
+      "file_type": "code",
+      "norm_label": "nextcounterbon()",
+      "source_file": "server/src/services/orderService.ts",
+      "source_location": "L334"
     },
     {
       "id": "server_src_services_orderservice_ordervalidationerror_constructor",
@@ -2661,7 +2661,7 @@
       "file_type": "code",
       "norm_label": ".constructor()",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L27"
+      "source_location": "L34"
     },
     {
       "id": "server_src_services_orderservice_reopenorder",
@@ -2673,7 +2673,7 @@
       "file_type": "code",
       "norm_label": "reopenorder()",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L463"
+      "source_location": "L560"
     },
     {
       "id": "server_src_services_orderservice_transferorder",
@@ -2685,7 +2685,7 @@
       "file_type": "code",
       "norm_label": "transferorder()",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L417"
+      "source_location": "L514"
     },
     {
       "id": "server_src_services_orderservice_updateorderstatus",
@@ -2697,7 +2697,7 @@
       "file_type": "code",
       "norm_label": "updateorderstatus()",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L282"
+      "source_location": "L379"
     },
     {
       "id": "server_src_services_paymentservice_computelinetotalcents",
@@ -2921,7 +2921,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 40,
-      "community_name": "formatPrice",
+      "community_name": "CashierView.tsx",
       "file_type": "code",
       "norm_label": "cashierview()",
       "source_file": "client/src/components/CashierView.tsx",
@@ -2933,7 +2933,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 40,
-      "community_name": "formatPrice",
+      "community_name": "CashierView.tsx",
       "file_type": "code",
       "norm_label": "formatcents()",
       "source_file": "client/src/components/CashierView.tsx",
@@ -2945,7 +2945,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 40,
-      "community_name": "formatPrice",
+      "community_name": "CashierView.tsx",
       "file_type": "code",
       "norm_label": "formatcents()",
       "source_file": "client/src/components/TableSwitcherModal.tsx",
@@ -2957,59 +2957,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 40,
-      "community_name": "formatPrice",
+      "community_name": "CashierView.tsx",
       "file_type": "code",
       "norm_label": "tableswitchermodal()",
       "source_file": "client/src/components/TableSwitcherModal.tsx",
       "source_location": "L18"
-    },
-    {
-      "id": "client_src_lib_money_formatprice",
-      "label": "formatPrice()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "formatPrice",
-      "file_type": "code",
-      "norm_label": "formatprice()",
-      "source_file": "client/src/lib/money.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "client_src_pages_guestorder_formatcents",
-      "label": "formatCents()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "formatPrice",
-      "file_type": "code",
-      "norm_label": "formatcents()",
-      "source_file": "client/src/pages/GuestOrder.tsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "client_src_pages_guestorder_guestorder",
-      "label": "GuestOrder()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "formatPrice",
-      "file_type": "code",
-      "norm_label": "guestorder()",
-      "source_file": "client/src/pages/GuestOrder.tsx",
-      "source_location": "L16"
-    },
-    {
-      "id": "client_src_pages_order_formatcents",
-      "label": "formatCents()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "formatPrice",
-      "file_type": "code",
-      "norm_label": "formatcents()",
-      "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L14"
     },
     {
       "id": "client_src_pages_admin_adminexport_adminexport",
@@ -3312,6 +3264,90 @@
       "source_location": "L37"
     },
     {
+      "id": "server_src_routes_events_eventroutes",
+      "label": "eventRoutes()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "eventService.ts",
+      "file_type": "code",
+      "norm_label": "eventroutes()",
+      "source_file": "server/src/routes/events.ts",
+      "source_location": "L18"
+    },
+    {
+      "id": "server_src_services_eventservice_createevent",
+      "label": "createEvent()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "eventService.ts",
+      "file_type": "code",
+      "norm_label": "createevent()",
+      "source_file": "server/src/services/eventService.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "server_src_services_eventservice_deleteevent",
+      "label": "deleteEvent()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "eventService.ts",
+      "file_type": "code",
+      "norm_label": "deleteevent()",
+      "source_file": "server/src/services/eventService.ts",
+      "source_location": "L119"
+    },
+    {
+      "id": "server_src_services_eventservice_getevent",
+      "label": "getEvent()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "eventService.ts",
+      "file_type": "code",
+      "norm_label": "getevent()",
+      "source_file": "server/src/services/eventService.ts",
+      "source_location": "L25"
+    },
+    {
+      "id": "server_src_services_eventservice_listevents",
+      "label": "listEvents()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "eventService.ts",
+      "file_type": "code",
+      "norm_label": "listevents()",
+      "source_file": "server/src/services/eventService.ts",
+      "source_location": "L18"
+    },
+    {
+      "id": "server_src_services_eventservice_synccounterwaiter",
+      "label": "syncCounterWaiter()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "eventService.ts",
+      "file_type": "code",
+      "norm_label": "synccounterwaiter()",
+      "source_file": "server/src/services/eventService.ts",
+      "source_location": "L81"
+    },
+    {
+      "id": "server_src_services_eventservice_updateevent",
+      "label": "updateEvent()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "eventService.ts",
+      "file_type": "code",
+      "norm_label": "updateevent()",
+      "source_file": "server/src/services/eventService.ts",
+      "source_location": "L37"
+    },
+    {
       "id": "client_tests_setup_disconnect",
       "label": "disconnect()",
       "_callable": true,
@@ -3414,81 +3450,48 @@
       "source_location": "L1"
     },
     {
-      "id": "server_src_routes_events",
-      "label": "events.ts",
+      "id": "server_src_routes_layouts",
+      "label": "layouts.ts",
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "events.ts",
-      "source_file": "server/src/routes/events.ts",
+      "norm_label": "layouts.ts",
+      "source_file": "server/src/routes/layouts.ts",
       "source_location": "L1"
     },
     {
-      "id": "server_src_routes_events_createeventschema",
-      "label": "createEventSchema",
+      "id": "server_src_routes_layouts_createlayoutschema",
+      "label": "createLayoutSchema",
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "createeventschema",
-      "source_file": "server/src/routes/events.ts",
-      "source_location": "L5"
+      "norm_label": "createlayoutschema",
+      "source_file": "server/src/routes/layouts.ts",
+      "source_location": "L11"
     },
     {
-      "id": "server_src_routes_events_updateeventschema",
-      "label": "updateEventSchema",
+      "id": "server_src_routes_layouts_updatelayoutschema",
+      "label": "updateLayoutSchema",
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "updateeventschema",
-      "source_file": "server/src/routes/events.ts",
-      "source_location": "L10"
+      "norm_label": "updatelayoutschema",
+      "source_file": "server/src/routes/layouts.ts",
+      "source_location": "L18"
     },
     {
-      "id": "server_src_routes_waiters",
-      "label": "waiters.ts",
+      "id": "server_src_routes_qr",
+      "label": "qr.ts",
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "waiters.ts",
-      "source_file": "server/src/routes/waiters.ts",
+      "norm_label": "qr.ts",
+      "source_file": "server/src/routes/qr.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "server_src_routes_waiters_createwaiterbody",
-      "label": "createWaiterBody",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "src/index.ts",
-      "file_type": "code",
-      "norm_label": "createwaiterbody",
-      "source_file": "server/src/routes/waiters.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "server_src_routes_waiters_toggleactivebody",
-      "label": "toggleActiveBody",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "src/index.ts",
-      "file_type": "code",
-      "norm_label": "toggleactivebody",
-      "source_file": "server/src/routes/waiters.ts",
-      "source_location": "L33"
-    },
-    {
-      "id": "server_src_routes_waiters_updatewaiterbody",
-      "label": "updateWaiterBody",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "src/index.ts",
-      "file_type": "code",
-      "norm_label": "updatewaiterbody",
-      "source_file": "server/src/routes/waiters.ts",
-      "source_location": "L22"
     },
     {
       "id": "server_src_services_configservice",
@@ -3502,37 +3505,26 @@
       "source_location": "L1"
     },
     {
-      "id": "server_src_services_eventservice",
-      "label": "eventService.ts",
+      "id": "server_src_services_layoutservice",
+      "label": "layoutService.ts",
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "eventservice.ts",
-      "source_file": "server/src/services/eventService.ts",
+      "norm_label": "layoutservice.ts",
+      "source_file": "server/src/services/layoutService.ts",
       "source_location": "L1"
     },
     {
-      "id": "server_src_services_waiterservice",
-      "label": "waiterService.ts",
+      "id": "server_src_services_layoutservice_layoutselect",
+      "label": "layoutSelect",
       "_origin": "ast",
       "community": 0,
       "community_name": "src/index.ts",
       "file_type": "code",
-      "norm_label": "waiterservice.ts",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_src_services_waiterservice_waiterselect",
-      "label": "waiterSelect",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "src/index.ts",
-      "file_type": "code",
-      "norm_label": "waiterselect",
-      "source_file": "server/src/services/waiterService.ts",
-      "source_location": "L5"
+      "norm_label": "layoutselect",
+      "source_file": "server/src/services/layoutService.ts",
+      "source_location": "L4"
     },
     {
       "id": "server_tests_helpers_seed",
@@ -3598,6 +3590,17 @@
       "file_type": "code",
       "norm_label": "config.test.ts",
       "source_file": "server/tests/integration/config.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_tests_integration_counter_test",
+      "label": "counter.test.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "src/index.ts",
+      "file_type": "code",
+      "norm_label": "counter.test.ts",
+      "source_file": "server/tests/integration/counter.test.ts",
       "source_location": "L1"
     },
     {
@@ -3862,17 +3865,6 @@
       "file_type": "code",
       "norm_label": "websocket.test.ts",
       "source_file": "server/tests/integration/websocket.test.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_tests_unit_eventwipe_test",
-      "label": "eventWipe.test.ts",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "src/index.ts",
-      "file_type": "code",
-      "norm_label": "eventwipe.test.ts",
-      "source_file": "server/tests/unit/eventWipe.test.ts",
       "source_location": "L1"
     },
     {
@@ -5064,59 +5056,70 @@
       "source_location": "L320"
     },
     {
-      "id": "server_src_routes_layouts",
-      "label": "layouts.ts",
+      "id": "server_src_routes_waiters",
+      "label": "waiters.ts",
       "_origin": "ast",
       "community": 15,
-      "community_name": "layouts.ts",
+      "community_name": "waiters.ts",
       "file_type": "code",
-      "norm_label": "layouts.ts",
-      "source_file": "server/src/routes/layouts.ts",
+      "norm_label": "waiters.ts",
+      "source_file": "server/src/routes/waiters.ts",
       "source_location": "L1"
     },
     {
-      "id": "server_src_routes_layouts_createlayoutschema",
-      "label": "createLayoutSchema",
+      "id": "server_src_routes_waiters_createwaiterbody",
+      "label": "createWaiterBody",
       "_origin": "ast",
       "community": 15,
-      "community_name": "layouts.ts",
+      "community_name": "waiters.ts",
       "file_type": "code",
-      "norm_label": "createlayoutschema",
-      "source_file": "server/src/routes/layouts.ts",
-      "source_location": "L11"
+      "norm_label": "createwaiterbody",
+      "source_file": "server/src/routes/waiters.ts",
+      "source_location": "L12"
     },
     {
-      "id": "server_src_routes_layouts_updatelayoutschema",
-      "label": "updateLayoutSchema",
+      "id": "server_src_routes_waiters_toggleactivebody",
+      "label": "toggleActiveBody",
       "_origin": "ast",
       "community": 15,
-      "community_name": "layouts.ts",
+      "community_name": "waiters.ts",
       "file_type": "code",
-      "norm_label": "updatelayoutschema",
-      "source_file": "server/src/routes/layouts.ts",
-      "source_location": "L18"
+      "norm_label": "toggleactivebody",
+      "source_file": "server/src/routes/waiters.ts",
+      "source_location": "L33"
     },
     {
-      "id": "server_src_services_layoutservice",
-      "label": "layoutService.ts",
+      "id": "server_src_routes_waiters_updatewaiterbody",
+      "label": "updateWaiterBody",
       "_origin": "ast",
       "community": 15,
-      "community_name": "layouts.ts",
+      "community_name": "waiters.ts",
       "file_type": "code",
-      "norm_label": "layoutservice.ts",
-      "source_file": "server/src/services/layoutService.ts",
+      "norm_label": "updatewaiterbody",
+      "source_file": "server/src/routes/waiters.ts",
+      "source_location": "L22"
+    },
+    {
+      "id": "server_src_services_waiterservice",
+      "label": "waiterService.ts",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "waiters.ts",
+      "file_type": "code",
+      "norm_label": "waiterservice.ts",
+      "source_file": "server/src/services/waiterService.ts",
       "source_location": "L1"
     },
     {
-      "id": "server_src_services_layoutservice_layoutselect",
-      "label": "layoutSelect",
+      "id": "server_src_services_waiterservice_waiterselect",
+      "label": "waiterSelect",
       "_origin": "ast",
       "community": 15,
-      "community_name": "layouts.ts",
+      "community_name": "waiters.ts",
       "file_type": "code",
-      "norm_label": "layoutselect",
-      "source_file": "server/src/services/layoutService.ts",
-      "source_location": "L4"
+      "norm_label": "waiterselect",
+      "source_file": "server/src/services/waiterService.ts",
+      "source_location": "L5"
     },
     {
       "id": "client_src_pages_admin_adminproducts",
@@ -5262,6 +5265,50 @@
       "source_location": "L1"
     },
     {
+      "id": "client_src_lib_productcolors",
+      "label": "productColors.ts",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "StationDisplay.tsx",
+      "file_type": "code",
+      "norm_label": "productcolors.ts",
+      "source_file": "client/src/lib/productColors.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "client_src_lib_productcolors_product_bg_classes",
+      "label": "PRODUCT_BG_CLASSES",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "StationDisplay.tsx",
+      "file_type": "code",
+      "norm_label": "product_bg_classes",
+      "source_file": "client/src/lib/productColors.ts",
+      "source_location": "L22"
+    },
+    {
+      "id": "client_src_lib_productcolors_product_border_classes",
+      "label": "PRODUCT_BORDER_CLASSES",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "StationDisplay.tsx",
+      "file_type": "code",
+      "norm_label": "product_border_classes",
+      "source_file": "client/src/lib/productColors.ts",
+      "source_location": "L42"
+    },
+    {
+      "id": "client_src_lib_productcolors_product_colors",
+      "label": "PRODUCT_COLORS",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "StationDisplay.tsx",
+      "file_type": "code",
+      "norm_label": "product_colors",
+      "source_file": "client/src/lib/productColors.ts",
+      "source_location": "L2"
+    },
+    {
       "id": "client_src_pages_kitchenmonitor",
       "label": "KitchenMonitor.tsx",
       "_origin": "ast",
@@ -5317,48 +5364,26 @@
       "source_location": "L1"
     },
     {
-      "id": "client_src_lib_productcolors",
-      "label": "productColors.ts",
+      "id": "client_src_lib_money",
+      "label": "money.ts",
       "_origin": "ast",
       "community": 19,
       "community_name": "Order.tsx",
       "file_type": "code",
-      "norm_label": "productcolors.ts",
-      "source_file": "client/src/lib/productColors.ts",
+      "norm_label": "money.ts",
+      "source_file": "client/src/lib/money.ts",
       "source_location": "L1"
     },
     {
-      "id": "client_src_lib_productcolors_product_bg_classes",
-      "label": "PRODUCT_BG_CLASSES",
+      "id": "client_src_pages_guestorder",
+      "label": "GuestOrder.tsx",
       "_origin": "ast",
       "community": 19,
       "community_name": "Order.tsx",
       "file_type": "code",
-      "norm_label": "product_bg_classes",
-      "source_file": "client/src/lib/productColors.ts",
-      "source_location": "L22"
-    },
-    {
-      "id": "client_src_lib_productcolors_product_border_classes",
-      "label": "PRODUCT_BORDER_CLASSES",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "product_border_classes",
-      "source_file": "client/src/lib/productColors.ts",
-      "source_location": "L42"
-    },
-    {
-      "id": "client_src_lib_productcolors_product_colors",
-      "label": "PRODUCT_COLORS",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "Order.tsx",
-      "file_type": "code",
-      "norm_label": "product_colors",
-      "source_file": "client/src/lib/productColors.ts",
-      "source_location": "L2"
+      "norm_label": "guestorder.tsx",
+      "source_file": "client/src/pages/GuestOrder.tsx",
+      "source_location": "L1"
     },
     {
       "id": "client_src_pages_order",
@@ -5380,7 +5405,7 @@
       "file_type": "code",
       "norm_label": "status_i18n",
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L18"
+      "source_location": "L19"
     },
     {
       "id": "client_src_stores_cart",
@@ -5403,6 +5428,17 @@
       "norm_label": "usecartstore",
       "source_file": "client/src/stores/cart.ts",
       "source_location": "L33"
+    },
+    {
+      "id": "client_tests_money_test",
+      "label": "money.test.ts",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "Order.tsx",
+      "file_type": "code",
+      "norm_label": "money.test.ts",
+      "source_file": "client/tests/money.test.ts",
+      "source_location": "L1"
     },
     {
       "id": "server_src_printer_dispatch",
@@ -6294,18 +6330,7 @@
       "file_type": "code",
       "norm_label": "payitemsbody",
       "source_file": "server/src/routes/payments.ts",
-      "source_location": "L11"
-    },
-    {
-      "id": "server_src_routes_qr",
-      "label": "qr.ts",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "orderService.ts",
-      "file_type": "code",
-      "norm_label": "qr.ts",
-      "source_file": "server/src/routes/qr.ts",
-      "source_location": "L1"
+      "source_location": "L12"
     },
     {
       "id": "server_src_services_guestorderservice",
@@ -6360,7 +6385,7 @@
       "file_type": "code",
       "norm_label": "valid_statuses",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L275"
+      "source_location": "L372"
     },
     {
       "id": "server_src_services_paymentservice",
@@ -6416,6 +6441,17 @@
       "norm_label": "print_dir",
       "source_file": "server/tests/integration/printDispatch.test.ts",
       "source_location": "L7"
+    },
+    {
+      "id": "server_tests_unit_eventwipe_test",
+      "label": "eventWipe.test.ts",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "orderService.ts",
+      "file_type": "code",
+      "norm_label": "eventwipe.test.ts",
+      "source_file": "server/tests/unit/eventWipe.test.ts",
+      "source_location": "L1"
     },
     {
       "id": "server_src_plugins_cors",
@@ -7227,7 +7263,7 @@
       "label": "CashierView.tsx",
       "_origin": "ast",
       "community": 40,
-      "community_name": "formatPrice",
+      "community_name": "CashierView.tsx",
       "file_type": "code",
       "norm_label": "cashierview.tsx",
       "source_file": "client/src/components/CashierView.tsx",
@@ -7238,43 +7274,10 @@
       "label": "TableSwitcherModal.tsx",
       "_origin": "ast",
       "community": 40,
-      "community_name": "formatPrice",
+      "community_name": "CashierView.tsx",
       "file_type": "code",
       "norm_label": "tableswitchermodal.tsx",
       "source_file": "client/src/components/TableSwitcherModal.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "client_src_lib_money",
-      "label": "money.ts",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "formatPrice",
-      "file_type": "code",
-      "norm_label": "money.ts",
-      "source_file": "client/src/lib/money.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "client_src_pages_guestorder",
-      "label": "GuestOrder.tsx",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "formatPrice",
-      "file_type": "code",
-      "norm_label": "guestorder.tsx",
-      "source_file": "client/src/pages/GuestOrder.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "client_tests_money_test",
-      "label": "money.test.ts",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "formatPrice",
-      "file_type": "code",
-      "norm_label": "money.test.ts",
-      "source_file": "client/tests/money.test.ts",
       "source_location": "L1"
     },
     {
@@ -7854,6 +7857,54 @@
       "source_location": "L11"
     },
     {
+      "id": "docs_requirements_6_1_service_mode_workflow",
+      "label": "6.1 Service Mode Workflow",
+      "_origin": "ast",
+      "community": 42,
+      "community_name": "Orderwas \u2014 Requirements Document",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "6.1 service mode workflow",
+      "source_file": "docs/REQUIREMENTS.md",
+      "source_location": "L405"
+    },
+    {
+      "id": "docs_requirements_6_2_bonkasse_voucher_workflow",
+      "label": "6.2 Bonkasse (Voucher) Workflow",
+      "_origin": "ast",
+      "community": 42,
+      "community_name": "Orderwas \u2014 Requirements Document",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "6.2 bonkasse (voucher) workflow",
+      "source_file": "docs/REQUIREMENTS.md",
+      "source_location": "L423"
+    },
+    {
+      "id": "docs_requirements_6_3_mixed_operation_workflow",
+      "label": "6.3 Mixed Operation Workflow",
+      "_origin": "ast",
+      "community": 42,
+      "community_name": "Orderwas \u2014 Requirements Document",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "6.3 mixed operation workflow",
+      "source_file": "docs/REQUIREMENTS.md",
+      "source_location": "L436"
+    },
+    {
+      "id": "docs_requirements_6_workflow_descriptions",
+      "label": "6. Workflow Descriptions",
+      "_origin": "ast",
+      "community": 42,
+      "community_name": "Orderwas \u2014 Requirements Document",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "6. workflow descriptions",
+      "source_file": "docs/REQUIREMENTS.md",
+      "source_location": "L403"
+    },
+    {
       "id": "docs_requirements_key_value_proposition_from_orderjutsu_s_own_marketing",
       "label": "Key Value Proposition (from Orderjutsu's own marketing)",
       "_origin": "ast",
@@ -8127,7 +8178,7 @@
       "node_kind": "heading",
       "norm_label": "10. non-goals (v1, explicit)",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L223"
+      "source_location": "L230"
     },
     {
       "id": "docs_architecture_11_tech_decisions_final",
@@ -8139,7 +8190,7 @@
       "node_kind": "heading",
       "norm_label": "11. tech decisions (final)",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L235"
+      "source_location": "L242"
     },
     {
       "id": "docs_architecture_1_system_overview",
@@ -8199,7 +8250,7 @@
       "node_kind": "heading",
       "norm_label": "5. request lifecycle \u2014 order creation (the critical path)",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L145"
+      "source_location": "L151"
     },
     {
       "id": "docs_architecture_6_real_time",
@@ -8211,7 +8262,7 @@
       "node_kind": "heading",
       "norm_label": "6. real-time",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L170"
+      "source_location": "L177"
     },
     {
       "id": "docs_architecture_7_offline_strategy",
@@ -8223,7 +8274,7 @@
       "node_kind": "heading",
       "norm_label": "7. offline strategy",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L176"
+      "source_location": "L183"
     },
     {
       "id": "docs_architecture_8_security_auth",
@@ -8235,7 +8286,7 @@
       "node_kind": "heading",
       "norm_label": "8. security / auth",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L183"
+      "source_location": "L190"
     },
     {
       "id": "docs_architecture_9_deployment",
@@ -8247,7 +8298,7 @@
       "node_kind": "heading",
       "norm_label": "9. deployment",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L217"
+      "source_location": "L224"
     },
     {
       "id": "docs_architecture_core_hierarchy",
@@ -8283,7 +8334,7 @@
       "node_kind": "heading",
       "norm_label": "deferred entities (documented non-goals for v1)",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L139"
+      "source_location": "L145"
     },
     {
       "id": "docs_architecture_endpoint_permission_matrix",
@@ -8295,7 +8346,7 @@
       "node_kind": "heading",
       "norm_label": "endpoint \u2192 permission matrix",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L201"
+      "source_location": "L208"
     },
     {
       "id": "docs_architecture_enforcement_global_guard",
@@ -8307,7 +8358,7 @@
       "node_kind": "heading",
       "norm_label": "enforcement (global guard)",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L189"
+      "source_location": "L196"
     },
     {
       "id": "docs_architecture_hot_path_indexes_added_phase_5",
@@ -8331,7 +8382,7 @@
       "node_kind": "heading",
       "norm_label": "login & tokens",
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L185"
+      "source_location": "L192"
     },
     {
       "id": "docs_architecture_orderwas_architecture",
@@ -8502,52 +8553,160 @@
       "source_location": "L130"
     },
     {
-      "id": "docs_requirements_6_1_service_mode_workflow",
-      "label": "6.1 Service Mode Workflow",
+      "id": "hermes_plans_2026_10_04_tearoff_numbering",
+      "label": "2026-10-04_tearoff-numbering.md",
       "_origin": "ast",
       "community": 45,
-      "community_name": "6. Workflow Descriptions",
+      "community_name": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
       "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "6.1 service mode workflow",
-      "source_file": "docs/REQUIREMENTS.md",
-      "source_location": "L405"
+      "node_kind": "page",
+      "norm_label": "2026-10-04_tearoff-numbering.md",
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L1"
     },
     {
-      "id": "docs_requirements_6_2_bonkasse_voucher_workflow",
-      "label": "6.2 Bonkasse (Voucher) Workflow",
+      "id": "hermes_plans_2026_10_04_tearoff_numbering_a_restore_event_wide_uniqueness_recommended",
+      "label": "A. Restore event-wide uniqueness (recommended)",
       "_origin": "ast",
       "community": 45,
-      "community_name": "6. Workflow Descriptions",
+      "community_name": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
       "file_type": "document",
       "node_kind": "heading",
-      "norm_label": "6.2 bonkasse (voucher) workflow",
-      "source_file": "docs/REQUIREMENTS.md",
-      "source_location": "L423"
+      "norm_label": "a. restore event-wide uniqueness (recommended)",
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L54"
     },
     {
-      "id": "docs_requirements_6_3_mixed_operation_workflow",
-      "label": "6.3 Mixed Operation Workflow",
+      "id": "hermes_plans_2026_10_04_tearoff_numbering_b_keep_per_waiter_sequences_make_it_a_real_invariant",
+      "label": "B. Keep per-waiter sequences, make it a real invariant",
       "_origin": "ast",
       "community": 45,
-      "community_name": "6. Workflow Descriptions",
+      "community_name": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
       "file_type": "document",
       "node_kind": "heading",
-      "norm_label": "6.3 mixed operation workflow",
-      "source_file": "docs/REQUIREMENTS.md",
-      "source_location": "L436"
+      "norm_label": "b. keep per-waiter sequences, make it a real invariant",
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L72"
     },
     {
-      "id": "docs_requirements_6_workflow_descriptions",
-      "label": "6. Workflow Descriptions",
+      "id": "hermes_plans_2026_10_04_tearoff_numbering_c_document_only_not_recommended",
+      "label": "C. Document-only (not recommended)",
       "_origin": "ast",
       "community": 45,
-      "community_name": "6. Workflow Descriptions",
+      "community_name": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
       "file_type": "document",
       "node_kind": "heading",
-      "norm_label": "6. workflow descriptions",
-      "source_file": "docs/REQUIREMENTS.md",
-      "source_location": "L403"
+      "norm_label": "c. document-only (not recommended)",
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L84"
+    },
+    {
+      "id": "hermes_plans_2026_10_04_tearoff_numbering_decision_2026_10_04_philipp",
+      "label": "Decision (2026-10-04, Philipp)",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "decision (2026-10-04, philipp)",
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L103"
+    },
+    {
+      "id": "hermes_plans_2026_10_04_tearoff_numbering_evidence_throwaway_probe_server_tests_integration_tmp_tearoff_probe_test_ts_deleted",
+      "label": "Evidence (throwaway probe, `server/tests/integration/tmp-tearoff-probe.test.ts`, deleted)",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "evidence (throwaway probe, `server/tests/integration/tmp-tearoff-probe.test.ts`, deleted)",
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L19"
+    },
+    {
+      "id": "hermes_plans_2026_10_04_tearoff_numbering_open_questions_for_philipp",
+      "label": "Open questions for Philipp",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "open questions for philipp",
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L95"
+    },
+    {
+      "id": "hermes_plans_2026_10_04_tearoff_numbering_options",
+      "label": "Options",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "options",
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L52"
+    },
+    {
+      "id": "hermes_plans_2026_10_04_tearoff_numbering_plan_tear_off_bon_numbering_restore_event_wide_uniqueness",
+      "label": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "plan: tear-off / bon numbering \u2014 restore event-wide uniqueness?",
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "hermes_plans_2026_10_04_tearoff_numbering_related_same_root_cause_the_test_live_reset",
+      "label": "Related, same root cause: the test\u2192live reset",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "related, same root cause: the test\u2192live reset",
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L41"
+    },
+    {
+      "id": "hermes_plans_2026_10_04_tearoff_numbering_verification_whatever_is_chosen",
+      "label": "Verification (whatever is chosen)",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "verification (whatever is chosen)",
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L88"
+    },
+    {
+      "id": "hermes_plans_2026_10_04_tearoff_numbering_what_changed_in_1ebda01",
+      "label": "What changed in `1ebda01`",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "what changed in `1ebda01`",
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L6"
+    },
+    {
+      "id": "hermes_plans_2026_10_04_tearoff_numbering_why_it_matters",
+      "label": "Why it matters",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "Plan: Tear-off / Bon numbering \u2014 restore event-wide uniqueness?",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "why it matters",
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L30"
     },
     {
       "id": "docs_requirements_8_1_performance",
@@ -8642,7 +8801,7 @@
       "file_type": "code",
       "norm_label": "api",
       "source_file": "client/src/api/client.ts",
-      "source_location": "L76"
+      "source_location": "L81"
     },
     {
       "id": "client_src_pages_admin",
@@ -9670,6 +9829,127 @@
       "source_location": "L29"
     },
     {
+      "id": "client_tests_order_page_counter_test",
+      "label": "order-page-counter.test.tsx",
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "order-page-counter.test.tsx",
+      "file_type": "code",
+      "norm_label": "order-page-counter.test.tsx",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "client_tests_order_page_counter_test_barproducts",
+      "label": "barProducts",
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "order-page-counter.test.tsx",
+      "file_type": "code",
+      "norm_label": "barproducts",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L45"
+    },
+    {
+      "id": "client_tests_order_page_counter_test_mockcreateorder",
+      "label": "mockCreateOrder",
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "order-page-counter.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockcreateorder",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L19"
+    },
+    {
+      "id": "client_tests_order_page_counter_test_mockgetcounterunpaid",
+      "label": "mockGetCounterUnpaid",
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "order-page-counter.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetcounterunpaid",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L21"
+    },
+    {
+      "id": "client_tests_order_page_counter_test_mockgetevent",
+      "label": "mockGetEvent",
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "order-page-counter.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetevent",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L23"
+    },
+    {
+      "id": "client_tests_order_page_counter_test_mockgetnextcounterbon",
+      "label": "mockGetNextCounterBon",
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "order-page-counter.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetnextcounterbon",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L22"
+    },
+    {
+      "id": "client_tests_order_page_counter_test_mockgetorders",
+      "label": "mockGetOrders",
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "order-page-counter.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetorders",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L20"
+    },
+    {
+      "id": "client_tests_order_page_counter_test_mockgetproducts",
+      "label": "mockGetProducts",
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "order-page-counter.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetproducts",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L18"
+    },
+    {
+      "id": "client_tests_order_page_counter_test_mockgetstations",
+      "label": "mockGetStations",
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "order-page-counter.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetstations",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L17"
+    },
+    {
+      "id": "client_tests_order_page_counter_test_openbon",
+      "label": "openBon",
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "order-page-counter.test.tsx",
+      "file_type": "code",
+      "norm_label": "openbon",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L49"
+    },
+    {
+      "id": "client_tests_order_page_counter_test_stations",
+      "label": "stations",
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "order-page-counter.test.tsx",
+      "file_type": "code",
+      "norm_label": "stations",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L42"
+    },
+    {
       "id": "docs_requirements_14_success_criteria",
       "label": "14. Success Criteria",
       "_origin": "ast",
@@ -10043,6 +10323,160 @@
       "norm_label": "7. user interface requirements",
       "source_file": "docs/REQUIREMENTS.md",
       "source_location": "L448"
+    },
+    {
+      "id": "server_src_routes_events",
+      "label": "events.ts",
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "eventService.ts",
+      "file_type": "code",
+      "norm_label": "events.ts",
+      "source_file": "server/src/routes/events.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_routes_events_createeventschema",
+      "label": "createEventSchema",
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "eventService.ts",
+      "file_type": "code",
+      "norm_label": "createeventschema",
+      "source_file": "server/src/routes/events.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "server_src_routes_events_updateeventschema",
+      "label": "updateEventSchema",
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "eventService.ts",
+      "file_type": "code",
+      "norm_label": "updateeventschema",
+      "source_file": "server/src/routes/events.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "server_src_services_eventservice",
+      "label": "eventService.ts",
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "eventService.ts",
+      "file_type": "code",
+      "norm_label": "eventservice.ts",
+      "source_file": "server/src/services/eventService.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "client_tests_order_page_counter_submit_test",
+      "label": "order-page-counter-submit.test.tsx",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "order-page-counter-submit.test.tsx",
+      "file_type": "code",
+      "norm_label": "order-page-counter-submit.test.tsx",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "client_tests_order_page_counter_submit_test_barproducts",
+      "label": "barProducts",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "order-page-counter-submit.test.tsx",
+      "file_type": "code",
+      "norm_label": "barproducts",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L51"
+    },
+    {
+      "id": "client_tests_order_page_counter_submit_test_mockcreateorder",
+      "label": "mockCreateOrder",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "order-page-counter-submit.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockcreateorder",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L25"
+    },
+    {
+      "id": "client_tests_order_page_counter_submit_test_mockgetcounterunpaid",
+      "label": "mockGetCounterUnpaid",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "order-page-counter-submit.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetcounterunpaid",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L27"
+    },
+    {
+      "id": "client_tests_order_page_counter_submit_test_mockgetevent",
+      "label": "mockGetEvent",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "order-page-counter-submit.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetevent",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L29"
+    },
+    {
+      "id": "client_tests_order_page_counter_submit_test_mockgetnextcounterbon",
+      "label": "mockGetNextCounterBon",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "order-page-counter-submit.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetnextcounterbon",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L28"
+    },
+    {
+      "id": "client_tests_order_page_counter_submit_test_mockgetorders",
+      "label": "mockGetOrders",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "order-page-counter-submit.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetorders",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L26"
+    },
+    {
+      "id": "client_tests_order_page_counter_submit_test_mockgetproducts",
+      "label": "mockGetProducts",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "order-page-counter-submit.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetproducts",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L24"
+    },
+    {
+      "id": "client_tests_order_page_counter_submit_test_mockgetstations",
+      "label": "mockGetStations",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "order-page-counter-submit.test.tsx",
+      "file_type": "code",
+      "norm_label": "mockgetstations",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L23"
+    },
+    {
+      "id": "client_tests_order_page_counter_submit_test_stations",
+      "label": "stations",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "order-page-counter-submit.test.tsx",
+      "file_type": "code",
+      "norm_label": "stations",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L48"
     },
     {
       "id": "package",
@@ -11156,7 +11590,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "client/src/api/client.ts",
-      "source_location": "L59",
+      "source_location": "L63",
       "weight": 1.0
     },
     {
@@ -11528,19 +11962,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "client_src_pages_order_orderpage",
-      "target": "client_src_pages_order_statustext",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L270",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -11552,7 +11974,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L28",
+      "source_location": "L29",
       "weight": 1.0
     },
     {
@@ -11564,7 +11986,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "client_src_pages_order_orderpage",
+      "target": "client_src_pages_order_statustext",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "client/src/pages/Order.tsx",
+      "source_location": "L339",
       "weight": 1.0
     },
     {
@@ -12176,7 +12610,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/routes/payments.ts",
-      "source_location": "L32",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -12188,7 +12622,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/routes/payments.ts",
-      "source_location": "L45",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -12200,7 +12634,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/routes/payments.ts",
-      "source_location": "L52",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_payments_paymentsroutes",
+      "target": "server_src_services_orderservice_nextcounterbon",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/src/routes/payments.ts",
+      "source_location": "L72",
       "weight": 1.0
     },
     {
@@ -12564,6 +13010,18 @@
       "weight": 1.0
     },
     {
+      "source": "server_src_services_eventservice_updateevent",
+      "target": "server_src_services_eventservice_synccounterwaiter",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/src/services/eventService.ts",
+      "source_location": "L57",
+      "weight": 1.0
+    },
+    {
       "source": "server_src_services_guestorderservice_guestorder",
       "target": "server_src_services_orderservice_ordervalidationerror",
       "relation": "calls",
@@ -12632,7 +13090,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L333",
+      "source_location": "L430",
       "weight": 1.0
     },
     {
@@ -12644,7 +13102,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L352",
+      "source_location": "L449",
       "weight": 1.0
     },
     {
@@ -12656,7 +13114,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L358",
+      "source_location": "L455",
       "weight": 1.0
     },
     {
@@ -12668,7 +13126,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L361",
+      "source_location": "L458",
       "weight": 1.0
     },
     {
@@ -12680,24 +13138,12 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L146",
+      "source_location": "L169",
       "weight": 1.0
     },
     {
       "source": "server_src_services_orderservice_createorder",
-      "target": "server_src_services_stockservice_decrementstock",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "server/src/services/orderService.ts",
-      "source_location": "L161",
-      "weight": 1.0
-    },
-    {
-      "source": "server_src_services_orderservice_createorder",
-      "target": "server_src_printer_dispatch_dispatchorderprints",
+      "target": "server_src_services_orderservice_nextbonafterlastorder",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -12709,6 +13155,30 @@
     },
     {
       "source": "server_src_services_orderservice_createorder",
+      "target": "server_src_services_stockservice_decrementstock",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/src/services/orderService.ts",
+      "source_location": "L221",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_services_orderservice_createorder",
+      "target": "server_src_printer_dispatch_dispatchorderprints",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/src/services/orderService.ts",
+      "source_location": "L270",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_services_orderservice_createorder",
       "target": "server_src_services_auditservice_logaudit",
       "relation": "calls",
       "_origin": "ast",
@@ -12716,7 +13186,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L232",
+      "source_location": "L292",
       "weight": 1.0
     },
     {
@@ -12728,7 +13198,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L70",
+      "source_location": "L78",
       "weight": 1.0
     },
     {
@@ -12740,7 +13210,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L383",
+      "source_location": "L480",
       "weight": 1.0
     },
     {
@@ -12752,7 +13222,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L397",
+      "source_location": "L494",
       "weight": 1.0
     },
     {
@@ -12764,7 +13234,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L400",
+      "source_location": "L497",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_services_orderservice_nextcounterbon",
+      "target": "server_src_services_orderservice_nextbonafterlastorder",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/src/services/orderService.ts",
+      "source_location": "L340",
       "weight": 1.0
     },
     {
@@ -12776,7 +13258,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L468",
+      "source_location": "L565",
       "weight": 1.0
     },
     {
@@ -12788,7 +13270,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L481",
+      "source_location": "L578",
       "weight": 1.0
     },
     {
@@ -12800,7 +13282,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L484",
+      "source_location": "L581",
       "weight": 1.0
     },
     {
@@ -12812,7 +13294,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L422",
+      "source_location": "L519",
       "weight": 1.0
     },
     {
@@ -12824,7 +13306,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L443",
+      "source_location": "L540",
       "weight": 1.0
     },
     {
@@ -12836,7 +13318,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L446",
+      "source_location": "L543",
       "weight": 1.0
     },
     {
@@ -12848,7 +13330,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L284",
+      "source_location": "L381",
       "weight": 1.0
     },
     {
@@ -12860,7 +13342,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L308",
+      "source_location": "L405",
       "weight": 1.0
     },
     {
@@ -12872,7 +13354,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L311",
+      "source_location": "L408",
       "weight": 1.0
     },
     {
@@ -14761,18 +15243,6 @@
     },
     {
       "source": "client_src_pages_order",
-      "target": "client_src_components_cashierview_cashierview",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "client_src_pages_order",
       "target": "client_src_api_types_order",
       "relation": "imports",
       "_origin": "ast",
@@ -14780,7 +15250,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -14792,7 +15262,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -14804,7 +15274,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -14816,7 +15286,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L12",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -14853,30 +15323,6 @@
       "context": "import",
       "source_file": "client/src/pages/Order.tsx",
       "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "client_src_pages_order",
-      "target": "client_src_components_productsection_productsection",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "client_src_pages_order",
-      "target": "client_src_components_cartbar_cartbar",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -15165,6 +15611,54 @@
       "context": "import",
       "source_file": "client/tests/money.test.ts",
       "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_submit_test",
+      "target": "client_src_pages_order_orderpage",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_submit_test",
+      "target": "client_src_stores_cart_usecartstore",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_src_pages_order_orderpage",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_src_stores_cart_usecartstore",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -16225,6 +16719,18 @@
     },
     {
       "source": "server_src_routes_payments",
+      "target": "server_src_plugins_auth_jwtpayload",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/payments.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_payments",
       "target": "server_src_services_paymentservice_listopentables",
       "relation": "imports",
       "_origin": "ast",
@@ -16261,19 +16767,19 @@
     },
     {
       "source": "server_src_routes_payments",
-      "target": "server_src_services_orderservice_ordervalidationerror",
+      "target": "server_src_services_orderservice_nextcounterbon",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/routes/payments.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
       "source": "server_src_routes_payments",
-      "target": "server_src_plugins_auth_jwtpayload",
+      "target": "server_src_services_orderservice_ordervalidationerror",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -16820,7 +17326,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0
     },
     {
@@ -16832,7 +17338,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L2",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -16844,7 +17350,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L2",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -16856,7 +17362,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -16868,7 +17374,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L4",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -16880,7 +17386,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L4",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -16892,7 +17398,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L4",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -16904,7 +17410,19 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L5",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_services_orderservice",
+      "target": "server_src_services_waiterservice_waiterselect",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/services/orderService.ts",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -17229,6 +17747,42 @@
       "context": "import",
       "source_file": "server/tests/integration/config.test.ts",
       "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_tests_integration_counter_test",
+      "target": "server_src_index_appserver",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/tests/integration/counter.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_tests_integration_counter_test",
+      "target": "server_src_index_buildserver",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/tests/integration/counter.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_tests_integration_counter_test",
+      "target": "server_src_db_client_prisma",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/tests/integration/counter.test.ts",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -18362,6 +18916,18 @@
     {
       "source": "server_tests_unit_eventwipe_test",
       "target": "server_src_services_orderservice_createorder",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/tests/unit/eventWipe.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_tests_unit_eventwipe_test",
+      "target": "server_src_services_orderservice_nextcounterbon",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -19508,7 +20074,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -19520,7 +20086,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L12",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -19893,6 +20459,54 @@
       "context": "import",
       "source_file": "client/tests/money.test.ts",
       "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_submit_test",
+      "target": "client_src_pages_order",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_submit_test",
+      "target": "client_src_stores_cart",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_src_pages_order",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_src_stores_cart",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -20341,6 +20955,18 @@
     },
     {
       "source": "server_src_routes_payments",
+      "target": "server_src_plugins_auth",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/payments.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_payments",
       "target": "server_src_services_paymentservice",
       "relation": "imports_from",
       "_origin": "ast",
@@ -20354,18 +20980,6 @@
     {
       "source": "server_src_routes_payments",
       "target": "server_src_services_orderservice",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "server/src/routes/payments.ts",
-      "source_location": "L8",
-      "weight": 1.0
-    },
-    {
-      "source": "server_src_routes_payments",
-      "target": "server_src_plugins_auth",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -20612,7 +21226,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0
     },
     {
@@ -20624,7 +21238,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L2",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -20636,7 +21250,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -20648,7 +21262,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L4",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -20660,7 +21274,19 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L5",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_services_orderservice",
+      "target": "server_src_services_waiterservice",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/services/orderService.ts",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -20937,6 +21563,30 @@
       "context": "import",
       "source_file": "server/tests/integration/config.test.ts",
       "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_tests_integration_counter_test",
+      "target": "server_src_index",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/tests/integration/counter.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_tests_integration_counter_test",
+      "target": "server_src_db_client",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/tests/integration/counter.test.ts",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -22396,7 +23046,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "client/src/api/client.ts",
-      "source_location": "L76",
+      "source_location": "L81",
       "weight": 1.0
     },
     {
@@ -23144,7 +23794,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -23155,7 +23805,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -23166,7 +23816,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L22",
+      "source_location": "L23",
       "weight": 1.0
     },
     {
@@ -23177,7 +23827,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "client/src/pages/Order.tsx",
-      "source_location": "L26",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -23786,6 +24436,215 @@
       "weight": 1.0
     },
     {
+      "source": "client_tests_order_page_counter_submit_test",
+      "target": "client_tests_order_page_counter_submit_test_mockgetstations",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_submit_test",
+      "target": "client_tests_order_page_counter_submit_test_mockgetproducts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_submit_test",
+      "target": "client_tests_order_page_counter_submit_test_mockcreateorder",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_submit_test",
+      "target": "client_tests_order_page_counter_submit_test_mockgetorders",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_submit_test",
+      "target": "client_tests_order_page_counter_submit_test_mockgetcounterunpaid",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_submit_test",
+      "target": "client_tests_order_page_counter_submit_test_mockgetnextcounterbon",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_submit_test",
+      "target": "client_tests_order_page_counter_submit_test_mockgetevent",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_submit_test",
+      "target": "client_tests_order_page_counter_submit_test_stations",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L48",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_submit_test",
+      "target": "client_tests_order_page_counter_submit_test_barproducts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter-submit.test.tsx",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_tests_order_page_counter_test_mockgetstations",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_tests_order_page_counter_test_mockgetproducts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_tests_order_page_counter_test_mockcreateorder",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_tests_order_page_counter_test_mockgetorders",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_tests_order_page_counter_test_mockgetcounterunpaid",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_tests_order_page_counter_test_mockgetnextcounterbon",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_tests_order_page_counter_test_mockgetevent",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_tests_order_page_counter_test_stations",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_tests_order_page_counter_test_barproducts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "client_tests_order_page_counter_test",
+      "target": "client_tests_order_page_counter_test_openbon",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "client/tests/order-page-counter.test.tsx",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
       "source": "client_tests_order_page_test",
       "target": "client_tests_order_page_test_mockgetstations",
       "relation": "contains",
@@ -24189,7 +25048,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L139",
+      "source_location": "L145",
       "weight": 1.0
     },
     {
@@ -24211,7 +25070,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L185",
+      "source_location": "L192",
       "weight": 1.0
     },
     {
@@ -24222,7 +25081,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L189",
+      "source_location": "L196",
       "weight": 1.0
     },
     {
@@ -24233,7 +25092,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L201",
+      "source_location": "L208",
       "weight": 1.0
     },
     {
@@ -24244,7 +25103,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L145",
+      "source_location": "L151",
       "weight": 1.0
     },
     {
@@ -24255,7 +25114,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L170",
+      "source_location": "L177",
       "weight": 1.0
     },
     {
@@ -24266,7 +25125,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L176",
+      "source_location": "L183",
       "weight": 1.0
     },
     {
@@ -24277,7 +25136,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L183",
+      "source_location": "L190",
       "weight": 1.0
     },
     {
@@ -24288,7 +25147,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L217",
+      "source_location": "L224",
       "weight": 1.0
     },
     {
@@ -24299,7 +25158,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L223",
+      "source_location": "L230",
       "weight": 1.0
     },
     {
@@ -24310,7 +25169,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/ARCHITECTURE.md",
-      "source_location": "L235",
+      "source_location": "L242",
       "weight": 1.0
     },
     {
@@ -26415,6 +27274,138 @@
       "weight": 1.0
     },
     {
+      "source": "hermes_plans_2026_10_04_tearoff_numbering",
+      "target": "hermes_plans_2026_10_04_tearoff_numbering_plan_tear_off_bon_numbering_restore_event_wide_uniqueness",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_10_04_tearoff_numbering_options",
+      "target": "hermes_plans_2026_10_04_tearoff_numbering_a_restore_event_wide_uniqueness_recommended",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_10_04_tearoff_numbering_options",
+      "target": "hermes_plans_2026_10_04_tearoff_numbering_b_keep_per_waiter_sequences_make_it_a_real_invariant",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L72",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_10_04_tearoff_numbering_options",
+      "target": "hermes_plans_2026_10_04_tearoff_numbering_c_document_only_not_recommended",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L84",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_10_04_tearoff_numbering_plan_tear_off_bon_numbering_restore_event_wide_uniqueness",
+      "target": "hermes_plans_2026_10_04_tearoff_numbering_decision_2026_10_04_philipp",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_10_04_tearoff_numbering_plan_tear_off_bon_numbering_restore_event_wide_uniqueness",
+      "target": "hermes_plans_2026_10_04_tearoff_numbering_evidence_throwaway_probe_server_tests_integration_tmp_tearoff_probe_test_ts_deleted",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_10_04_tearoff_numbering_plan_tear_off_bon_numbering_restore_event_wide_uniqueness",
+      "target": "hermes_plans_2026_10_04_tearoff_numbering_why_it_matters",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_10_04_tearoff_numbering_plan_tear_off_bon_numbering_restore_event_wide_uniqueness",
+      "target": "hermes_plans_2026_10_04_tearoff_numbering_related_same_root_cause_the_test_live_reset",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_10_04_tearoff_numbering_plan_tear_off_bon_numbering_restore_event_wide_uniqueness",
+      "target": "hermes_plans_2026_10_04_tearoff_numbering_options",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_10_04_tearoff_numbering_plan_tear_off_bon_numbering_restore_event_wide_uniqueness",
+      "target": "hermes_plans_2026_10_04_tearoff_numbering_what_changed_in_1ebda01",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_10_04_tearoff_numbering_plan_tear_off_bon_numbering_restore_event_wide_uniqueness",
+      "target": "hermes_plans_2026_10_04_tearoff_numbering_verification_whatever_is_chosen",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L88",
+      "weight": 1.0
+    },
+    {
+      "source": "hermes_plans_2026_10_04_tearoff_numbering_plan_tear_off_bon_numbering_restore_event_wide_uniqueness",
+      "target": "hermes_plans_2026_10_04_tearoff_numbering_open_questions_for_philipp",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".hermes/plans/2026-10-04_tearoff-numbering.md",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
       "source": "package",
       "target": "package_name",
       "relation": "contains",
@@ -28105,7 +29096,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/routes/payments.ts",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -28116,7 +29107,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/routes/payments.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -28561,6 +29552,17 @@
     },
     {
       "source": "server_src_services_eventservice",
+      "target": "server_src_services_eventservice_deleteevent",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/services/eventService.ts",
+      "source_location": "L119",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_services_eventservice",
       "target": "server_src_services_eventservice_listevents",
       "relation": "contains",
       "_origin": "ast",
@@ -28589,7 +29591,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/eventService.ts",
-      "source_location": "L34",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -28605,13 +29607,13 @@
     },
     {
       "source": "server_src_services_eventservice",
-      "target": "server_src_services_eventservice_deleteevent",
+      "target": "server_src_services_eventservice_synccounterwaiter",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/eventService.ts",
-      "source_location": "L60",
+      "source_location": "L81",
       "weight": 1.0
     },
     {
@@ -28798,7 +29800,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L12",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_services_orderservice",
+      "target": "server_src_services_orderservice_nextbonafterlastorder",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/services/orderService.ts",
+      "source_location": "L319",
       "weight": 1.0
     },
     {
@@ -28809,7 +29822,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L25",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_services_orderservice",
+      "target": "server_src_services_orderservice_nextcounterbon",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/services/orderService.ts",
+      "source_location": "L334",
       "weight": 1.0
     },
     {
@@ -28820,7 +29844,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L253",
+      "source_location": "L346",
       "weight": 1.0
     },
     {
@@ -28831,7 +29855,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L266",
+      "source_location": "L363",
       "weight": 1.0
     },
     {
@@ -28842,7 +29866,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L275",
+      "source_location": "L372",
       "weight": 1.0
     },
     {
@@ -28853,7 +29877,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L276",
+      "source_location": "L373",
       "weight": 1.0
     },
     {
@@ -28864,7 +29888,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L282",
+      "source_location": "L379",
       "weight": 1.0
     },
     {
@@ -28875,7 +29899,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L328",
+      "source_location": "L425",
       "weight": 1.0
     },
     {
@@ -28886,7 +29910,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L37",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -28897,7 +29921,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L378",
+      "source_location": "L475",
       "weight": 1.0
     },
     {
@@ -28908,7 +29932,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L417",
+      "source_location": "L514",
       "weight": 1.0
     },
     {
@@ -28919,7 +29943,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L463",
+      "source_location": "L560",
       "weight": 1.0
     },
     {
@@ -28930,7 +29954,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L65",
+      "source_location": "L72",
       "weight": 1.0
     },
     {
@@ -28941,7 +29965,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L7",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -30114,7 +31138,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/services/orderService.ts",
-      "source_location": "L27",
+      "source_location": "L34",
       "weight": 1.0
     },
     {
@@ -30388,5 +31412,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "619fa6f3fecb89112b319a8b947d2a6f00c70ed5"
+  "built_at_commit": "99f81c3f702b2bfd29e9db152477580f337d4c0c"
 }

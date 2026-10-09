@@ -1,16 +1,16 @@
-# Graph Report - orderwas  (2026-10-08)
+# Graph Report - orderwas  (2026-10-09)
 
 ## Corpus Check
-- 174 files · ~251,923 words
+- 175 files · ~253,859 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 954 nodes · 1668 edges · 60 communities (54 shown, 6 thin omitted)
+- 992 nodes · 1720 edges · 63 communities (57 shown, 6 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 16 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `619fa6f3`
+- Built from commit: `99f81c3f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -30,7 +30,7 @@
 - compilerOptions
 - vouchers.ts
 - Order → Payment → Delivery Lifecycle Implementation Plan
-- layouts.ts
+- waiters.ts
 - AdminProducts.tsx
 - auditService.ts
 - StationDisplay.tsx
@@ -49,12 +49,12 @@
 - routes/auth.ts
 - i18n-parity.test.ts
 - OrderWas Quality Remediation Implementation Plan
-- formatPrice
+- CashierView.tsx
 - Orderwas
 - Orderwas — Requirements Document
 - AGENTS.md — Orderwas
 - 3.4 Philipp's Specific Requirements
-- 6. Workflow Descriptions
+- Plan: Tear-off / Bon numbering — restore event-wide uniqueness?
 - 8. Technical Requirements
 - Admin.tsx
 - 17. Requirements from Live Review (2026-08-17)
@@ -66,42 +66,45 @@
 - order-page.test.tsx
 - OrderWas UI Fixes: Cashier Item Display & Station Paid Orders
 - station-display.test.tsx
+- order-page-counter.test.tsx
 - 14. Success Criteria
 - 2. Target Audience & Use Cases
 - 7. User Interface Requirements
+- eventService.ts
+- order-page-counter-submit.test.tsx
 
 ## God Nodes (most connected - your core abstractions)
-1. `prisma` - 49 edges
-2. `buildServer()` - 40 edges
-3. `AppServer` - 25 edges
+1. `prisma` - 50 edges
+2. `buildServer()` - 41 edges
+3. `AppServer` - 26 edges
 4. `formatPrice()` - 20 edges
-5. `Orderwas — Requirements Document` - 19 edges
-6. `api` - 19 edges
+5. `api` - 19 edges
+6. `Orderwas — Requirements Document` - 19 edges
 7. `useSessionStore` - 18 edges
-8. `Product` - 16 edges
-9. `OrderValidationError` - 16 edges
+8. `OrderValidationError` - 16 edges
+9. `Product` - 16 edges
 10. `Orderwas` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `buildServer()` --indirect_call--> `eventRoutes()`  [INFERRED]
+  server/src/index.ts → server/src/routes/events.ts
+- `buildServer()` --indirect_call--> `paymentsRoutes()`  [INFERRED]
+  server/src/index.ts → server/src/routes/payments.ts
 - `buildServer()` --indirect_call--> `authPlugin()`  [INFERRED]
   server/src/index.ts → server/src/plugins/auth.ts
 - `buildServer()` --indirect_call--> `auditRoutes()`  [INFERRED]
   server/src/index.ts → server/src/routes/audit.ts
 - `buildServer()` --indirect_call--> `authRoutes()`  [INFERRED]
   server/src/index.ts → server/src/routes/auth.ts
-- `buildServer()` --indirect_call--> `eventRoutes()`  [INFERRED]
-  server/src/index.ts → server/src/routes/events.ts
-- `buildServer()` --indirect_call--> `layoutsRoutes()`  [INFERRED]
-  server/src/index.ts → server/src/routes/layouts.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (60 total, 6 thin omitted)
+## Communities (63 total, 6 thin omitted)
 
 ### Community 0 - "src/index.ts"
-Cohesion: 0.06
-Nodes (40): globalForPrisma, prisma, AppServer, buildServer(), corsPlugin, main(), configRoutes(), createEventSchema (+32 more)
+Cohesion: 0.07
+Nodes (35): globalForPrisma, prisma, AppServer, buildServer(), corsPlugin, main(), configRoutes(), createLayoutSchema (+27 more)
 
 ### Community 1 - "dependencies"
 Cohesion: 0.05
@@ -109,11 +112,11 @@ Nodes (44): typescript, typescript, fastify, @fastify/cors, @fastify/jwt, fastif
 
 ### Community 2 - "escpos.ts"
 Cohesion: 0.08
-Nodes (31): dispatchOrderPrints(), DUMMY_PRINT_DIR, executePrintJob(), OrderForPrint, PrintJob, sendToNetworkPrinter(), BOLD_OFF, BOLD_ON (+23 more)
+Nodes (30): DUMMY_PRINT_DIR, executePrintJob(), OrderForPrint, PrintJob, sendToNetworkPrinter(), BOLD_OFF, BOLD_ON, CENTER (+22 more)
 
 ### Community 3 - "orderService.ts"
-Cohesion: 0.07
-Nodes (52): AdminJwtPayload, authPlugin(), fastify, FastifyInstance, JwtPayload, createOrderBody, createOrderItemSchema, ordersRoutes() (+44 more)
+Cohesion: 0.06
+Nodes (54): AdminJwtPayload, authPlugin(), fastify, FastifyInstance, JwtPayload, dispatchOrderPrints(), createOrderBody, createOrderItemSchema (+46 more)
 
 ### Community 4 - "types.ts"
 Cohesion: 0.16
@@ -159,9 +162,9 @@ Nodes (11): bulkCreateSchema, createVoucherSchema, redeemSchema, voucherRoutes()
 Cohesion: 0.09
 Nodes (21): Current State (verified), Key Decisions, Order → Payment → Delivery Lifecycle Implementation Plan, Phase A — Backend: Payment Model + API, Phase B — Client: CashierView, Phase C — i18n (parity rule!), Phase D — Tests & Verification, Risks / Open Questions (+13 more)
 
-### Community 15 - "layouts.ts"
-Cohesion: 0.32
-Nodes (10): createLayoutSchema, layoutsRoutes(), updateLayoutSchema, createLayout(), CreateLayoutData, deleteLayout(), getWaiterLayout(), layoutSelect (+2 more)
+### Community 15 - "waiters.ts"
+Cohesion: 0.27
+Nodes (12): createWaiterBody, toggleActiveBody, updateWaiterBody, waitersRoutes(), createWaiter(), CreateWaiterData, deleteWaiter(), getWaiter() (+4 more)
 
 ### Community 16 - "AdminProducts.tsx"
 Cohesion: 0.19
@@ -172,12 +175,12 @@ Cohesion: 0.45
 Nodes (10): auditRoutes(), AuditLogEntry, getPeakTimes(), getProductConsumption(), getProductEventId(), getStationRevenue(), getStockHistory(), getWaiterSummary() (+2 more)
 
 ### Community 18 - "StationDisplay.tsx"
-Cohesion: 0.42
-Nodes (6): OrderEventPayload, useWebSocket(), formatTime(), KitchenMonitor(), formatTime(), StationDisplay()
+Cohesion: 0.27
+Nodes (9): OrderEventPayload, useWebSocket(), PRODUCT_BG_CLASSES, PRODUCT_BORDER_CLASSES, PRODUCT_COLORS, formatTime(), KitchenMonitor(), formatTime() (+1 more)
 
 ### Community 19 - "Order.tsx"
-Cohesion: 0.17
-Nodes (18): Product, CartBar(), formatCents(), Props, formatCents(), ProductSection(), Props, Props (+10 more)
+Cohesion: 0.16
+Nodes (19): Product, CartBar(), formatCents(), Props, formatCents(), ProductSection(), Props, Props (+11 more)
 
 ### Community 20 - "4.2 Entity Definitions"
 Cohesion: 0.15
@@ -211,17 +214,17 @@ Nodes (3): DE, EN, FR
 Cohesion: 0.04
 Nodes (45): OrderWas Quality Remediation Implementation Plan, PHASE 0 — CI is red: fix E2E auth breakage (blocking everything), PHASE 1 — CRITICAL security fixes (auth closure), PHASE 2 — Payment model unification (HIGH, money correctness), PHASE 3 — Correctness fixes (HIGH), PHASE 4 — DRY / cleanliness refactors (MEDIUM), PHASE 5 — Test backfill for untested features (HIGH for convention compliance), PHASE 6 — Documentation reconciliation (MEDIUM) (+37 more)
 
-### Community 40 - "formatPrice"
-Cohesion: 0.21
-Nodes (12): OpenTable, TableOrderItem, CashierView(), formatCents(), Props, formatCents(), Props, TableSwitcherModal() (+4 more)
+### Community 40 - "CashierView.tsx"
+Cohesion: 0.29
+Nodes (8): OpenTable, TableOrderItem, CashierView(), formatCents(), Props, formatCents(), Props, TableSwitcherModal()
 
 ### Community 41 - "Orderwas"
 Cohesion: 0.05
 Nodes (43): Abholscheine Mode (Pickup Slips), Acknowledgments, Advanced Features, Architecture, Bonkasse Mode (Voucher Cashier), Comparison with Bierblock, Comparison with Orderjutsu, Contributing (+35 more)
 
 ### Community 42 - "Orderwas — Requirements Document"
-Cohesion: 0.25
-Nodes (8): 11. Version History Analysis (Orderjutsu), 12. User Testimonials (from YouTube), 16. Next Steps, 18. Requirements — Theke / Abholcounter (2026-09-12), 1. Executive Summary, Key Value Proposition (from Orderjutsu's own marketing), Orderwas — Requirements Document, What Orderjutsu Is (and Isn't)
+Cohesion: 0.17
+Nodes (12): 11. Version History Analysis (Orderjutsu), 12. User Testimonials (from YouTube), 16. Next Steps, 18. Requirements — Theke / Abholcounter (2026-09-12), 1. Executive Summary, 6.1 Service Mode Workflow, 6.2 Bonkasse (Voucher) Workflow, 6.3 Mixed Operation Workflow (+4 more)
 
 ### Community 43 - "AGENTS.md — Orderwas"
 Cohesion: 0.05
@@ -231,9 +234,9 @@ Nodes (37): After commits, AGENTS.md — Orderwas, Architecture Rules (binding �
 Cohesion: 0.20
 Nodes (10): 3.1 Hardware Architecture (Orderjutsu's Approach), 3.2 Software Architecture (Orderjutsu), 3.3 Orderwas Architecture (Proposed), 3.4 Philipp's Specific Requirements, 3. System Architecture, Database Strategy, Development Approach, Frontend Requirements (+2 more)
 
-### Community 45 - "6. Workflow Descriptions"
-Cohesion: 0.50
-Nodes (4): 6.1 Service Mode Workflow, 6.2 Bonkasse (Voucher) Workflow, 6.3 Mixed Operation Workflow, 6. Workflow Descriptions
+### Community 45 - "Plan: Tear-off / Bon numbering — restore event-wide uniqueness?"
+Cohesion: 0.15
+Nodes (12): A. Restore event-wide uniqueness (recommended), B. Keep per-waiter sequences, make it a real invariant, C. Document-only (not recommended), Decision (2026-10-04, Philipp), Evidence (throwaway probe, `server/tests/integration/tmp-tearoff-probe.test.ts`, deleted), Open questions for Philipp, Options, Plan: Tear-off / Bon numbering — restore event-wide uniqueness? (+4 more)
 
 ### Community 46 - "8. Technical Requirements"
 Cohesion: 0.29
@@ -279,6 +282,10 @@ Nodes (9): Files Changed, Issue 1: Cashier View Individual Item Display, Issue 2
 Cohesion: 0.29
 Nodes (3): mockGetOrders, mockGetStation, station
 
+### Community 57 - "order-page-counter.test.tsx"
+Cohesion: 0.18
+Nodes (10): barProducts, mockCreateOrder, mockGetCounterUnpaid, mockGetEvent, mockGetNextCounterBon, mockGetOrders, mockGetProducts, mockGetStations (+2 more)
+
 ### Community 58 - "14. Success Criteria"
 Cohesion: 0.50
 Nodes (4): 14. Success Criteria, Community Requirements, Functional Requirements, Non-Functional Requirements
@@ -291,25 +298,33 @@ Nodes (4): 2.1 Primary Users, 2.2 User Roles, 2.3 Deployment Scenarios, 2. Targe
 Cohesion: 0.50
 Nodes (4): 7.1 Waiter App (Mobile), 7.2 Admin Interface (Web), 7.3 Kitchen Monitor, 7. User Interface Requirements
 
+### Community 61 - "eventService.ts"
+Cohesion: 0.20
+Nodes (5): createEventSchema, eventRoutes(), updateEventSchema, syncCounterWaiter(), updateEvent()
+
+### Community 62 - "order-page-counter-submit.test.tsx"
+Cohesion: 0.20
+Nodes (9): barProducts, mockCreateOrder, mockGetCounterUnpaid, mockGetEvent, mockGetNextCounterBon, mockGetOrders, mockGetProducts, mockGetStations (+1 more)
+
 ## Knowledge Gaps
-- **440 isolated node(s):** `Task 0.1: E2E helper `adminLogin` for specs`, `Task 0.2: Verify `npm run ci` is green end-to-end`, `Task 1.1: Global auth hook — implement what ARCHITECTURE.md §8 documents`, `Task 1.2: Close the `PATCH /orders/:id` permission bypass`, `Task 1.3: Permission gates on the 8 ungated route files` (+435 more)
+- **468 isolated node(s):** `What changed in `1ebda01``, `Evidence (throwaway probe, `server/tests/integration/tmp-tearoff-probe.test.ts`, deleted)`, `Why it matters`, `Related, same root cause: the test→live reset`, `A. Restore event-wide uniqueness (recommended)` (+463 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Orderwas — Requirements Document` connect `Orderwas — Requirements Document` to `5.2 Advanced Features (Should-Have)`, `AGENTS.md — Orderwas`, `3.4 Philipp's Specific Requirements`, `6. Workflow Descriptions`, `8. Technical Requirements`, `17. Requirements from Live Review (2026-08-17)`, `10. Competitive Analysis`, `13. Implementation Roadmap`, `15. Appendix`, `4.2 Entity Definitions`, `9. Hardware Requirements`, `14. Success Criteria`, `2. Target Audience & Use Cases`, `7. User Interface Requirements`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
-- **Why does `prisma` connect `src/index.ts` to `escpos.ts`, `orderService.ts`, `routes/auth.ts`, `products.ts`, `vouchers.ts`, `layouts.ts`, `auditService.ts`, `stations.ts`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+- **Why does `Orderwas — Requirements Document` connect `Orderwas — Requirements Document` to `5.2 Advanced Features (Should-Have)`, `AGENTS.md — Orderwas`, `3.4 Philipp's Specific Requirements`, `8. Technical Requirements`, `17. Requirements from Live Review (2026-08-17)`, `10. Competitive Analysis`, `13. Implementation Roadmap`, `15. Appendix`, `4.2 Entity Definitions`, `9. Hardware Requirements`, `14. Success Criteria`, `2. Target Audience & Use Cases`, `7. User Interface Requirements`?**
+  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `prisma` connect `src/index.ts` to `escpos.ts`, `orderService.ts`, `routes/auth.ts`, `products.ts`, `vouchers.ts`, `waiters.ts`, `auditService.ts`, `stations.ts`, `eventService.ts`?**
+  _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **Why does `Orderwas` connect `Orderwas` to `AGENTS.md — Orderwas`?**
-  _High betweenness centrality (0.015) - this node is a cross-community bridge._
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **Are the 14 inferred relationships involving `buildServer()` (e.g. with `authPlugin()` and `auditRoutes()`) actually correct?**
   _`buildServer()` has 14 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Task 0.1: E2E helper `adminLogin` for specs`, `Task 0.2: Verify `npm run ci` is green end-to-end`, `Task 1.1: Global auth hook — implement what ARCHITECTURE.md §8 documents` to the rest of the system?**
-  _440 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `What changed in `1ebda01``, `Evidence (throwaway probe, `server/tests/integration/tmp-tearoff-probe.test.ts`, deleted)`, `Why it matters` to the rest of the system?**
+  _468 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `src/index.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.059096459096459095 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07098765432098765 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.045454545454545456 - nodes in this community are weakly interconnected._
